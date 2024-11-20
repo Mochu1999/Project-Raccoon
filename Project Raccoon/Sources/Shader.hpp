@@ -151,7 +151,7 @@ GLFWwindow* initialize() {
 	/*glfwWindowHint(GLFW_DEPTH_BITS, 32);
 
 	glfwWindowHint(GLFW_SAMPLES, 4);*/
-	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Buoyancy Simulation 3D", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", NULL, NULL);
 
 	//glEnable(GL_MULTISAMPLE);
 
@@ -177,7 +177,6 @@ GLFWwindow* initialize() {
 
 	return window;
 }
-
 
 
 

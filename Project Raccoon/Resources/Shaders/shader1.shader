@@ -6,6 +6,9 @@ layout(location = 0) in vec3 pos3D;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 pos2D;
 
+layout(location = 3) in vec4 textPos; 
+layout(location = 4) in vec2 texCoord;
+
 //uniforms are universal variables that can be accessed from other shaders and in main without the use of a VAO
 uniform mat4 u_MVP;
 uniform mat4 u_OrthoProjection;
@@ -14,6 +17,8 @@ uniform int u_vertexMode;
 
 out vec3 Normal;  //Output that goes to the fragment shader
 out vec3 crntPos;
+
+out vec2 v_TexCoord; 
 
 
 void main() {
@@ -29,7 +34,8 @@ void main() {
     }
 	else if(u_vertexMode == 2) //text
 	{
-
+		gl_Position = u_OrthoProjection * textPos;
+		v_TexCoord = texCoord;	
 	}
     
 }
@@ -41,7 +47,6 @@ void main() {
 #version 330 core
 
 
-out vec4 FragColor;
 
 in vec3 Normal;
 in vec3 crntPos;
@@ -54,6 +59,11 @@ uniform vec3 u_lightPos;
 
 
 uniform vec4 u_Color;
+
+uniform sampler2D u_Texture;
+in vec2 v_TexCoord;
+
+out vec4 FragColor;
 
 void main()
 {
@@ -80,10 +90,16 @@ void main()
     {
         FragColor = u_Color;
     }
-	if (u_fragmentMode == 3) 
+	if (u_fragmentMode == 3) //text
     {
+    vec4 textColor = texture(u_Texture, v_TexCoord); // Sample the glyph texture
+    vec4 backgroundColor = vec4(0.035f, 0.065f, 0.085f, 1.0f); // Hardcoded background color
 
-    }
+    // Blend the text color (alpha determines visibility of glyph) with the background color
+    FragColor = mix(backgroundColor, vec4(textColor.rgb, 1.0), textColor.r); 
+
+	//FragColor = texture(u_Texture, v_TexCoord);
+}
 }
 
 

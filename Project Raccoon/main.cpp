@@ -162,9 +162,19 @@ int main(void)
 
 	printm16(camera.orthoMatrix);
 
-	
 
 
+	Polyhedra stl, bin;
+
+
+	/*readSTL(stl.positions, stl.normals, "Eiffel.STL");
+
+
+	stl.simpleIndices();*/
+
+
+
+	readSimplePolyhedra(bin.positions, bin.normals, bin.indices, "Eiffel.bin");
 
 
 
@@ -186,7 +196,7 @@ int main(void)
 	int locationLightPos = glGetUniformLocation(shader.ID, "u_lightPos");
 	int cameraPosition = glGetUniformLocation(shader.ID, "camPos");
 
-	glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
+	//glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
 
 
 
@@ -199,7 +209,7 @@ int main(void)
 	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
 
 
-	Text text;
+	Text text("abcp 100,200.521", 100, 100);
 
 
 	int counter = 0;
@@ -224,7 +234,7 @@ int main(void)
 			glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			
+
 
 			glUniform1i(locationFragment, 1);
 			glUniform1i(locationVertex, 1);
@@ -264,11 +274,13 @@ int main(void)
 
 
 			glUniform4f(colorLocation, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+
 			sphere.draw();
 			fourier.draw();
 			//eiffel.draw();
 			//fourier.createWavePositions();
 			glUniform4f(colorLocation, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
+			bin.draw();
 			//printflat(fourier.indices);
 			glUniform4f(colorLocation, 187.0f / 255.0f, 165.61f / 255.0f, 61.0f / 255.0f, 1);
 			//bin.draw();
@@ -298,18 +310,29 @@ int main(void)
 
 			glUniform1i(locationFragment, 0);
 			glUniform4f(colorLocation, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
-			
+
 
 
 
 			//sphere.drawLines();
 			//sphere.draw();
 
-			//2d objects
+			/////2d objects
 			glUniform1i(locationVertex, 0);
 			glUniform1i(locationFragment, 1);
 			glUniform4f(colorLocation, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
 			p2d.draw();
+
+
+
+			//text
+			glUniform1i(locationVertex, 2);
+			glUniform1i(locationFragment, 3);
+			glDisable(GL_DEPTH_TEST);
+			text.draw();
+
+
+
 
 			camera.updateKeys();
 			camera.updateCamera();
@@ -320,8 +343,6 @@ int main(void)
 
 			//printp3(camera.forward);
 			//printp3(camera.cameraPos);
-
-
 
 			//break;
 		}
