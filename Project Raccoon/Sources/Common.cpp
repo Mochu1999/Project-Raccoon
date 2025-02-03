@@ -1,4 +1,4 @@
-#include "Common.hpp"
+﻿#include "Common.hpp"
 
 
 
@@ -7,6 +7,7 @@ p2 cursor = { 0, 0 };
 float windowHeight = 1080;
 float windowWidth = 1920;
 bool isRunning = true;
+
 
 
 float fastInverseSqrt(float number) {
@@ -78,7 +79,7 @@ p3 rotatePoint(const p3& point, const float& angle, const p3& axis) {
 
 void rotate3D(std::vector<p3>& vertices, const p3& centroid, float angleX, float angleY, float angleZ) {
 
-	for (p3& vertex : vertices) 
+	for (p3& vertex : vertices)
 	{
 		vertex -= centroid;
 		vertex = rotatePoint(vertex, radians(angleX), { 1, 0, 0 });
@@ -141,4 +142,16 @@ std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std
 	}
 
 	return output;
+}
+
+// Normalizes the quaternion [w, x, y, z] in-place
+void normalizeQuaternion(std::array<float, 4>& q)
+{
+	float mag = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+	if (mag > 0.0f) {
+		q[0] /= mag;
+		q[1] /= mag;
+		q[2] /= mag;
+		q[3] /= mag;
+	}
 }

@@ -285,6 +285,7 @@ inline vector<p3> model;
 
 
 
+
 void getCursorPos(GLFWwindow* window);
 
 
@@ -441,3 +442,7 @@ vec3<T> normal(const vec3<T>& p1, const vec3<T>& p2, const vec3<T>& p3) {
 
 
 std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std::array<float, 16>& b);
+
+
+// Normalizes the quaternion [w, x, y, z] in-place
+void normalizeQuaternion(std::array<float, 4>& q);

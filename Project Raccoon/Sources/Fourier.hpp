@@ -50,20 +50,28 @@ struct Fourier {
 
 	Fourier() {
 		genBuffers();
-		createWavePositions();
+		//createWavePositions();
 		//calculateNormals();
-		createIndices();
+		//createIndices();
 		/*cout << "fourier: ";
 		printv3(positions);
 		printflat(indices);*/
 		/*print(positions);
 		print(normals);
 		print(indices);*/
+		
+		positions = { {0,0,0},{100,0,0},{100,0,100},{0,0,100} };
+		indices = { 0,1,2,0,2,3};
+		normals =  {{0,-0.999723,0},{0,-0.999723,0},{0,-0.999723,0},{0,-0.999723,0},{0,-0.999723,0},{0,-0.999723,0} };
+		//calculateNormals();
 		print(positions.size());
 		print(normals.size());
 		print(indices.size());
-	}
 
+		print(positions);
+		print(normals);
+		print(indices);
+	}
 	float waveFunction(float x, float z) {
 		//return amplitude * sin(100 * x + phase) * sin(100 * z) + offset;
 		//return amplitude * sin(100 * x + phase) + offset;
@@ -116,26 +124,35 @@ struct Fourier {
 	}
 
 	void calculateNormals() {
-		for (auto& pos : positions)
+		//for (auto& pos : positions)
+		//{
+
+		//// Compute partial derivatives
+		//float partialX = amplitude * 100 * cos(100 * pos.x);
+		//float partialZ = amplitude * sin(100 * pos.x);
+
+		//p3 vx = normalize3(p3{ 1,0,partialX });  // Tangent vector along x
+		//p3 vz = normalize3(p3{ 0,1,partialZ});  // Tangent vector along z
+
+		//// Cross product of vx and vz to get the normal
+		//p3 normal = normalize3(cross3(vx, vz));
+		//if (normal.y<0)
+		//	normals.push_back(p3{ -normal.x, -normal.y, -normal.z });
+		//else
+		//	normals.push_back(normal);
+		//}
+
+		for (size_t i = 0; i < positions.size(); i+=3)
 		{
+			
 
-		// Compute partial derivatives
-		float partialX = amplitude * 100 * cos(100 * pos.x);
-		float partialZ = amplitude * sin(100 * pos.x);
+			p3 v1 = normalize3(positions[indices[i + 1]] - positions[indices[i]]);
+			p3 v2 = normalize3(positions[indices[i + 2]] - positions[indices[i]]);
 
+			p3 normal = normalize3(cross3(v1, v2));
+			//print(normal);
+			normals.insert(normals.end(), { normal,normal,normal });
 
-
-
-		p3 vx = normalize3(p3{ 1,0,partialX });  // Tangent vector along x
-		p3 vz = normalize3(p3{ 0,1,partialZ});  // Tangent vector along z
-
-		// Cross product of vx and vz to get the normal
-		p3 normal = normalize3(cross3(vx, vz));
-		if (normal.y<0)
-			normals.push_back(p3{ -normal.x, -normal.y, -normal.z });
-		else
-			normals.push_back(normal);
-		
 		}
 		
 	}

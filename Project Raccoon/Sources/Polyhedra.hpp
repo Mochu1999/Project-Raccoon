@@ -54,7 +54,7 @@ struct Polyhedra {
 
 		glBindVertexArray(vertexArray);
 
-		if (isBufferUpdated)
+		//if (isBufferUpdated)
 		{
 			currentPositionsDataSize = positions.size() * sizeof(p3);
 			currentIndicesDataSize = indices.size() * sizeof(unsigned int);

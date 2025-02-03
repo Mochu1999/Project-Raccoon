@@ -101,11 +101,11 @@ struct Shader {
 	~Shader() {
 		glDeleteProgram(ID);
 	}
-	void Bind() const {
+	void bind() const {
 		glUseProgram(ID);
 	}
 
-	void Unbind() const {
+	void unbind() const {
 		glUseProgram(0);
 	}
 

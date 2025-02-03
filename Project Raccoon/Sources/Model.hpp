@@ -116,7 +116,9 @@ void readSTL(std::vector<p3>& positions, std::vector<p3>& normals, const std::st
 		else if (word == "vertex") {
 			// Read and store vertex position
 			iss >> vertex.x >> vertex.y >> vertex.z;
-			positions.push_back(vertex);
+			vector<p3> interm;
+			interm.push_back(vertex);
+			positions.insert(positions.end(), { interm[0].x / 100,interm[0].y / 100,interm[0].z / 100 });
 			//print(vertex);
 		}
 	}

@@ -1,5 +1,15 @@
 #include "Camera.hpp"
 
+std::array<float, 16> Camera::createScalingMatrix(float scaleX, float scaleY, float scaleZ) {
+	std::array<float, 16> scalingMatrix = { 0 };
+	scalingMatrix[0] = scaleX;
+	scalingMatrix[5] = scaleY;
+	scalingMatrix[10] = scaleZ;
+	scalingMatrix[15] = 1.0f;
+	return scalingMatrix;
+}
+
+
 array<float, 16> Camera::createOrthoMatrix() {
 	array<float, 16> orthoMatrix = {};
 
@@ -70,6 +80,77 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 	return viewMatrix;
 }
 
+// Creates model matrix by applying a translation and a rotation of a given axis
+std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDeg, p3 axis){
+
+	std::array<float, 16> modelMatrix = createIdentityMatrix();
+
+	float theta = radians(angleDeg);
+
+	axis = normalize3(axis);
+	float x = axis.x;
+	float y = axis.y;
+	float z = axis.z;
+
+	float c = std::cos(theta);
+	float s = std::sin(theta);
+	float oneMinusC = 1.0f - c;
+
+	// 4) Fill the 3x3 rotation in column-major order
+	//    Using the formula:
+	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
+	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
+	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
+
+
+	// Column 0
+	modelMatrix[0] = x * x * oneMinusC + c;    // r_xx
+	modelMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
+	modelMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
+
+	// Column 1
+	modelMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
+	modelMatrix[5] = y * y * oneMinusC + c;    // r_yy
+	modelMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
+
+	// Column 2
+	modelMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
+	modelMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
+	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
+
+	// Column 3 (translation)
+	modelMatrix[12] = position.x;
+	modelMatrix[13] = position.y;
+	modelMatrix[14] = position.z;
+
+	return modelMatrix;
+}
+
+std::array<float, 16> Camera::createIdentityMatrix() {
+
+	return std::array<float, 16>{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+}
+
+std::array<float, 16> Camera::createModelMatrix(const p3& position) {
+
+	std::array<float, 16> modelMatrix = createIdentityMatrix();
+
+	//Translation components in the fourth column
+	modelMatrix[12] = position.x;  // X translation
+	modelMatrix[13] = position.y;  // Y translation
+	modelMatrix[14] = position.z;  // Z translation
+
+	return modelMatrix;
+}
+
+
+
 void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis) {
 	p3 intermForward;
 
@@ -81,6 +162,8 @@ void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& 
 
 void Camera::updateKeys() {
 	// Rotation
+	
+
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		calculateForward(forward, rotationSpeed, right);
 
