@@ -192,7 +192,7 @@ int main(void)
 	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());*/
 
 	//shaderText.bind(); //NO DEBERÍA DE NECESITAR ESTAR BINDED?
-	Text text("abcp 100,200.521 ñ á", 100, 100);
+	Text text("abcp 100,200.521 Lorem ipsum dolor sit amet, consectetur adipiscing elit.", 100, 100);
 	shader2D.bind();
 	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
 	shaderText.bind();

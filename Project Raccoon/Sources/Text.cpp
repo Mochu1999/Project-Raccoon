@@ -1,7 +1,7 @@
 #include "Text.hpp"
 
 //initializes the library and loads the font face
-void Text::initializeFreeType(const std::string& fontPath) {
+void Text::initializeFreeType(const std::string& fontPath, const int fontPixelSize) {
 	if (FT_Init_FreeType(&ft)) {
 		std::cerr << "Could not init FreeType Library" << std::endl;
 		return;
@@ -11,8 +11,8 @@ void Text::initializeFreeType(const std::string& fontPath) {
 		std::cerr << "Failed to load font" << std::endl;
 		return;
 	}
-
-	FT_Set_Pixel_Sizes(face, 0, 48); // Set font size 
+	// Set font size in pixels. Word and other apps set the size in dots per inch. RESCALING IS NOT AN OPTION YET
+	FT_Set_Pixel_Sizes(face, 0, fontPixelSize); 
 
 	FT_ULong  charcode; //unicode codepoint (the number that represents the character)
 	FT_UInt   glyphIndex;
@@ -59,9 +59,35 @@ void Text::initializeBuffer() {
 	glBindVertexArray(0);
 }
 
+//Stores the metrics of a character inside a map
+void Text::storeGlyph(char character, float& widthAtlas) {
+
+	if (FT_Load_Char(face, character, FT_LOAD_RENDER))
+	{
+		std::cout << "Failed to load glyph" << std::endl;
+	}
+
+	FT_GlyphSlot& glyph = face->glyph;
+	FT_Bitmap& bitmap = glyph->bitmap; //A bitmap is the FreeType structure that contains the data of a glyph
+
+	//Glyph metrics
+	float bearingX = glyph->bitmap_left;
+	float bearingY = glyph->bitmap_top;
+	float width = bitmap.width;
+	float height = bitmap.rows;
+	float advance = glyph->advance.x >> 6;
+
+
+	widthAtlas += width;
+
+
+	glyphMetricsMap.emplace(character, GlyphMetrics{ width, height, bearingX, bearingY, advance });
+
+}
+
 Text::~Text() {
 	// Clean up the resources
-	glDeleteTextures(1, &textID);
+	glDeleteTextures(1, &textAtlasTexture);
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteBuffers(1, &indexBuffer); // Ensure you've created and stored the indexBuffer handle
 	glDeleteVertexArrays(1, &vertexArray);

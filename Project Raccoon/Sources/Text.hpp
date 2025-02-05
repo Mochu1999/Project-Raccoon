@@ -7,11 +7,20 @@
 
 
 
+//////////////////////////// 
+/*
+General pipeline:
+The objective is to construct the class with the font name and the size at the start.
+It automatically creates a texture atlas looping through storeGlyph in createAtlasTexture, storing the metrics
 
+Considerations:
+A lot of variables should be cleared after the createAtlasTexture creation. These variables should be inside functions and not as class variables
+Can't have different font types, nor sizes
+*/
 
 
 struct Text {
-	unsigned int textID;
+	unsigned int textAtlasTexture;
 
 
 	unsigned int vertexArray, vertexBuffer, indexBuffer;
@@ -31,74 +40,107 @@ struct Text {
 
 
 	//initializes the library and loads the font face
-	void initializeFreeType(const std::string& fontPath);
+	void initializeFreeType(const std::string& fontPath, const int fontPixelSize);
 
 
-
+	//in oneNote you have images of what every metric is.
 	struct GlyphMetrics {
 		float width, height;
 		float bearingX, bearingY;
-		float advertexArraynce;
+		float advance;
 		float texCoordX0 = 0, texCoordY0 = 0;
 		float texCoordX1 = 1, texCoordY1 = 1;
 	};
-	std::map<char, GlyphMetrics> glyphMetricsMap;
+	std::map<char, GlyphMetrics> glyphMetricsMap; //will store all the metrics
 
 
-	int startX, startY;
+	int positionX, positionY; //positions in the screen where the text will be rendered
 	//You should have a main constructor to build the atlas and choose the font and functions to add text to be all rendered in one call
-	Text(string textToDraw_, int startX_, int startY_) :textToDraw(textToDraw_), startX(startX_), startY(startY_) {
-		
-		initializeFreeType(glyphPath);
-		fillTextureAtlas();
+	Text(string textToDraw_, int positionX_, int positionY_) :textToDraw(textToDraw_), positionX(positionX_), positionY(positionY_) {
+
+		initializeFreeType(glyphPath, 48);
+		createAtlasTexture();
 		renderGlyph();
 
 		initializeBuffer();
 	}
 
+	//Creates and sets the texture of the atlas first without data
+	void initializeAtlasTexture(const float atlasWidth, const float atlasHeight) {
+		glGenTextures(1, &textAtlasTexture);
+		glBindTexture(GL_TEXTURE_2D, textAtlasTexture);
 
-	float widthAtlas = 0;
-	float heightAtlas = 0;
-	float totalAdvertexArraynce = 0;
-	void fillTextureAtlas() {
 
-		float currentX = 0;
-		for (char& c : allGlyphs) {
 
-			storeGlyph(c, widthAtlas, totalAdvertexArraynce); //store metrics and increases widthAtlas and totalAdvertexArraynce
-			if (glyphMetricsMap[c].height > heightAtlas) {
-				heightAtlas = glyphMetricsMap[c].height;
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,//level of detail, setted on base detail
+			GL_RED,	//this gives the internal format, look for more info
+			atlasWidth, // width of the entire texture atlas.
+			atlasHeight, //height of the tallest glyph in the atlas, used as the atlas height.
+			0, //border of the texture, must be 0
+			GL_RED,
+			GL_UNSIGNED_BYTE,
+			nullptr);
+
+
+
+		/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/ //linearly interpolates the pixel, smoother, but somewhat blurry 
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //choose the nearest pixel: pixelated, but sharp 
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);//clamps texture outside 0,1 range? Don't think I need it
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	//Stores the metrics of a character inside a map and the sum of its advances gets the width of the atlas
+	void storeGlyph(char character, float& atlasWidth);
+
+	//main function that includes the initialization of the texture and the call of storeGlyph to end with the final Atlas
+	void createAtlasTexture() {
+
+		float atlasWidth = 0, atlasHeight = 0;//Total dimensions of the atlas
+
+		for (char& c : allGlyphs)
+		{
+
+			storeGlyph(c, atlasWidth); //creates metrics map and sets atlas dimensions
+			if (glyphMetricsMap[c].height > atlasHeight)
+			{
+				atlasHeight = glyphMetricsMap[c].height; //highest glyph determines final atlasHeight
 			}
 		}
 
-		createTextureAtlas(); //sets empty texture
+		initializeAtlasTexture(atlasWidth, atlasHeight);
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //Sets the unpack alignment to 1 byte to handle bitmaps that are not aligned to 4 bytes
+		//OpenGL by default expects the rows of data to be packed in multiples of 4 bytes, it isn't our case, putting it in 1 somehow means 
+		// that “Each row is packed with no extra padding—just one byte per pixel, back-to-back.” and it just works without removing efficiency
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		for (char& c : allGlyphs) { //stores each metric in the texture
+		float currentAdvance = 0; //sets the x position of the glyph in the atlas
+		for (char& c : allGlyphs) { //stores a texture of each glyph in the atlas
 
-			glBindTexture(GL_TEXTURE_2D, textID);//necessary here
+			glBindTexture(GL_TEXTURE_2D, textAtlasTexture);//necessary here
 
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-				std::cerr << "Failed to load glyph " << c << std::endl;
+				std::cout << "Failed to load glyph " << c << std::endl;
 				continue;
 			}
-			FT_Bitmap& bitmap = face->glyph->bitmap;
 
 
-
-
-
-			//cout << "widthAtlas: " << widthAtlas << " heightAtlas: " << heightAtlas << endl;
+			//cout << "atlasWidth: " << atlasWidth << " atlasHeight: " << atlasHeight << endl;
 			//cout << "face->glyph->bitmap.width: " << face->glyph->bitmap.width << " face->glyph->bitmap.rows: " << face->glyph->bitmap.rows << endl;
-			//cout << "currentX: " << currentX << endl;
+			//cout << "currentAdvance: " << currentAdvance << endl;
 
+			FT_Bitmap& bitmap = face->glyph->bitmap; //A bitmap is the FreeType structure that contains the data of a glyph
 			glTexSubImage2D(
 				GL_TEXTURE_2D,
-				0, //detail number, 0 is base image level
-				currentX, // x position in the texture from the left
-				0, // y position in the texture
-				bitmap.width, // width of the subimage
+				0, //level of detail, setted on base detail
+				currentAdvance, //X offset in the texture where the subimage will be placed
+				0, //Y offset in the texture
+				bitmap.width, // width of the subimage (glyph)
 				bitmap.rows, //  height of the subimage
 				GL_RED,
 				GL_UNSIGNED_BYTE,
@@ -107,77 +149,66 @@ struct Text {
 
 
 
+
+
+
+
+
+
+
+
+
+			////////////////////////////////////////////////////////////////////////////////////////////////////////// Falta por entender
+
 			float yOffset = 0;
 
-			glyphMetricsMap[c].texCoordX0 = currentX / widthAtlas;
-			glyphMetricsMap[c].texCoordY0 = yOffset / heightAtlas;
-			glyphMetricsMap[c].texCoordX1 = (currentX + glyphMetricsMap[c].width) / widthAtlas;
-			glyphMetricsMap[c].texCoordY1 = (yOffset + glyphMetricsMap[c].height) / heightAtlas;
+			glyphMetricsMap[c].texCoordX0 = currentAdvance / atlasWidth;
+			glyphMetricsMap[c].texCoordY0 = yOffset / atlasHeight;
+			glyphMetricsMap[c].texCoordX1 = (currentAdvance + glyphMetricsMap[c].width) / atlasWidth;
+			glyphMetricsMap[c].texCoordY1 = (yOffset + glyphMetricsMap[c].height) / atlasHeight;
 
-			currentX += glyphMetricsMap[c].width;
+			currentAdvance += glyphMetricsMap[c].width;
 
 
 		}
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4); //Returning to default for next operations
 
 		/*for (auto& pair : glyphMetricsMap) {
-			cout << endl << endl;
+			
 			char i = pair.first;
 			cout << "Glyph: " << i << endl;
-			cout << "glyphMetricsMap[i].width: " << glyphMetricsMap[i].width << endl;
-			cout << "glyphMetricsMap[i].height: " << glyphMetricsMap[i].height << endl;
-			cout << "glyphMetricsMap[i].bearingX: " << glyphMetricsMap[i].bearingX << endl;
-			cout << "glyphMetricsMap[i].bearingY: " << glyphMetricsMap[i].bearingY << endl;
-			cout << "glyphMetricsMap[i].advertexArraynce: " << glyphMetricsMap[i].advertexArraynce << endl;
-			cout << "glyphMetricsMap[i].texCoordX0: " << glyphMetricsMap[i].texCoordX0 << endl;
-			cout << "glyphMetricsMap[i].texCoordY0: " << glyphMetricsMap[i].texCoordY0 << endl;
-			cout << "glyphMetricsMap[i].texCoordX1: " << glyphMetricsMap[i].texCoordX1 << endl;
-			cout << "glyphMetricsMap[i].texCoordY1: " << glyphMetricsMap[i].texCoordY1 << endl << endl;
+			print(glyphMetricsMap[i].width);
+			print(glyphMetricsMap[i].height);
+			print(glyphMetricsMap[i].bearingX);
+			print(glyphMetricsMap[i].bearingY);
+			print(glyphMetricsMap[i].advance);
+			print(glyphMetricsMap[i].texCoordX0);
+			print(glyphMetricsMap[i].texCoordY0);
+			print(glyphMetricsMap[i].texCoordX1);
+			print(glyphMetricsMap[i].texCoordY1);
+			cout << endl << endl;
 		}*/
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//glyphMetricsMap.clear(); //Clears that memory bc it's not going to be used anymore
 	}
 
 
+	
 
-	void storeGlyph(char character, float& widthAtlas, float& totalAdvertexArraynce) {		//Stores metrics inside a map //change to allow multiple glyphs
-
-
-		if (FT_Load_Char(face, character, FT_LOAD_RENDER)) {
-			std::cerr << "Failed to load glyph" << std::endl;
-
-		}
-
-
-
-		FT_Bitmap& bitmap = face->glyph->bitmap;
-
-		float bearingX = face->glyph->bitmap_left;
-		float bearingY = face->glyph->bitmap_top;
-		float w = bitmap.width;
-		float h = bitmap.rows;
-		/*float offsetX = bearingX;
-		float offsetY = (bearingY - bitmap.rows);*/
-		float advertexArraynce = face->glyph->advance.x >> 6;
-
-
-		widthAtlas += w;
-		totalAdvertexArraynce += advertexArraynce;
-
-
-		glyphMetricsMap.emplace(character, GlyphMetrics{ w, h, bearingX, bearingY, advertexArraynce });
-
-	}
+	
 
 	void pushIndices(size_t i) {
 		unsigned int aux = i * 4;
 		indices.insert(indices.end(), { aux,aux + 1,aux + 2,aux,aux + 2,aux + 3 });
 	}
 
-	void renderGlyph() {	//creates the quads and takes positions from the texture
+	//creates the quads and takes positions from the texture
+	void renderGlyph() {	
 
-		int x = startX;
-		int y = startY;
+		int x = positionX;
+		int y = positionY;
 
 		for (size_t i = 0; i < textToDraw.length(); ++i) {
 			char c = textToDraw[i];
@@ -207,7 +238,7 @@ struct Text {
 				});
 
 
-			x += metrics.advertexArraynce;
+			x += metrics.advance;
 
 			pushIndices(i);
 		}
@@ -215,40 +246,11 @@ struct Text {
 	}
 
 
-	void createTextureAtlas() {
-		glGenTextures(1, &textID);
-		glBindTexture(GL_TEXTURE_2D, textID);
 
 
 
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RED,	//this gives the internal format, look for more info
-			widthAtlas, // width of the entire texture atlas.
-			heightAtlas, //height of the tallest glyph in the atlas, used as the atlas height.
-			0,
-			GL_RED,
-			GL_UNSIGNED_BYTE,
-			nullptr
-		);
 
 
-
-		/*glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);*/ //smoother, but somewhat blurry 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //pixelated, but sharp 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-	}
-
-
-
-	
 
 
 	void initializeBuffer();
@@ -263,7 +265,7 @@ struct Text {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
 
-		glBindTexture(GL_TEXTURE_2D, textID);
+		glBindTexture(GL_TEXTURE_2D, textAtlasTexture);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * 4, positions.data());
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
