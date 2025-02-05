@@ -137,6 +137,7 @@
     <ClCompile Include="Sources\Common.cpp" />
     <ClCompile Include="Sources\glm\detail\glm.cpp" />
     <ClCompile Include="Sources\Polygons.cpp" />
+    <ClCompile Include="Sources\Text.cpp" />
     <ClCompile Include="Sources\WettedSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -445,7 +446,7 @@
     <ClInclude Include="Sources\Shader.hpp" />
     <ClInclude Include="Sources\Spheres.hpp" />
     <ClInclude Include="Sources\SweepTriangulation.hpp" />
-    <ClInclude Include="Sources\Text.h" />
+    <ClInclude Include="Sources\Text.hpp" />
     <ClInclude Include="Sources\Time.hpp" />
     <ClInclude Include="Sources\TrWettedSurface.hpp" />
     <ClInclude Include="Sources\WettedSurface.hpp" />

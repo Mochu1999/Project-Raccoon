@@ -42,8 +42,8 @@ struct Polygons2D {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
 
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
 		glBindVertexArray(0);
 	}

@@ -34,15 +34,18 @@ struct Shader {
 		stringstream ss[2];
 		ShaderType type = ShaderType::NONE;
 		while (getline(stream, line)) {
-			if (line.find("#shader") != std::string::npos) { //npos is the constant that will be given if it was not found, otherwise it will give a position, not a bool
-				if (line.find("vertex") != std::string::npos)
-					type = ShaderType::VERTEX;
-				else if (line.find("fragment") != string::npos)
-					type = ShaderType::FRAGMENT;
+			if (!line.empty()) //without this check if there's a leading space at the start of the shader it doesn't read the entire shader
+			{
+				if (line.find("#shader") != std::string::npos) { //npos is the constant that will be given if it was not found, otherwise it will give a position, not a bool
+					if (line.find("vertex") != std::string::npos)
+						type = ShaderType::VERTEX;
+					else if (line.find("fragment") != string::npos)
+						type = ShaderType::FRAGMENT;
 
-			}
-			else { //what isn't in #shader line is included in the stream
-				ss[(int)type] << line << '\n'; //the enum positionates vertex in 0 and fr in 1
+				}
+				else { //what isn't in #shader line is included in the stream
+					ss[(int)type] << line << '\n'; //the enum positionates vertex in 0 and fr in 1
+				}
 			}
 		}
 

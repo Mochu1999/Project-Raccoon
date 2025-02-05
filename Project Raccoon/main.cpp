@@ -36,7 +36,9 @@
 
 #include "Polyhedra.hpp"
 
-#include "Text.h"
+#include "Text.hpp"
+
+#include "auxiliary_elements.hpp"
 
 using namespace std::chrono;
 
@@ -173,7 +175,7 @@ int main(void)
 	int colorLocation2D = glGetUniformLocation(shader2D.ID, "u_Color");
 
 	int locationLightPos = glGetUniformLocation(shader3D.ID, "u_lightPos");
-	int cameraPosition = glGetUniformLocation(shader3D.ID, "camPos");
+	int cameraPosition = glGetUniformLocation(shader3D.ID, "u_CamPos");
 
 	shader3D.bind();
 	glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
@@ -190,7 +192,7 @@ int main(void)
 	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());*/
 
 	//shaderText.bind(); //NO DEBERÍA DE NECESITAR ESTAR BINDED?
-	Text text("abcp 100,200.521", 100, 100);
+	Text text("abcp 100,200.521 ñ á", 100, 100);
 	shader2D.bind();
 	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
 	shaderText.bind();
@@ -240,7 +242,7 @@ int main(void)
 			glUniform1i(locationFragment, 0);
 
 			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 },angle,{1,0,0});
-			angle++;
+			//angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			glUniform4f(colorLocation3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();

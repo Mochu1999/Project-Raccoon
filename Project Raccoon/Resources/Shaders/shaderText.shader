@@ -1,10 +1,8 @@
 #shader vertex 
 #version 330 core
 
-//EL ERROR POR LEADING SPACE
-
-layout(location = 0) in vec4 textPos; //POR QUE CUANDO CREAS UN VAO NO TIENES QUE ESTAR BINDED?
-layout(location = 1) in vec2 texCoord; //NOMBRE DE MIERDA
+layout(location = 0) in vec4 positions;
+layout(location = 1) in vec2 texCoord;
 
 
 uniform mat4 u_OrthoProjection;
@@ -13,7 +11,7 @@ out vec2 v_TexCoord;
 
 
 void main() {
-		gl_Position = u_OrthoProjection * textPos;
+		gl_Position = u_OrthoProjection * positions;
 		v_TexCoord = texCoord;	
     
 }
@@ -25,7 +23,7 @@ void main() {
 #version 330 core
 
 
-uniform sampler2D u_Texture; //LITERALMENTE NO ESTÁ HACIENDO NADA, NO EXISTE EN MAIN
+uniform sampler2D u_Texture; //No sé lo que hace, pero no se puede quitar. Pinta que va a ser necesario
 in vec2 v_TexCoord;
 
 out vec4 FragColor;

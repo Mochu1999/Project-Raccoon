@@ -54,7 +54,7 @@ struct Polyhedra {
 
 		glBindVertexArray(vertexArray);
 
-		//if (isBufferUpdated)
+		/*if (isBufferUpdated)
 		{
 			currentPositionsDataSize = positions.size() * sizeof(p3);
 			currentIndicesDataSize = indices.size() * sizeof(unsigned int);
@@ -85,12 +85,29 @@ struct Polyhedra {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, currentPositionsDataSize, normals.data());
 
 			isBufferUpdated = false;
-		}
+		}*/
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3) , positions.data(), GL_DYNAMIC_DRAW);
 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(p3), normals.data(), GL_DYNAMIC_DRAW);
 
 
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
+		/*
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3), positions.data(), GL_DYNAMIC_DRAW);
+
+		//glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(p3), normals.data(), GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
+		*/
 	}
 
 
@@ -113,6 +130,24 @@ struct Polyhedra {
 
 		glBindVertexArray(0);
 	}
+	//void genBuffers() {
+	//	glGenVertexArrays(1, &vertexArray);
+	//	glBindVertexArray(vertexArray);
+
+	//	glGenBuffers(1, &vertexBuffer);
+	//	glGenBuffers(1, &indexBuffer);
+	//	//glGenBuffers(1, &normalsBuffer);
+
+	//	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	//	glEnableVertexAttribArray(0);
+	//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+	//	//glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+	//	glEnableVertexAttribArray(1);
+	//	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	//	glBindVertexArray(0);
+	//}
 	
 	~Polyhedra() {
 		glDeleteVertexArrays(1, &vertexArray);

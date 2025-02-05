@@ -33,6 +33,9 @@
     <ClCompile Include="Sources\WettedSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\glm\detail\_features.hpp">
@@ -959,7 +962,7 @@
     <ClInclude Include="Sources\Delaunay2D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Text.h">
+    <ClInclude Include="Sources\Text.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

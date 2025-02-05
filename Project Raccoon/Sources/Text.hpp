@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Common.hpp"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <map>
@@ -9,11 +10,11 @@
 
 
 
-struct Text {		//lacks destructor!
+struct Text {
 	unsigned int textID;
 
 
-	unsigned int vertexArray, vertexBuffer, ibo;
+	unsigned int vertexArray, vertexBuffer, indexBuffer;
 
 	vector<float> positions;	//quads
 	vector<unsigned int> indices;
@@ -22,10 +23,15 @@ struct Text {		//lacks destructor!
 
 
 	FT_Library ft;
-	FT_Face face;
-	string glyphPath = R"(C:\dev\C++ libs\Helvetica\Helvetica.otf)";
+	//A typeface (or font family) englobes all the stylings of a font, a typefont is Helvetica while a font is Helvetica Regular
+	FT_Face face; //a face is the structure that stores all the data for a specific font
+	string glyphPath = "resources/Glyphs/Helvetica/Helvetica.otf";
 
-	string allGlyphs = "abcp .,;?1234567890";
+	string allGlyphs; //a font is a collection of glyphs
+
+
+	//initializes the library and loads the font face
+	void initializeFreeType(const std::string& fontPath);
 
 
 
@@ -40,14 +46,14 @@ struct Text {		//lacks destructor!
 
 
 	int startX, startY;
+	//You should have a main constructor to build the atlas and choose the font and functions to add text to be all rendered in one call
 	Text(string textToDraw_, int startX_, int startY_) :textToDraw(textToDraw_), startX(startX_), startY(startY_) {
-		//allGlyphs = textToDraw_;
+		
 		initializeFreeType(glyphPath);
 		fillTextureAtlas();
 		renderGlyph();
 
 		initializeBuffer();
-		initializeIBO();
 	}
 
 
@@ -242,75 +248,27 @@ struct Text {		//lacks destructor!
 
 
 
-
-	void initializeFreeType(const std::string& fontPath) {
-		if (FT_Init_FreeType(&ft)) {
-			std::cerr << "Could not init FreeType Library" << std::endl;
-			return;
-		}
-
-		if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
-			std::cerr << "Failed to load font" << std::endl;
-			return;
-		}
-
-		FT_Set_Pixel_Sizes(face, 0, 48); // Set font size
-	}
+	
 
 
-	void initializeBuffer() {
-		glBindVertexArray(0);
-		glGenVertexArrays(1, &vertexArray);
-		glBindVertexArray(vertexArray);
+	void initializeBuffer();
 
-		glGenBuffers(1, &vertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), /*positions.data()*/ nullptr, GL_DYNAMIC_DRAW);
-
-
-
-		// Position attribute
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-
-		// text coordinate attribute
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-		//glBindVertexArray(0);
-	}
-
-	void initializeIBO() {
-
-
-		glGenBuffers(1, &ibo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
-	}
-
+	//MODIFICAR PARA TEXTO DINÁMICO
 	void draw() {
 		glBindVertexArray(0);
 		glBindVertexArray(vertexArray);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), /*positions.data()*/ nullptr, GL_DYNAMIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
+
 		glBindTexture(GL_TEXTURE_2D, textID);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * 4, positions.data());
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	void textUnbind() {
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
 
-	~Text() {
-		// Clean up the resources
-		glDeleteTextures(1, &textID);
-		glDeleteBuffers(1, &vertexBuffer);
-		glDeleteBuffers(1, &ibo); // Ensure you've created and stored the IBO handle
-		glDeleteVertexArrays(1, &vertexArray);
-
-		// Cleanup FreeType resources
-		FT_Done_Face(face);
-		FT_Done_FreeType(ft);
-	}
+	~Text();
 
 };
