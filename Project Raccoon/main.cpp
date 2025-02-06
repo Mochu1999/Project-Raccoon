@@ -192,7 +192,12 @@ int main(void)
 	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());*/
 
 	//shaderText.bind(); //NO DEBERÍA DE NECESITAR ESTAR BINDED?
-	Text text("abcp 100,200.521 Lorem ipsum dolor sit amet, consectetur adipiscing elit.", 100, 100);
+	Text text("resources/Glyphs/Helvetica/Helvetica.otf",48);
+	//text.addText("abcp 100,200.521 Lorem ipsum dolor sit amet, consectetur adipiscing elit.", 100, 100);
+	text.addText("abcp 100,200.521 Lorem ipsum dolor sit amet, consectetur adipiscing elit.", 100, 300);
+	text.addText("The quick brown fox jumpes over the lazy dog. 1234567890", 100, 100);
+
+	text.renderGlyph();
 	shader2D.bind();
 	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
 	shaderText.bind();
@@ -242,7 +247,7 @@ int main(void)
 			glUniform1i(locationFragment, 0);
 
 			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 },angle,{1,0,0});
-			//angle++;
+			angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			glUniform4f(colorLocation3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();
