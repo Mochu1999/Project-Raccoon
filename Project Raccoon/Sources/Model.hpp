@@ -192,3 +192,31 @@ void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::
 	}
 	inFile.close();
 }
+
+//void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::vector<unsigned int>& indices, const std::string& path) {
+//	/*std::string basePath = "Resources/Simple polyhedra/";
+//	std::string path = basePath + modelPath;*/
+//
+//	std::ifstream inFile(path, std::ios::binary);
+//	if (inFile)
+//	{
+//		size_t size;
+//
+//		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+//		model.resize(size);
+//		inFile.read(reinterpret_cast<char*>(model.data()), size * sizeof(p3));
+//
+//		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+//		normals.resize(size);
+//		inFile.read(reinterpret_cast<char*>(normals.data()), size * sizeof(p3));
+//
+//		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+//		indices.resize(size);
+//		inFile.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int));
+//	}
+//	else
+//	{
+//		std::cerr << "Error opening file for reading." << std::endl;
+//	}
+//	inFile.close();
+//}

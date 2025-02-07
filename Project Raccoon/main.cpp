@@ -150,6 +150,7 @@ int main(void)
 		//writeSimplePolyhedra(stl.positions, stl.normals, stl.indices);
 	}
 
+	//readSimplePolyhedra(timon.positions, timon.normals, timon.indices, "C:\dev\C++ libs\modelos\timon.bin");
 
 	readSimplePolyhedra(timon.positions, timon.normals, timon.indices, "timon.bin");
 	readSimplePolyhedra(modelo.positions, modelo.normals, modelo.indices, "modelo.bin");

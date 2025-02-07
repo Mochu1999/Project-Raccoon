@@ -175,11 +175,9 @@ struct Text {
 	
 
 	
-	int currentIndex = 0;
+	int currentIndex = 0; //to separate different textToDraws
 	void pushIndices(size_t i) {
 		unsigned int aux = i * 4;
-		//indices.insert(indices.end(), { aux,aux + 1,aux + 2,aux,aux + 2,aux + 3 });
-		//2 triangles in the format of {0,1,2}{0,2,3}
 		indices.insert(indices.end(), { currentIndex + aux,currentIndex + aux + 1,currentIndex + aux + 2,currentIndex + aux,currentIndex + aux + 2,currentIndex + aux + 3 });
 	}
 
