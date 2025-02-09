@@ -199,10 +199,12 @@ void Text::createAtlasTexture() {
 }
 
 
+
 //fills the vertex buffer with the final quad positions and the atlas coordinates of the glyph
 void Text::renderGlyph() {
-
-	
+	positions.clear();
+	indices.clear();
+	indexCounter = 0;
 
 	
 	for (size_t i = 0; i < textData.textToDraw.size(); i++)

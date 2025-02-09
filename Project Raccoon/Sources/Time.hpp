@@ -51,20 +51,13 @@ struct TimeStruct {
 		frameCount++;
 		timeAccumulator += deltaTime;
 
-		if (timeAccumulator >= 1.0f) {
+		if (timeAccumulator >= 0.5f) {
 			fps = frameCount / timeAccumulator;
 			frameCount = 0;
-			timeAccumulator -= 1.0f;
+			timeAccumulator -= 0.5f;
 		}
 	}
 
-	float getDeltaTime() const {
-		return deltaTime;
-	}
-
-	float getFPS() const {
-		return fps;
-	}
 };
 
 

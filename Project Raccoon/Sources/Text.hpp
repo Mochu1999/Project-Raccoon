@@ -83,6 +83,8 @@ struct Text {
 	void substituteText(int index, string textToDraw_, p2 textPosition_) {
 		textData.textToDraw[index] = textToDraw_;
 		textData.textPosition[index] = textPosition_;
+
+		renderGlyph();
 	}
 
 	//Creates and sets the texture of the atlas first without data

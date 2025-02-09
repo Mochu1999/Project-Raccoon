@@ -10,6 +10,8 @@
 #include "Shader.hpp"
 
 #include "lines3d.hpp"
+#include "Lines2D.hpp"
+
 #include "Fourier.hpp"
 
 #include "Camera.hpp"
@@ -102,7 +104,7 @@ int main(void)
 
 
 
-
+	TimeStruct timeStruct;
 
 	Shader shader3D("resources/shaders/shader3D.shader");
 	Shader shader2D("resources/shaders/shader2D.shader");
@@ -140,8 +142,22 @@ int main(void)
 	zLine2.addSet({ {0,0,0},{0,0,5} });
 
 
+	/*
+	36,420
+	960,420
+	960,64
+	960,68
 
-	Polygons2D polygon2D; //the blue square
+		929,60
+		960,88
+		*/
+	Polygons2D polygon2D; //Faltan reserves
+	//polygon2D.addPositions({ {0,0},{200,0},{200,200},{0,200},{0,0} });
+	polygon2D.addPositions({ {36,64},{960,64},{960,420},{36,420},{36,64 } });
+
+	Lines2D lines2d;
+	//lines2d.addSet({ {36,64},{960,64},{960,420},{36,420},{36,64 } });
+	lines2d.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
 
 	Polyhedra stl, timon, modelo;
 	{
@@ -187,26 +203,26 @@ int main(void)
 
 	//SEPARATE THE LOGIC OF THE KEYS FROM UPDATECAMERA
 	camera.updateCamera();
-	//glUniform3f(cameraPosition, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-	//glUniformMatrix4fv(locationMVP, 1, GL_FALSE, camera.vpMatrix.data());
-	/*glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
-	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());*/
 
-	//shaderText.bind(); //NO DEBERÍA DE NECESITAR ESTAR BINDED?
-	Text text("resources/Glyphs/Helvetica/Helvetica.otf",48);
+
+
+	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
+	Text text("resources/Glyphs/Helvetica/Helvetica.otf",36);
+	text.addText(std::to_string(timeStruct.fps), { 10,950 });
 	text.addText("abcp 100,200.521", { 100, 100 });
 	text.addText("abcp 100,200.521", { 100, 300 });
 	text.addText("abcp 100,200.521", { 100, 500 });
-	//text.addText("abcp 100,200.521 Lorem ipsum dolor sit amet, consectetur adipiscing elit.", 100, 300);
-	//text.addText("The quick brown fox jumpes over the lazy dog. 1234567890", 100, 100);
-
+	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });
 	text.renderGlyph();
+
 	shader2D.bind();
 	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
 	shaderText.bind();
 	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());
 
 	float angle = 0;
+	int counter = 0;
+
 	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyCallback);
 
@@ -215,6 +231,9 @@ int main(void)
 	{
 		if (isRunning)
 		{
+			timeStruct.update();
+			text.substituteText(0, std::to_string(timeStruct.fps), { 10,950 }); // si no especificas position que no se mueva
+			//print(text.textData.textToDraw[3]);
 			shader3D.bind();
 
 			//opaque objects first
@@ -250,7 +269,7 @@ int main(void)
 			glUniform1i(locationFragment, 0);
 
 			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 },angle,{1,0,0});
-			//angle++;
+			angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			glUniform4f(colorLocation3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();
@@ -276,13 +295,16 @@ int main(void)
 			///2d objects
 			shader2D.bind();
 			glUniform4f(colorLocation2D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
-			polygon2D.draw();
+			//polygon2D.draw();
+			lines2d.draw();
 
 
-
+			counter++;
 
 			//text
 			glDisable(GL_DEPTH_TEST);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			shaderText.bind();
 			text.sDraw();
 

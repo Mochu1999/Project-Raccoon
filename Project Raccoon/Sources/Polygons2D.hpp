@@ -5,15 +5,15 @@
 
 
 
-
+//Closed polygons
 struct Polygons2D {
 	GLenum usageHint = GL_DYNAMIC_DRAW;
 
 	bool isBufferUpdated = false;
 
 	//hardcoding values just for testing
-	vector<p2> positions = { {0,0},{200,0},{200,200},{0,200},{0,0} };
-	vector <unsigned int> indices = { 0,1,2,2,3,0 };
+	vector<p2> positions;
+	vector <unsigned int> indices;
 
 
 	unsigned int vertexBuffer;
@@ -30,6 +30,23 @@ struct Polygons2D {
 
 	Polygons2D() {
 		genBuffers();
+
+		
+	}
+
+	void addPositions(vector<p2> positions_) {
+		positions = positions_;
+		createConvexIndices();
+	}
+
+	void createConvexIndices() {
+		indices.clear();
+		for (unsigned int i = 0; i < positions.size() - 1; i++)
+		{
+			indices.insert(indices.end(), { 0,i + 1,i + 2 });
+		}
+		//print(indices);
+
 	}
 
 	void genBuffers() {
@@ -49,7 +66,7 @@ struct Polygons2D {
 	}
 
 	void draw() {
-		isBufferUpdated = true; //just for debugging
+		isBufferUpdated = true;
 
 		glBindVertexArray(vertexArray);
 
@@ -85,7 +102,7 @@ struct Polygons2D {
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
 
-
+	
 	~Polygons2D() {
 		glDeleteVertexArrays(1, &vertexArray);
 		glDeleteBuffers(1, &vertexBuffer);
@@ -93,7 +110,7 @@ struct Polygons2D {
 	}
 
 
-	
+
 
 
 
