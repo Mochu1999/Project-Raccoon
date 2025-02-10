@@ -151,12 +151,11 @@ GLFWwindow* initialize() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	/*glfwWindowHint(GLFW_DEPTH_BITS, 32);
 
-	glfwWindowHint(GLFW_SAMPLES, 4);*/
+	glfwWindowHint(GLFW_SAMPLES, 4);  // Request 4x MSAA for antialiasing
+	glEnable(GL_MULTISAMPLE);
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", NULL, NULL);
 
-	//glEnable(GL_MULTISAMPLE);
 
 	glfwMakeContextCurrent(window);
 	//glewExperimental = GL_TRUE;
@@ -167,16 +166,14 @@ GLFWwindow* initialize() {
 	glEnable(GL_DEPTH_TEST);
 	//glDepthFunc(GL_LESS);
 
+	glEnable(GL_LINE_SMOOTH);
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
 	glEnable(GL_BLEND);//blend for alpha opacity, lets blending pixels in the same position
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	
 
-
-	////// Enable polygon offset fill
-	////glEnable(GL_POLYGON_OFFSET_FILL);
-	////// Apply the offset. These values might need tweaking for your specific use case
-	////glPolygonOffset(1.0f, 1.0f);
 
 	return window;
 }

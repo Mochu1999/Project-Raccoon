@@ -31,21 +31,37 @@ struct Polygons2D {
 	Polygons2D() {
 		genBuffers();
 
-		
+
 	}
 
-	void addPositions(vector<p2> positions_) {
-		positions = positions_;
-		createConvexIndices();
+
+
+	//Meant to be additive. The mode sets the type of index you want to have.
+	//To determine if the last positions should be removed you must finish wettedSurface
+	void addSet(const vector<p2>& items, int mode = 0) {
+
+		positions.reserve(positions.size() + items.size());
+		//////////////////////////////////////////////
+		//indices.reserve(indices.size() + items.size() * 2);
+
+		positions.insert(positions.end(), items.begin(), items.end());
+
+		createConvexIndices(items);
+
+		isBufferUpdated = true;
 	}
 
-	void createConvexIndices() {
-		indices.clear();
-		for (unsigned int i = 0; i < positions.size() - 1; i++)
+	unsigned int indexOffset = 0;
+	//INTEGRATE SWEEPTRIANGULATION  AS ANOTHER FUNCTION TO BE USED HERE
+	void createConvexIndices(const vector<p2>& items) {
+
+		for (unsigned int i = 0; i < items.size() - 3; i++)
 		{
-			indices.insert(indices.end(), { 0,i + 1,i + 2 });
+			indices.insert(indices.end(), { indexOffset,indexOffset + i + 1,indexOffset + i + 2 });
+			
 		}
-		//print(indices);
+
+		indexOffset = indices.back() + 2;//position[indices.back()+1] is positions[indices.front()], must be +2
 
 	}
 
@@ -102,7 +118,7 @@ struct Polygons2D {
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
 
-	
+
 	~Polygons2D() {
 		glDeleteVertexArrays(1, &vertexArray);
 		glDeleteBuffers(1, &vertexBuffer);
@@ -110,13 +126,10 @@ struct Polygons2D {
 	}
 
 
-
-
-
-
 	void clear() {
 		indices.clear();
 		positions.clear();
+		indexOffset = 0;
 	}
 
 };

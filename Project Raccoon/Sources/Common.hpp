@@ -63,6 +63,11 @@ struct vec2 {
 		return { x + other.x, y + other.y };
 	}
 
+	
+	vec2 operator + (const T other) const { //PASSING WITHOUT REFERENCE MIGHT BE LESS EXPENSIVE, CAN YOU CHECK?
+		return { x + other, y + other };
+	}
+
 	vec2 operator - (const vec2& other) const {
 		return { x - other.x, y - other.y };
 	}
@@ -388,15 +393,8 @@ float crossProduct(const vec2<T>& p0, const vec2<T>& p1, const vec2<T>& p2) {
 }
 
 
-template<typename T>
-T radians(T input) {
-	return input * PI * inv180;
-}
 
-template<typename T>
-T degrees(T input) {
-	return input * 180 / invPI;
-}
+
 
 
 
@@ -446,3 +444,9 @@ std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std
 
 // Normalizes the quaternion [w, x, y, z] in-place
 void normalizeQuaternion(std::array<float, 4>& q);
+
+
+float radians(float input);
+
+
+float degrees(float input);

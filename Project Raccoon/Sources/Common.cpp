@@ -155,3 +155,12 @@ void normalizeQuaternion(std::array<float, 4>& q)
 		q[3] /= mag;
 	}
 }
+
+float radians(float input) {
+	return input * PI * inv180;
+}
+
+
+float degrees(float input) {
+	return input * 180 / invPI;
+}

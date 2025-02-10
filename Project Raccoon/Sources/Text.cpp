@@ -204,7 +204,7 @@ void Text::createAtlasTexture() {
 void Text::renderGlyph() {
 	positions.clear();
 	indices.clear();
-	indexCounter = 0;
+	indexOffset = 0;
 
 	
 	for (size_t i = 0; i < textData.textToDraw.size(); i++)
@@ -242,16 +242,16 @@ void Text::renderGlyph() {
 
 			x += metrics.advance;
 
-			pushIndices(j);
+			createIndices(j);
 		}
-			indexCounter = indices.back() + 1;
+			indexOffset = indices.back() + 1;
 	}
 }
 
 //2 triangles per each quad in the order {0,1,2 , 0,2,3}
-void Text::pushIndices(size_t i) {
+void Text::createIndices(size_t i) {
 	unsigned int aux = i * 4;
-	indices.insert(indices.end(), { indexCounter + aux,indexCounter + aux + 1,indexCounter + aux + 2,indexCounter + aux,indexCounter + aux + 2,indexCounter + aux + 3 });
+	indices.insert(indices.end(), { indexOffset + aux,indexOffset + aux + 1,indexOffset + aux + 2,indexOffset + aux,indexOffset + aux + 2,indexOffset + aux + 3 });
 }
 
 

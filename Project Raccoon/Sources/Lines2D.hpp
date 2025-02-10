@@ -2,6 +2,9 @@
 
 #include "Common.hpp"
 
+//POR FAVOR SI PUEDES REVISA LA PIPELINE PARA BUSCAR POSIBLES OPTIMIZACIONES, LO SIENTO
+// , también falta un substitute y dejaría lo de colores para otro momento
+
 //draw lines defined in batches, these batches creates indices for their components
 struct Lines2D {
 
@@ -29,9 +32,7 @@ struct Lines2D {
 		genBuffers();
 	}
 
-	void clear() {
-		positions.clear(); indices.clear(); setOffset = 0;
-	}
+	
 
 
 	void genBuffers() {
@@ -102,27 +103,34 @@ struct Lines2D {
 
 
 
-	unsigned int setOffset = 0;	//the offset that lets multiple indices be over the past ones
+	unsigned int indexOffset = 0;	//to add indices over previoses sets
 
-	//It doesn't reset indices each time, items are expected to be full models, can't be a single pair
-	void addSet(const vector<p2>& items) {
+	//Meant to be additive. The mode sets the type of index you want to have
+	void addSet(const vector<p2>& items, int mode = 0) {
 
-		positions.clear(); indices.clear();
-
-		positions.reserve(items.size());
-		indices.reserve(items.size() * 2);
+		positions.reserve(positions.size() + items.size());
+		indices.reserve(indices.size() + items.size() * 2);
 
 		positions.insert(positions.end(), items.begin(), items.end());
 
-		for (unsigned int i = 0; i < items.size() - 1; i++)
-		{
-			indices.emplace_back(i + setOffset);
-			indices.emplace_back(i + setOffset + 1);
-		}
-
-		setOffset += items.size();
+		createIndices(items);
 
 		isBufferUpdated = true;
 	}
+	//mode 0
+	void createIndices(const vector<p2>& items) {
+		for (unsigned int i = 0; i < items.size() - 1; i++)
+		{
+			indices.insert(indices.end(), { indexOffset + i,indexOffset + i + 1 });
+		}
 
+		indexOffset = indices.back() + 1;
+	}
+
+	void clear() {
+
+		positions.clear(); 
+		indices.clear(); 
+		indexOffset = 0;
+	}
 };

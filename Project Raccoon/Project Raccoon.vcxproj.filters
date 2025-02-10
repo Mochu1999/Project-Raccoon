@@ -971,6 +971,9 @@
     <ClInclude Include="Sources\Lines2D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Circles.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Sources\glm\detail\func_common.inl">

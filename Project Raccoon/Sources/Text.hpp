@@ -103,9 +103,9 @@ struct Text {
 	//fills the vertex buffer with the final quad positions and the atlas coordinates of the glyph
 	void renderGlyph();
 
-	int indexCounter = 0; //to separate different textToDraws
+	int indexOffset = 0; //to separate different textToDraws
 	//2 triangles per each quad in the order {0,1,2 , 0,2,3}
-	void pushIndices(size_t i);
+	void createIndices(size_t i);
 
 
 

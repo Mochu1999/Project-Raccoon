@@ -148,6 +148,7 @@
     <ClInclude Include="Sources\BinariesManager.h" />
     <ClInclude Include="Sources\BinariesManager.hpp" />
     <ClInclude Include="Sources\Camera.hpp" />
+    <ClInclude Include="Sources\Circles.hpp" />
     <ClInclude Include="Sources\Common.hpp" />
     <ClInclude Include="Sources\Delaunay2D.hpp" />
     <ClInclude Include="Sources\Delaunay_2D.hpp" />

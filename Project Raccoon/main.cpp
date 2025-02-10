@@ -12,6 +12,8 @@
 #include "lines3d.hpp"
 #include "Lines2D.hpp"
 
+#include "Circles.hpp"
+
 #include "Fourier.hpp"
 
 #include "Camera.hpp"
@@ -42,6 +44,8 @@
 
 #include "auxiliary_elements.hpp"
 
+#include "Graphics.hpp"
+
 using namespace std::chrono;
 
 // to not render what is not visible to the camera:
@@ -49,7 +53,7 @@ using namespace std::chrono;
 //glCullFace(GL_BACK);          // Cull back faces
 //glFrontFace(GL_CCW);          // Counter-clockwise winding is front-facing
 
-
+//instance rendering for the future
 
 struct AllPointers {
 	BinariesManager* binariesManager;
@@ -58,16 +62,6 @@ struct AllPointers {
 
 
 
-float crtRotation=0, objtRotation;
-
-void orderRudder(vector<p3>& positions) {
-	cout << "Rotame esta: ";
-	cin >> objtRotation;
-	crtRotation = objtRotation - crtRotation;
-	cout << "rotating "<< crtRotation << endl;
-	rotate3D(positions, 0, crtRotation, 0);
-	cout << "chama " << endl;
-}
 
 
 
@@ -119,7 +113,7 @@ int main(void)
 
 
 
-	Sphere light(3, 80);
+	Sphere light(3);
 	p3 lightPos = { 30,25,40 };
 	light.addSet(lightPos);
 
@@ -152,14 +146,29 @@ int main(void)
 		960,88
 		*/
 	Polygons2D polygon2D; //Faltan reserves
-	//polygon2D.addPositions({ {0,0},{200,0},{200,200},{0,200},{0,0} });
-	polygon2D.addPositions({ {36,64},{960,64},{960,420},{36,420},{36,64 } });
+	polygon2D.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
+	polygon2D.addSet({ {600,600},{800,600},{800,800},{600,800},{600,600} });
+
 
 	Lines2D lines2d;
 	//lines2d.addSet({ {36,64},{960,64},{960,420},{36,420},{36,64 } });
 	lines2d.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
 
+	Lines2D arc;
+	//vector<p2> a = createArc({ 300,300 }, 100, radians(270), radians(360));
+		
+	
+	arc.addSet(createRoundedSquare(500, 0.1));
+	//print(arc.positions);
+	
+
+
+	Circles circle(20,4);
+	circle.addSet({ {210,210},{300,500} });
+
+
 	Polyhedra stl, timon, modelo;
+
 	{
 		//readSTL(stl.positions, stl.normals, "modeloNR.stl");
 		//stl.simpleIndices();
@@ -209,10 +218,10 @@ int main(void)
 	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
 	Text text("resources/Glyphs/Helvetica/Helvetica.otf",36);
 	text.addText(std::to_string(timeStruct.fps), { 10,950 });
-	text.addText("abcp 100,200.521", { 100, 100 });
+	/*text.addText("abcp 100,200.521", { 100, 100 });
 	text.addText("abcp 100,200.521", { 100, 300 });
 	text.addText("abcp 100,200.521", { 100, 500 });
-	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });
+	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });*/
 	text.renderGlyph();
 
 	shader2D.bind();
@@ -222,6 +231,8 @@ int main(void)
 
 	float angle = 0;
 	int counter = 0;
+
+	printm16(camera.orthoMatrix);
 
 	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyCallback);
@@ -245,7 +256,7 @@ int main(void)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-
+			glLineWidth(2); //this is deprecated and platform dependent
 			glUniform1i(locationFragment, 1);
 			//axis
 			glUniform4f(colorLocation3D, 1.0, 0.0, 0.0, 1.0);
@@ -269,7 +280,7 @@ int main(void)
 			glUniform1i(locationFragment, 0);
 
 			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 },angle,{1,0,0});
-			angle++;
+			//angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			glUniform4f(colorLocation3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();
@@ -294,9 +305,14 @@ int main(void)
 
 			///2d objects
 			shader2D.bind();
+
+			glLineWidth(5);
 			glUniform4f(colorLocation2D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
 			//polygon2D.draw();
-			lines2d.draw();
+			//lines2d.draw();
+			//circle.drawInterior();
+			//circle.drawCircunference();
+			arc.draw();
 
 
 			counter++;
@@ -316,8 +332,7 @@ int main(void)
 
 			shader3D.bind();
 			
-			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-				orderRudder(timon.positions);
+
 
 			camera.updateKeys();
 			camera.updateCamera();
