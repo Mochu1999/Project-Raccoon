@@ -201,7 +201,7 @@ void Text::createAtlasTexture() {
 
 
 //fills the vertex buffer with the final quad positions and the atlas coordinates of the glyph
-void Text::renderGlyph() {
+void Text::fillVertexBuffer() {
 	positions.clear();
 	indices.clear();
 	indexOffset = 0;

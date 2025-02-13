@@ -38,8 +38,8 @@ vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
 
 uniform int u_fragmentMode; //1 for lit, 0 for full color
 uniform vec3 u_CamPos;
-uniform vec3 u_lightPos;
 uniform vec4 u_Color;
+uniform vec3 u_lightPos;
 
 
 out vec4 fragColor;

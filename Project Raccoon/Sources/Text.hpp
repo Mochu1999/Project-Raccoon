@@ -3,7 +3,6 @@
 #include "Common.hpp"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <map>
 
 
 
@@ -15,20 +14,19 @@ It automatically creates a texture atlas looping through storeGlyph in createAtl
 
 Considerations:
 A lot of variables should be cleared after the createAtlasTexture creation. These variables should be inside functions and not as class variables
-Can't have different font types, nor sizes
+It only allows one font type and size per atlas, which I don't know if it positive or negative
+No kerning, it can improve spacing between glyphs for specific pairs, like AA vs AV
+
 */
 
 
+
 struct Text {
-	unsigned int textAtlasTexture;
 
-
-	unsigned int vertexArray, vertexBuffer, indexBuffer;
+	unsigned int vertexArray, vertexBuffer, indexBuffer, textAtlasTexture;
 
 	vector<float> positions;	//quads
 	vector<unsigned int> indices;
-
-
 
 	FT_Library ft;
 	//A typeface (or font family) englobes all the stylings of a font, a typefont is Helvetica while a font is Helvetica Regular
@@ -62,7 +60,7 @@ struct Text {
 	TextData textData;
 
 	
-	//You should have a main constructor to build the atlas and choose the font and functions to add text to be all rendered in one call
+	
 	Text(string glyphPath_, int fontPixelSize_) :glyphPath(glyphPath_), fontPixelSize(fontPixelSize_){
 
 		initializeFreeType(glyphPath, fontPixelSize);
@@ -72,19 +70,45 @@ struct Text {
 
 	}
 	
-	void addText(string textToDraw_, p2 textPosition_) {
+	/*void addText(string textToDraw_, p2 textPosition_) {
 
 		textData.textToDraw.push_back(textToDraw_);
 		textData.textPosition.push_back(textPosition_);
 
 		
-	};
+	};*/
 
-	void substituteText(int index, string textToDraw_, p2 textPosition_) {
+	//If performance becomes an issue working only with concatenated strings is an option
+	template <typename... Args> //Variadic arguments
+	void addText(p2 textPosition_, Args&&... args)
+	{
+		// We'll build the final string from all the variadic arguments.
+		std::ostringstream oss;
+		// Fold expression: essentially does (oss << args) for each argument.
+		(oss << ... << args);
+		textData.textToDraw.push_back(oss.str());
+
+		textData.textPosition.push_back(textPosition_);
+	}
+
+	/*void substituteText(int index, string textToDraw_, p2 textPosition_) {
 		textData.textToDraw[index] = textToDraw_;
 		textData.textPosition[index] = textPosition_;
 
-		renderGlyph();
+		fillVertexBuffer();
+	}*/
+	template <typename... Args> //Variadic arguments
+	void substituteText(int index,p2 textPosition_, Args&&... args)
+	{
+		// We'll build the final string from all the variadic arguments.
+		std::ostringstream oss;
+		// Fold expression: essentially does (oss << args) for each argument.
+		(oss << ... << args);
+
+		textData.textToDraw[index] = oss.str();
+		textData.textPosition[index] = textPosition_;
+
+		fillVertexBuffer();
 	}
 
 	//Creates and sets the texture of the atlas first without data
@@ -100,8 +124,8 @@ struct Text {
 
 	
 
-	//fills the vertex buffer with the final quad positions and the atlas coordinates of the glyph
-	void renderGlyph();
+	//fills the vertex buffer with the final quad positions and with the coordinates of the glyph in the atlas
+	void fillVertexBuffer();
 
 	int indexOffset = 0; //to separate different textToDraws
 	//2 triangles per each quad in the order {0,1,2 , 0,2,3}
@@ -111,7 +135,7 @@ struct Text {
 
 	void initializeBuffer();
 
-	//static draw
+	//static draw //NOT WORKING///////////////////////
 	void sDraw() {
 		glBindVertexArray(0);
 		glBindVertexArray(vertexArray);
@@ -130,3 +154,13 @@ struct Text {
 	~Text();
 
 };
+
+template<typename T>
+T round2d(T number) {
+	return round(number * 100.0) / 100.0;
+}
+
+template<typename T>
+T round1d(T number) {
+	return round(number * 10.0) / 10.0;
+}

@@ -11,6 +11,7 @@
 
 #include "lines3d.hpp"
 #include "Lines2D.hpp"
+#include "Lines2D_Instanced.hpp"
 
 #include "Circles.hpp"
 
@@ -102,6 +103,7 @@ int main(void)
 
 	Shader shader3D("resources/shaders/shader3D.shader");
 	Shader shader2D("resources/shaders/shader2D.shader");
+	Shader shader2D_Instanced("resources/shaders/shader2D_Instanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
 	//shader3D.bind();
 
@@ -136,15 +138,6 @@ int main(void)
 	zLine2.addSet({ {0,0,0},{0,0,5} });
 
 
-	/*
-	36,420
-	960,420
-	960,64
-	960,68
-
-		929,60
-		960,88
-		*/
 	Polygons2D polygon2D; //Faltan reserves
 	polygon2D.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
 	polygon2D.addSet({ {600,600},{800,600},{800,800},{600,800},{600,600} });
@@ -156,14 +149,14 @@ int main(void)
 
 	Lines2D arc;
 	//vector<p2> a = createArc({ 300,300 }, 100, radians(270), radians(360));
-		
-	
 	arc.addSet(createRoundedSquare(500, 0.1));
 	//print(arc.positions);
-	
+
+	Lines2D_Instanced lines2D_Instanced;
+	lines2D_Instanced.addSet({ {100,100},{100,500} });
 
 
-	Circles circle(20,4);
+	Circles circle(20, 4);
 	circle.addSet({ {210,210},{300,500} });
 
 
@@ -187,27 +180,7 @@ int main(void)
 	//getPos(window);
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	//Look for uniform buffer objects. Used to send a lot of uniforms into a program more efficiently. I think it let's you share DATA BETWEEN SHADERS
-	int locationPerspective = glGetUniformLocation(shader3D.ID, "u_Perspective");
-	int locationModel = glGetUniformLocation(shader3D.ID, "u_Model");
-	int locationView = glGetUniformLocation(shader3D.ID, "u_View");
-	int locationOrtho = glGetUniformLocation(shader2D.ID, "u_OrthoProjection");
-	int locationOrthoText = glGetUniformLocation(shaderText.ID, "u_OrthoProjection");  //Y esta no tiene que hacerse estando binded??
-
-	int locationFragment = glGetUniformLocation(shader3D.ID, "u_fragmentMode");
-
-
-	int colorLocation3D = glGetUniformLocation(shader3D.ID, "u_Color");
-	int colorLocation2D = glGetUniformLocation(shader2D.ID, "u_Color");
-
-	int locationLightPos = glGetUniformLocation(shader3D.ID, "u_lightPos");
-	int cameraPosition = glGetUniformLocation(shader3D.ID, "u_CamPos");
-
-	shader3D.bind();
-	glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
-	glUniformMatrix4fv(locationPerspective, 1, GL_FALSE, camera.perspectiveMatrix.data());
-
-	glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+	
 
 
 	//SEPARATE THE LOGIC OF THE KEYS FROM UPDATECAMERA
@@ -216,26 +189,70 @@ int main(void)
 
 
 	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
-	Text text("resources/Glyphs/Helvetica/Helvetica.otf",36);
-	text.addText(std::to_string(timeStruct.fps), { 10,950 });
+	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
+	text.addText({ 10,950 }, timeStruct.fps, " fps");
 	/*text.addText("abcp 100,200.521", { 100, 100 });
 	text.addText("abcp 100,200.521", { 100, 300 });
 	text.addText("abcp 100,200.521", { 100, 500 });
 	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });*/
-	text.renderGlyph();
+	text.fillVertexBuffer();
 
-	shader2D.bind();
-	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
-	shaderText.bind();
-	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());
+	
 
-	float angle = 0;
-	int counter = 0;
+	
 
-	printm16(camera.orthoMatrix);
+
 
 	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyCallback);
+
+
+
+
+	///Look for uniform buffer objects. Used to send a lot of uniforms into a program more efficiently. I think it let's you share DATA BETWEEN SHADERS
+	//Locations. They don't need to be binded to a shader in the creation but they do need to be binded when assigning the data
+	//3D
+	int locationPerspective = glGetUniformLocation(shader3D.ID, "u_Perspective");
+	int locationModel = glGetUniformLocation(shader3D.ID, "u_Model");
+	int locationView = glGetUniformLocation(shader3D.ID, "u_View");
+	int locationFragment = glGetUniformLocation(shader3D.ID, "u_fragmentMode");
+	int locationCamPos = glGetUniformLocation(shader3D.ID, "u_CamPos");
+	int locationColor3D = glGetUniformLocation(shader3D.ID, "u_Color");
+	int locationLightPos = glGetUniformLocation(shader3D.ID, "u_lightPos");
+
+	//2D
+	int locationOrtho = glGetUniformLocation(shader2D.ID, "u_OrthoProjection");
+	int locationColor2D = glGetUniformLocation(shader2D.ID, "u_Color");
+
+	//2D_Instanced
+	int locationOrtho_Instanced = glGetUniformLocation(shader2D_Instanced.ID, "u_OrthoProjection");
+	int locationColor2D_Instanced = glGetUniformLocation(shader2D_Instanced.ID, "u_Color");
+
+	//Text
+	int locationOrthoText = glGetUniformLocation(shaderText.ID, "u_OrthoProjection");
+
+
+	//3D
+	shader3D.bind();
+	glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
+	glUniformMatrix4fv(locationPerspective, 1, GL_FALSE, camera.perspectiveMatrix.data());
+	glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+
+	//2D
+	shader2D.bind();
+	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
+
+	//2D_Instanced
+	shader2D_Instanced.bind();
+	glUniformMatrix4fv(locationOrtho_Instanced, 1, GL_FALSE, camera.orthoMatrix.data());
+
+	//Text
+	shaderText.bind();
+	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());
+
+
+	float angle = 0;
+	int counter = 0;
 
 	//system("cls");
 	while (!glfwWindowShouldClose(window))
@@ -243,7 +260,7 @@ int main(void)
 		if (isRunning)
 		{
 			timeStruct.update();
-			text.substituteText(0, std::to_string(timeStruct.fps), { 10,950 }); // si no especificas position que no se mueva
+			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
 			//print(text.textData.textToDraw[3]);
 			shader3D.bind();
 
@@ -259,15 +276,15 @@ int main(void)
 			glLineWidth(2); //this is deprecated and platform dependent
 			glUniform1i(locationFragment, 1);
 			//axis
-			glUniform4f(colorLocation3D, 1.0, 0.0, 0.0, 1.0);
+			glUniform4f(locationColor3D, 1.0, 0.0, 0.0, 1.0);
 			xLine.draw();
-			glUniform4f(colorLocation3D, 0.0, 1.0, 0.0, 1.0);
+			glUniform4f(locationColor3D, 0.0, 1.0, 0.0, 1.0);
 			yLine.draw();
-			glUniform4f(colorLocation3D, 0.0, 0.0, 1.0, 1.0);
+			glUniform4f(locationColor3D, 0.0, 0.0, 1.0, 1.0);
 			zLine.draw();
 
 			//light
-			glUniform4f(colorLocation3D, 1, 1, 1, 1.0);
+			glUniform4f(locationColor3D, 1, 1, 1, 1.0);
 			light.draw();
 
 
@@ -275,21 +292,21 @@ int main(void)
 			glRotatef(0.0, 0.0, 45.0, 1.0);
 
 
-			
+
 			//model
 			glUniform1i(locationFragment, 0);
 
-			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 },angle,{1,0,0});
+			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 }, angle, { 1,0,0 });
 			//angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
-			glUniform4f(colorLocation3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
+			glUniform4f(locationColor3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();
-			glUniform4f(colorLocation3D, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
+			glUniform4f(locationColor3D, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
 			modelo.draw();
 			camera.modelMatrix = camera.identityMatrix;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 
-			
+
 
 
 			////transparent objects
@@ -297,7 +314,7 @@ int main(void)
 			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			//glDepthMask(GL_FALSE);
 			//glUniform1i(locationFragment, 0);
-			//glUniform4f(colorLocation3D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
+			//glUniform4f(locationColor3D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
 
 
 
@@ -307,13 +324,17 @@ int main(void)
 			shader2D.bind();
 
 			glLineWidth(5);
-			glUniform4f(colorLocation2D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
+			glUniform4f(locationColor2D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
 			//polygon2D.draw();
 			//lines2d.draw();
 			//circle.drawInterior();
 			//circle.drawCircunference();
 			arc.draw();
 
+			shader2D_Instanced.bind();
+			glLineWidth(1);
+			glUniform4f(locationColor2D_Instanced, 1, 1, 1, 1);
+			lines2D_Instanced.draw();
 
 			counter++;
 
@@ -324,25 +345,25 @@ int main(void)
 			shaderText.bind();
 			text.sDraw();
 
-			
-			
+
+
 
 
 
 
 			shader3D.bind();
-			
+
 
 
 			camera.updateKeys();
 			camera.updateCamera();
-			glUniform3f(cameraPosition, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+			glUniform3f(locationCamPos, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 			glUniformMatrix4fv(locationView, 1, GL_FALSE, camera.viewMatrix.data());
-			
 
-			
 
-			
+
+
+
 
 			/*print(camera.forward);
 			print(camera.cameraPos);*/
