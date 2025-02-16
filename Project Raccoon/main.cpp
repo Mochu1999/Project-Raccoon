@@ -153,7 +153,13 @@ int main(void)
 	//print(arc.positions);
 
 	Lines2D_Instanced lines2D_Instanced;
-	lines2D_Instanced.addSet({ {100,100},{100,500} });
+	/*lines2D_Instanced.addSet({ {0,0},{100,0} });
+	lines2D_Instanced.addInstances({
+	{ {190, 100},  0, {10, 1} },
+	{ {500, 100},  0, {1, 1} }
+		});*/
+
+	Graphics grafics;
 
 
 	Circles circle(20, 4);
@@ -261,7 +267,7 @@ int main(void)
 		{
 			timeStruct.update();
 			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
-			//print(text.textData.textToDraw[3]);
+
 			shader3D.bind();
 
 			//opaque objects first
@@ -329,12 +335,13 @@ int main(void)
 			//lines2d.draw();
 			//circle.drawInterior();
 			//circle.drawCircunference();
-			arc.draw();
+			//arc.draw();
 
 			shader2D_Instanced.bind();
-			glLineWidth(1);
+			glLineWidth(0.2f);
 			glUniform4f(locationColor2D_Instanced, 1, 1, 1, 1);
-			lines2D_Instanced.draw();
+			//lines2D_Instanced.draw();
+			//grafics.draw();
 
 			counter++;
 

@@ -141,7 +141,7 @@
     <ClCompile Include="Sources\WettedSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Lines2D_Instanced.hpp" />
+    <ClInclude Include="Sources\Lines2D_Instanced.hpp" />
     <ClInclude Include="Sources\Arrows.hpp" />
     <ClInclude Include="Sources\auxiliary_elements.h" />
     <ClInclude Include="Sources\auxiliary_elements.hpp" />

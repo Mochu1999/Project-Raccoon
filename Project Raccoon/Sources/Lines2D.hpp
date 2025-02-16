@@ -2,7 +2,11 @@
 
 #include "Common.hpp"
 
-//POR FAVOR SI PUEDES REVISA LA PIPELINE PARA BUSCAR POSIBLES OPTIMIZACIONES, LO SIENTO
+//Internet says that the performance diff between glDrawArraysInstanced (for sequencial-nonexistent indices) and glDrawElementsInstanced
+//  is negligible although glDrawElementsInstanced having an index loop (and that the same applies without instancing).
+//  This should be checked in the distant future 14/02/2025
+
+//POR FAVOR SI PUEDES REVISA LA PIPELINE PARA BUSCAR POSIBLES OPTIMIZACIONES
 // , también falta un substitute y dejaría lo de colores para otro momento
 
 //draw lines defined in batches, these batches creates indices for their components
