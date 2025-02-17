@@ -974,7 +974,10 @@
     <ClInclude Include="Sources\Circles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lines2D_Instanced.hpp">
+    <ClInclude Include="Sources\Lines2D_Instanced.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Globe.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

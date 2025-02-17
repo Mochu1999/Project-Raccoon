@@ -3,7 +3,7 @@
 #include "Common.hpp"
 
 #include "SweepTriangulation.hpp"
-#include "Lines3d.hpp"
+#include "Lines3D.hpp"
 
 
 
@@ -13,7 +13,7 @@ struct Polygons {
 	bool isBufferUpdated = false;
 
 
-	Lines3d lines;
+	Lines3D lines;
 
 	//vector<p3> model;
 	vector<p3>& positions = lines.positions;

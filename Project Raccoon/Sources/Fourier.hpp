@@ -23,7 +23,7 @@ struct Fourier {
 	float phaseSpeed = 0.01;
 
 
-	vector<Lines3d> lines;
+	vector<Lines3D> lines;
 	vector<unsigned int> indices;
 	vector<p3> positions;
 	vector<p3> normals;

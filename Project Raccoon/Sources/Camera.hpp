@@ -62,7 +62,7 @@ struct Camera {
 	//std::array<float, 16> createModelMatrix(const p3& position, float angleRadians, const p3& axisRaw);
 	std::array<float, 16> createModelMatrix(const p3& position);
 	//std::array<float, 16> createModelMatrix(const p3& position, const p3& rotationOX, const p3& rotationOY, const p3& rotationOZ);
-	std::array<float, 16> createModelMatrix(const p3 position, float angleDeg, p3 axis);
+	std::array<float, 16> createModelMatrix(const p3 position, float angleDeg, p3 axis, float scale = 1);
 	std::array<float, 16> createIdentityMatrix();
 
 	//the rotations create a new forward vector and the other 2 are deduced from it

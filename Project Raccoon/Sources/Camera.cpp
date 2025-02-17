@@ -81,7 +81,7 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 }
 
 // Creates model matrix by applying a translation and a rotation of a given axis
-std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDeg, p3 axis){
+std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDeg, p3 axis, float scale){ //scale defaulted to 1
 
 	std::array<float, 16> modelMatrix = createIdentityMatrix();
 
@@ -122,6 +122,20 @@ std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDe
 	modelMatrix[12] = position.x;
 	modelMatrix[13] = position.y;
 	modelMatrix[14] = position.z;
+
+	if (scale != 1)
+	{
+		//apply uniform scale to the 3×3 rotation block
+		modelMatrix[0] *= scale;
+		modelMatrix[1] *= scale;
+		modelMatrix[2] *= scale;
+		modelMatrix[4] *= scale;
+		modelMatrix[5] *= scale;
+		modelMatrix[6] *= scale;
+		modelMatrix[8] *= scale;
+		modelMatrix[9] *= scale;
+		modelMatrix[10] *= scale;
+	}
 
 	return modelMatrix;
 }

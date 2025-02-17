@@ -9,7 +9,7 @@
 
 #include "Shader.hpp"
 
-#include "lines3d.hpp"
+#include "Lines3D.hpp"
 #include "Lines2D.hpp"
 #include "Lines2D_Instanced.hpp"
 
@@ -46,6 +46,7 @@
 #include "auxiliary_elements.hpp"
 
 #include "Graphics.hpp"
+#include "Globe.hpp"
 
 using namespace std::chrono;
 
@@ -126,15 +127,15 @@ int main(void)
 
 
 
-	Lines3d xLine2;
+	Lines3D xLine2;
 	xLine2.addSet({ {0,0,0},{5,0,0} });
-	Lines3d xLine;
+	Lines3D xLine;
 	xLine.addSet({ {-100,0,0},{100,0,0} });
-	Lines3d yLine;
+	Lines3D yLine;
 	yLine.addSet({ {0,-100,0},{0,100,0} });
-	Lines3d zLine;
+	Lines3D zLine;
 	zLine.addSet({ {0,0,-100},{0,0,100} });
-	Lines3d zLine2;
+	Lines3D zLine2;
 	zLine2.addSet({ {0,0,0},{0,0,5} });
 
 
@@ -160,6 +161,21 @@ int main(void)
 		});*/
 
 	Graphics grafics;
+
+	Lines3D globe;
+	//globe.addSet({ {1,0,0},{0,0,1},{-1,0,0},{0,0,-1},{1,0,0} });
+	
+	for (float i = -90; i <= 90; i+=10)
+	{
+		globe.addSet(createLatitude(radians(i)));
+	}
+	for (float i = -90; i <= 90; i += 10)
+	{
+		globe.addSet(createLongitude(radians(i)));
+	}
+	//globe.addSet(createLongitude(radians(0), 4));
+
+	//print(globe.positions);
 
 
 	Circles circle(20, 4);
@@ -205,9 +221,41 @@ int main(void)
 
 	
 
-	
+	/*print(lonLatTo2D({ {0,0},{PI / 2,0},{-PI,0},{PI,0} }));
+	print(lonLatTo2D({ {0,PI / 4}, {0,PI/2},{0,PI} }));*/
 
-
+	Lines2D wkt;
+	vector<p2> socorro;
+	vector<vector<p2>> final;
+	readWKT(socorro, "C:\\dev\\Resources\\map\\final.csv",final);
+	//print(final.size());
+	vector<vector<p2>> socorros;
+	for (auto& p : final)
+	{
+		socorros.push_back(lonLatTo2D(p));
+		wkt.addSet(socorros.back());
+		//wkt.addSet(p);
+	}
+	/*print(wkt.positions.size());
+	print(wkt.indices.size());*/
+	//print(wkt.indices);
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Que completo descontrol, ha sido matador pero por lo menos hay un producto mínimo viable en pantalla, enorgullecete 
+	// que hemos sacado en 1 día lo que en otras circuntancias hubieramos sacado en semanas. lonLatTo2D no está funcionando
+	// está siendo overruled simplemente devolviendo las lonlat escaladas como coordenadas. Te dejo en el notepad el proceso 
+	// de limpieza, buena suerte
 
 	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyCallback);
@@ -268,8 +316,8 @@ int main(void)
 			timeStruct.update();
 			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
 
+			//3D
 			shader3D.bind();
-
 			//opaque objects first
 			glEnable(GL_DEPTH_TEST);		//ESTO PUEDE IR ANTES DEL BIND?
 			glDepthMask(GL_TRUE);      //depth writing
@@ -289,20 +337,26 @@ int main(void)
 			glUniform4f(locationColor3D, 0.0, 0.0, 1.0, 1.0);
 			zLine.draw();
 
-			//light
+			
 			glUniform4f(locationColor3D, 1, 1, 1, 1.0);
 			light.draw();
+			glLineWidth(1);
+			camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
+			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 
-
-
-			glRotatef(0.0, 0.0, 45.0, 1.0);
+			globe.draw();
+			camera.modelMatrix = camera.identityMatrix;
+			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+			//gestionar location desde camera, más opciones de modelMatrix, una solo para escalar, solo rotar o solo transladar
+			//  y combinaciones
+			
 
 
 
 			//model
 			glUniform1i(locationFragment, 0);
 
-			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 }, angle, { 1,0,0 });
+			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 }, angle, { 1,0,0 },1);
 			//angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			glUniform4f(locationColor3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
@@ -336,9 +390,12 @@ int main(void)
 			//circle.drawInterior();
 			//circle.drawCircunference();
 			//arc.draw();
+			glLineWidth(1);
+
+			wkt.draw();
 
 			shader2D_Instanced.bind();
-			glLineWidth(0.2f);
+			glLineWidth(1);
 			glUniform4f(locationColor2D_Instanced, 1, 1, 1, 1);
 			//lines2D_Instanced.draw();
 			//grafics.draw();

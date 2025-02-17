@@ -5,7 +5,7 @@
 
 
 
-struct Lines3d {
+struct Lines3D {
 
 	GLenum usageHint = GL_DYNAMIC_DRAW; //Pass this into the constructor for the final version
 
@@ -30,7 +30,7 @@ struct Lines3d {
 	size_t currentIndicesDataSize = 0;
 
 
-	Lines3d() {
+	Lines3D() {
 		genBuffers();
 	}
 
@@ -52,6 +52,59 @@ struct Lines3d {
 	}
 
 
+
+	
+
+
+	
+
+
+	//One set per lines
+	void addSet(const vector<p3>& items, int isConsecutiveIndices = 0) {
+		positions.reserve(positions.size() + items.size());
+		
+		positions.reserve(items.size());
+		positions.insert(positions.end(), items.begin(), items.end());
+
+		//consecutive
+		if (isConsecutiveIndices==0)
+		{
+			createIndices0(items);
+		}
+		////pairs
+		//else if (isConsecutiveIndices == 2)
+		//{
+		//	
+		//} 
+
+		isBufferUpdated = true;
+	}
+
+	unsigned int indexOffset = 0;	//to add indices over previoses sets
+
+	//mode 0 is consecutive, COMPROBAR, RESERVES
+	void createIndices0(const vector<p3>& items) {
+
+		for (unsigned int i = 0; i < items.size() - 1; i++)
+		{
+			indices.insert(indices.end(), { indexOffset + i,indexOffset + i + 1 });
+		}
+
+		indexOffset = indices.back() + 1;
+	}
+
+	////pairs, NO SÉ QUE ES ESTO, estaba antes de que separara createIndices de addSet
+	//void createIndices1(const vector<p2>& items){
+	//	indices.clear();
+	//	indices.reserve(items.size());
+	//	for (unsigned int i = 0; i < items.size() - 1; i += 2)
+	//	{
+	//		indices.emplace_back(i);
+	//		indices.emplace_back(i + 1);
+	//	}
+	//}
+
+	//SUBSTITUTE IS MISSING
 
 	void draw() {
 
@@ -89,49 +142,18 @@ struct Lines3d {
 
 	}
 
+	void clear() {
+		positions.clear();
+		indices.clear();
+	}
 
-	~Lines3d() {
+	~Lines3D() {
 		glDeleteVertexArrays(1, &vertexArray);
 		glDeleteBuffers(1, &vertexBuffer);
 		glDeleteBuffers(1, &indexBuffer);
 
 		positions.clear(); indices.clear();
 	}
-
-
-	//One set per lines
-	void addSet(const vector<p3>& items, int isConsecutiveIndices = 1) {
-
-		positions.clear(); 
-		positions.reserve(items.size());
-		positions.insert(positions.end(), items.begin(), items.end());
-
-		//consecutive
-		if (isConsecutiveIndices==1)
-		{
-			indices.clear();
-			indices.reserve(items.size());
-			for (unsigned int i = 0; i < items.size() - 1; i++)
-			{
-				indices.emplace_back(i);
-				indices.emplace_back(i + 1);
-			}
-		}
-		//pairs
-		else if (isConsecutiveIndices == 2)
-		{
-			indices.clear();
-			indices.reserve(items.size());
-			for (unsigned int i = 0; i < items.size() - 1; i+=2)
-			{
-				indices.emplace_back(i);
-				indices.emplace_back(i + 1);
-			}
-		}
-		isBufferUpdated = true;
-	}
-
-
 
 };
 

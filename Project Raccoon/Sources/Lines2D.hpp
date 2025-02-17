@@ -114,7 +114,7 @@ struct Lines2D {
 	void addSet(const vector<p2>& items, int mode = 0) {
 
 		positions.reserve(positions.size() + items.size());
-		indices.reserve(indices.size() + items.size() * 2);
+		
 
 		positions.insert(positions.end(), items.begin(), items.end());
 
@@ -124,6 +124,7 @@ struct Lines2D {
 	}
 	//mode 0
 	void createIndices(const vector<p2>& items) {
+		indices.reserve(indices.size() + items.size() * 2);
 		for (unsigned int i = 0; i < items.size() - 1; i++)
 		{
 			indices.insert(indices.end(), { indexOffset + i,indexOffset + i + 1 });

@@ -127,6 +127,108 @@ void readSTL(std::vector<p3>& positions, std::vector<p3>& normals, const std::st
 }
 
 
+
+/// Split a string by a delimiter (e.g. ',') into a list of tokens
+std::vector<std::string> split(const std::string& str, char delimiter) {
+	std::vector<std::string> tokens;
+	std::stringstream ss(str);
+	std::string item;
+	while (std::getline(ss, item, delimiter)) {
+		tokens.push_back(item);
+	}
+	return tokens;
+}
+
+/// Given a LINESTRING-like substring "1.0 2.0, 3.1 4.2, ..."
+/// parse out each "lon lat" and convert to p2
+std::vector<p2> parseLineStringCoords(const std::string& coordString) {
+	std::vector<p2> points;
+	// split by comma -> ["1.0 2.0", "3.1 4.2", ...]
+	auto commaSeparated = split(coordString, ',');
+	for (auto& cs : commaSeparated) {
+		std::stringstream ss(cs);
+		float lon, lat;
+		ss >> lon >> lat;  // read "1.0 2.0" etc.
+		points.push_back({ lon, lat });
+	}
+	return points;
+}
+
+void readWKT(std::vector<p2>& positions, const std::string& filepath, vector<vector<p2>>& final)
+{
+	std::ifstream inFile(filepath);
+	if (!inFile) {
+		std::cerr << "Unable to open file: " << filepath << std::endl;
+		return;
+	}
+	
+	std::string line;
+	while (std::getline(inFile, line)) {
+		// For simplicity, check if we have LINESTRING or MULTILINESTRING
+		// in that whole line (typical for CSV WKT lines).
+		// If you have more columns in CSV, you'd parse out just the WKT column.
+
+		if (line.find("LINESTRING") != std::string::npos) {
+			// Example:  "...LINESTRING (1.51417 38.6936,1.49 38.70)..."
+			// 1) find substring inside parentheses
+			size_t start = line.find("(");
+			size_t end = line.rfind(")");
+			if (start != std::string::npos && end != std::string::npos && end > start) {
+				// e.g. "1.51417 38.6936,1.49 38.70"
+				std::string coords = line.substr(start + 1, end - (start + 1));
+
+				// 2) parse coords into p2
+				auto pts = parseLineStringCoords(coords);
+				positions.insert(positions.end(), pts.begin(), pts.end());
+				final.push_back(pts);
+			}
+		}
+		else if (line.find("MULTILINESTRING") != std::string::npos) {
+			// Example: "...MULTILINESTRING ((x1 y1, x2 y2),(x3 y3, x4 y4))..."
+			// We'll have an *outer* parentheses pair, then multiple sets inside.
+			size_t start = line.find("((");
+			size_t end = line.rfind("))");
+			if (start != std::string::npos && end != std::string::npos && end > start) {
+				// Inside is something like: "x1 y1, x2 y2),(x3 y3, x4 y4"
+				std::string multi = line.substr(start + 2, end - (start + 2));
+
+				// Each sub-linestring is in parentheses, so let's split by ")(" 
+				// Easiest is to replace ")(" with some delimiter, e.g. '|', then split.
+
+				// naive approach: replace ")(" with "|"
+				// (In a robust parser, you'd do more careful scanning.)
+				// We'll do it quickly:
+				for (size_t pos = 0; pos + 1 < multi.size(); ) {
+					if (multi[pos] == ')' && multi[pos + 1] == '(') {
+						multi[pos] = '|';
+						multi[pos + 1] = '|';
+					}
+					pos++;
+				}
+
+				// Now we can split on "||"
+				auto subStrings = split(multi, '|');
+				for (auto& sub : subStrings) {
+					// sub might look like: "x1 y1, x2 y2, x3 y3"
+					// trim extra parentheses if any:
+					// e.g. if it starts with ')' or '('
+					// (in practice, it might be already stripped, but let's be safe).
+					// We can parse the substring as a single LINESTRING:
+					auto pts = parseLineStringCoords(sub);
+					positions.insert(positions.end(), pts.begin(), pts.end());
+					final.push_back(pts);
+				}
+			}
+		}
+		// else if there's "POLYGON" or "MULTIPOLYGON", you can handle similarly if needed
+	}
+
+	inFile.close();
+}
+
+
+
+
 // Function to write a polyhedra without dividing its surfaces in polygons
 void writeSimplePolyhedra(const std::vector<p3>& model, const std::vector<p3>& normals, const std::vector<unsigned int>& indices) {
 	std::string basePath = "Resources/Simple polyhedra/";
@@ -192,31 +294,3 @@ void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::
 	}
 	inFile.close();
 }
-
-//void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::vector<unsigned int>& indices, const std::string& path) {
-//	/*std::string basePath = "Resources/Simple polyhedra/";
-//	std::string path = basePath + modelPath;*/
-//
-//	std::ifstream inFile(path, std::ios::binary);
-//	if (inFile)
-//	{
-//		size_t size;
-//
-//		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-//		model.resize(size);
-//		inFile.read(reinterpret_cast<char*>(model.data()), size * sizeof(p3));
-//
-//		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-//		normals.resize(size);
-//		inFile.read(reinterpret_cast<char*>(normals.data()), size * sizeof(p3));
-//
-//		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-//		indices.resize(size);
-//		inFile.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int));
-//	}
-//	else
-//	{
-//		std::cerr << "Error opening file for reading." << std::endl;
-//	}
-//	inFile.close();
-//}

@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Common.hpp"
-#include "Lines3d.hpp"
+#include "Lines3D.hpp"
 #include "AuxSquare.hpp"
 
 struct Arrows {
 	AuxSquare squares;
-	Lines3d lines;
+	Lines3D lines;
 	vector<p3> positions;
 
 	void addSet(vector<p3> firstPoints, vector<p3> normals) {
