@@ -174,42 +174,7 @@ void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& 
 		forward = intermForward;
 }
 
-void Camera::updateKeys() {
-	// Rotation
-	
 
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		calculateForward(forward, rotationSpeed, right);
-
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		calculateForward(forward, -rotationSpeed, right);
-
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		calculateForward(forward, -rotationSpeed, up);
-
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		calculateForward(forward, rotationSpeed, up);
-
-
-	//translation
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos = cameraPos + forward * translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos = cameraPos - forward * translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos = cameraPos - right * translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos = cameraPos + right * translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		cameraPos.y += translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-		cameraPos.y -= translationSpeed;
-}
 
 void Camera::updateCamera() {
 
@@ -229,14 +194,4 @@ void Camera::updateCamera() {
 
 
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS)
-	{
-		switch (key)
-		{
-		case GLFW_KEY_P:
-			isRunning = !isRunning;
-			break;
-		}
-	}
-}
+

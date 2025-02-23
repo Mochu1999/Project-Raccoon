@@ -46,7 +46,10 @@
 #include "auxiliary_elements.hpp"
 
 #include "Graphics.hpp"
+
 #include "Globe.hpp"
+#include "Map.hpp"
+
 
 using namespace std::chrono;
 
@@ -56,13 +59,6 @@ using namespace std::chrono;
 //glFrontFace(GL_CCW);          // Counter-clockwise winding is front-facing
 
 //instance rendering for the future
-
-struct AllPointers {
-	BinariesManager* binariesManager;
-	Polygons* polygon;
-};
-
-
 
 
 
@@ -110,6 +106,7 @@ int main(void)
 
 
 	Camera camera(window);
+	camera.updateCamera();
 
 	Settings settings(camera);
 
@@ -125,7 +122,12 @@ int main(void)
 
 
 
-
+	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
+	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
+	text.addText({ 10,950 }, timeStruct.fps, " fps");
+	/*text.addText("abcp 100,200.521", { 100, 100 });
+	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });*/
+	text.fillVertexBuffer();
 
 	Lines3D xLine2;
 	xLine2.addSet({ {0,0,0},{5,0,0} });
@@ -138,7 +140,6 @@ int main(void)
 	Lines3D zLine2;
 	zLine2.addSet({ {0,0,0},{0,0,5} });
 
-
 	Polygons2D polygon2D; //Faltan reserves
 	polygon2D.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
 	polygon2D.addSet({ {600,600},{800,600},{800,800},{600,800},{600,600} });
@@ -147,6 +148,14 @@ int main(void)
 	Lines2D lines2d;
 	//lines2d.addSet({ {36,64},{960,64},{960,420},{36,420},{36,64 } });
 	lines2d.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
+
+
+	Circles circle(20, 4);
+	circle.addSet({ {210,210},{300,500} });
+
+	Polyhedra stl, timon, modelo;
+	readSimplePolyhedra(timon.positions, timon.normals, timon.indices, "timon.bin");
+	readSimplePolyhedra(modelo.positions, modelo.normals, modelo.indices, "modelo.bin");
 
 	Lines2D arc;
 	//vector<p2> a = createArc({ 300,300 }, 100, radians(270), radians(360));
@@ -160,111 +169,69 @@ int main(void)
 	{ {500, 100},  0, {1, 1} }
 		});*/
 
+	Lines3D globe;
+	for (float i = -90; i <= 90; i += 10)
+		globe.addSet(createLatitude(radians(i)));
+	for (float i = -90; i <= 90; i += 10)
+		globe.addSet(createLongitude(radians(i)));
+
+
+
+
 	Graphics grafics;
 
-	Lines3D globe;
-	//globe.addSet({ {1,0,0},{0,0,1},{-1,0,0},{0,0,-1},{1,0,0} });
-	
-	for (float i = -90; i <= 90; i+=10)
+
+
+
+	//Hola buenos días, objetivo encapsular en map (debería llamarse Autopilot?) todo esto. Para ello había pensado en primero
+	//  encapsular todas las locations en una struct llamada locations y pasarle referencia a map para actualizar model color, shaders?.
+	//  Va a ser un tema. Seguidamente hay que crear un background, un texto que siga el cursor y para mañana sería ideal dejar a que
+	//  elijas o zoom o prototipo de ruta entre barcelona e ibiza con geodésicas.
+	//  Muy buena suerte, tú puedes fácil con ello si te pones. Fuerzate un poquito al principio, rodará y acabarás féliz
+
+	vector<vector<p2>> mapVectorOfVectors;
+	Lines2D mercator;
+	readVectorOfVectorsAscii(mapVectorOfVectors);
+
+	for (auto& p : mapVectorOfVectors)
 	{
-		globe.addSet(createLatitude(radians(i)));
-	}
-	for (float i = -90; i <= 90; i += 10)
-	{
-		globe.addSet(createLongitude(radians(i)));
-	}
-	//globe.addSet(createLongitude(radians(0), 4));
+		vector<p2>interm = lonLatTo2D(p);
+		mercator.addSet(interm);
+		//mercator.addSet(p);
+		//print(interm);
 
-	//print(globe.positions);
-
-
-	Circles circle(20, 4);
-	circle.addSet({ {210,210},{300,500} });
-
-
-	Polyhedra stl, timon, modelo;
-
-	{
-		//readSTL(stl.positions, stl.normals, "modeloNR.stl");
-		//stl.simpleIndices();
-		//writeSimplePolyhedra(stl.positions, stl.normals, stl.indices);
 	}
 
-	//readSimplePolyhedra(timon.positions, timon.normals, timon.indices, "C:\dev\C++ libs\modelos\timon.bin");
-
-	readSimplePolyhedra(timon.positions, timon.normals, timon.indices, "timon.bin");
-	readSimplePolyhedra(modelo.positions, modelo.normals, modelo.indices, "modelo.bin");
 
 
+	//The region in 
+	p2 point0 = mercator.positions[0];
+	print(mercator.positions[0]);
 
+	//the ratio width/height of the map square is:
+	float totalX = mercator.positions[1].x - mercator.positions[0].x;
+	float totalY = mercator.positions[2].y - mercator.positions[1].y;
+	float naturalRatio = totalX / totalY;
+	print(totalX); //4.22809e+06
+	print(totalY); //3.52124e+06
+	print(naturalRatio); //1.20074
 
-
-	//getPos(window);
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-	
-
-
-	//SEPARATE THE LOGIC OF THE KEYS FROM UPDATECAMERA
-	camera.updateCamera();
-
-
-
-	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
-	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
-	text.addText({ 10,950 }, timeStruct.fps, " fps");
-	/*text.addText("abcp 100,200.521", { 100, 100 });
-	text.addText("abcp 100,200.521", { 100, 300 });
-	text.addText("abcp 100,200.521", { 100, 500 });
-	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });*/
-	text.fillVertexBuffer();
-
-	
-
-	/*print(lonLatTo2D({ {0,0},{PI / 2,0},{-PI,0},{PI,0} }));
-	print(lonLatTo2D({ {0,PI / 4}, {0,PI/2},{0,PI} }));*/
-
-	Lines2D wkt;
-	vector<p2> socorro;
-	vector<vector<p2>> final;
-	readWKT(socorro, "C:\\dev\\Resources\\map\\final.csv",final);
-	//print(final.size());
-	vector<vector<p2>> socorros;
-	for (auto& p : final)
-	{
-		socorros.push_back(lonLatTo2D(p));
-		wkt.addSet(socorros.back());
-		//wkt.addSet(p);
-	}
-	/*print(wkt.positions.size());
-	print(wkt.indices.size());*/
-	//print(wkt.indices);
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//Que completo descontrol, ha sido matador pero por lo menos hay un producto mínimo viable en pantalla, enorgullecete 
-	// que hemos sacado en 1 día lo que en otras circuntancias hubieramos sacado en semanas. lonLatTo2D no está funcionando
-	// está siendo overruled simplemente devolviendo las lonlat escaladas como coordenadas. Te dejo en el notepad el proceso 
-	// de limpieza, buena suerte
-
-	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
-	glfwSetKeyCallback(window, keyCallback);
+	//first the arbitrary scaling, which is going to be that x is 1000 pixels long
+	float scalingFactor = 1 / totalX * 1000;
+	p2 mapCorner = { 200,100 }; //the coordinates of the bottom left coordinate of the map that will be applied after centering
+	p2 translationFactor = { -point0.x * scalingFactor, -point0.y * scalingFactor }; //centering
+	translationFactor += mapCorner;
 
 
 
 
-	///Look for uniform buffer objects. Used to send a lot of uniforms into a program more efficiently. I think it let's you share DATA BETWEEN SHADERS
+
+
+
+	//////////////
 	//Locations. They don't need to be binded to a shader in the creation but they do need to be binded when assigning the data
+	///Look for uniform buffer objects. Used to send a lot of uniforms into a program more efficiently. I think it let's you share DATA BETWEEN SHADERS
+
 	//3D
 	int locationPerspective = glGetUniformLocation(shader3D.ID, "u_Perspective");
 	int locationModel = glGetUniformLocation(shader3D.ID, "u_Model");
@@ -276,6 +243,7 @@ int main(void)
 
 	//2D
 	int locationOrtho = glGetUniformLocation(shader2D.ID, "u_OrthoProjection");
+	int locationModel2D = glGetUniformLocation(shader2D.ID, "u_Model2D");
 	int locationColor2D = glGetUniformLocation(shader2D.ID, "u_Color");
 
 	//2D_Instanced
@@ -286,6 +254,8 @@ int main(void)
 	int locationOrthoText = glGetUniformLocation(shaderText.ID, "u_OrthoProjection");
 
 
+	//////////////
+	//INITIALAZING
 	//3D
 	shader3D.bind();
 	glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
@@ -295,6 +265,9 @@ int main(void)
 	//2D
 	shader2D.bind();
 	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
+	camera.model2DMatrix = camera.createModel2DMatrix(translationFactor, 0, scalingFactor);
+	glUniformMatrix4fv(locationModel2D, 1, GL_FALSE, camera.model2DMatrix.data());
+
 
 	//2D_Instanced
 	shader2D_Instanced.bind();
@@ -306,7 +279,16 @@ int main(void)
 
 
 	float angle = 0;
-	int counter = 0;
+	AllPointers allPointers(&camera, &mercator);
+	glfwSetWindowUserPointer(window, &allPointers);
+	//getPos(window);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	glfwSetKeyCallback(window, keyboardEventCallback);
+
+
+
+
 
 	//system("cls");
 	while (!glfwWindowShouldClose(window))
@@ -316,6 +298,7 @@ int main(void)
 			timeStruct.update();
 			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
 
+			/////////////
 			//3D
 			shader3D.bind();
 			//opaque objects first
@@ -337,7 +320,7 @@ int main(void)
 			glUniform4f(locationColor3D, 0.0, 0.0, 1.0, 1.0);
 			zLine.draw();
 
-			
+
 			glUniform4f(locationColor3D, 1, 1, 1, 1.0);
 			light.draw();
 			glLineWidth(1);
@@ -349,14 +332,12 @@ int main(void)
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			//gestionar location desde camera, más opciones de modelMatrix, una solo para escalar, solo rotar o solo transladar
 			//  y combinaciones
-			
-
 
 
 			//model
 			glUniform1i(locationFragment, 0);
 
-			camera.modelMatrix = camera.createModelMatrix({ 20,0,0 }, angle, { 1,0,0 },1);
+			camera.modelMatrix = camera.createModelMatrix({ 40,0,0 }, angle, { 1,0,0 }, 1);
 			//angle++;
 			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
 			glUniform4f(locationColor3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
@@ -379,20 +360,15 @@ int main(void)
 
 
 
-
+			/////////////
 			///2d objects
 			shader2D.bind();
 
 			glLineWidth(5);
 			glUniform4f(locationColor2D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
-			//polygon2D.draw();
-			//lines2d.draw();
-			//circle.drawInterior();
-			//circle.drawCircunference();
 			//arc.draw();
 			glLineWidth(1);
-
-			wkt.draw();
+			mercator.draw();
 
 			shader2D_Instanced.bind();
 			glLineWidth(1);
@@ -400,8 +376,11 @@ int main(void)
 			//lines2D_Instanced.draw();
 			//grafics.draw();
 
-			counter++;
 
+
+
+
+			/////////////
 			//text
 			glDisable(GL_DEPTH_TEST);
 			glEnable(GL_BLEND);
@@ -419,7 +398,7 @@ int main(void)
 
 
 
-			camera.updateKeys();
+			keyboardRealTimePolls(window, camera);
 			camera.updateCamera();
 			glUniform3f(locationCamPos, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 			glUniformMatrix4fv(locationView, 1, GL_FALSE, camera.viewMatrix.data());

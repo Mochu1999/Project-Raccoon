@@ -441,6 +441,7 @@
     <ClInclude Include="Sources\KeyMouseImputs.hpp" />
     <ClInclude Include="Sources\Lines2D.hpp" />
     <ClInclude Include="Sources\Lines3d.hpp" />
+    <ClInclude Include="Sources\Map.hpp" />
     <ClInclude Include="Sources\Model.hpp" />
     <ClInclude Include="Sources\Polygons.hpp" />
     <ClInclude Include="Sources\Polygons2D.hpp" />

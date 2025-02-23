@@ -49,39 +49,36 @@ vector<p3> createLongitude(float angleLongitude, int points = 100) {
     return positions;
 }
 
-// .x is longitude, .y is latitude
-vector<p2> lonLat(const vector<p3> positions_) {
-	vector<p2> positions;
+//// .x is longitude, .y is latitude
+//vector<p2> lonLat(const vector<p3> positions_) {
+//	vector<p2> positions;
+//
+//	for (size_t i = 0; i < positions_.size(); i++)
+//	{
+//		positions.push_back({ atan2f(positions_[i].z, positions_[i].x) ,asinf(positions_[i].y) });
+//	}
+//	return positions;
+//}
 
-	for (size_t i = 0; i < positions_.size(); i++)
-	{
-		positions.push_back({ atan2f(positions_[i].z, positions_[i].x) ,asinf(positions_[i].y) });
-	}
-	return positions;
-}
 
-float maxLat = radians(85);
 float earthRadius = 6378137.0f;
+//Web mercator projection. Outoput in mercator projected meters
+// In the equator the distances are exact (cilindrical proj) but you lose accuracy the more away you are from it
+// Mercator is only valid for visualization, otherwise use geodesic calculations
+//assumes you wont have latitudes close to +-90 for now. lonlats in degrees
 vector<p2> lonLatTo2D(const vector<p2>& lonLats) {
 	vector<p2> positions;
 	positions.reserve(lonLats.size());
 
 	for (auto& ll: lonLats)
 	{
-		float lambda = ll.x;   // lon in radians
-		float phi = ll.y;   // lat in radians
+		float lambda = radians(ll.x);   // lon in radians
+		float phi = radians(ll.y);   // lat in radians
 
-		// clamp lat
-		if (phi > maxLat) phi = maxLat;
-		if (phi < -maxLat) phi = -maxLat;
 
-		//positions.push_back({ earthRadius * lambda, earthRadius * log(tan((3.14159265359f / 4.0f) + (phi / 2.0f))) });
-		//positions.back() /= 10E+4;
-		//print(ll);
-		positions.push_back(ll);
-		positions.back() *= 25;
-		positions.back().x += 500;
-		positions.back().y += -300;
+
+		positions.push_back({ earthRadius * lambda, earthRadius * log(tan((3.14159265359f / 4.0f) + (phi / 2.0f))) });
+		//positions.back() *= 10E-6;
 	}
 
 	return positions;

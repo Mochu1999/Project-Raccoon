@@ -154,7 +154,7 @@ std::vector<p2> parseLineStringCoords(const std::string& coordString) {
 	return points;
 }
 
-void readWKT(std::vector<p2>& positions, const std::string& filepath, vector<vector<p2>>& final)
+void readWKT(/*std::vector<p2>& positions,*/ vector<vector<p2>> & final, const std::string& filepath)
 {
 	std::ifstream inFile(filepath);
 	if (!inFile) {
@@ -179,7 +179,7 @@ void readWKT(std::vector<p2>& positions, const std::string& filepath, vector<vec
 
 				// 2) parse coords into p2
 				auto pts = parseLineStringCoords(coords);
-				positions.insert(positions.end(), pts.begin(), pts.end());
+				//positions.insert(positions.end(), pts.begin(), pts.end());
 				final.push_back(pts);
 			}
 		}
@@ -215,7 +215,7 @@ void readWKT(std::vector<p2>& positions, const std::string& filepath, vector<vec
 					// (in practice, it might be already stripped, but let's be safe).
 					// We can parse the substring as a single LINESTRING:
 					auto pts = parseLineStringCoords(sub);
-					positions.insert(positions.end(), pts.begin(), pts.end());
+					//positions.insert(positions.end(), pts.begin(), pts.end());
 					final.push_back(pts);
 				}
 			}
@@ -229,7 +229,7 @@ void readWKT(std::vector<p2>& positions, const std::string& filepath, vector<vec
 
 
 
-// Function to write a polyhedra without dividing its surfaces in polygons
+// Function to write a 3D polyhedra without dividing its surfaces in polygons (positions, normals and indices)
 void writeSimplePolyhedra(const std::vector<p3>& model, const std::vector<p3>& normals, const std::vector<unsigned int>& indices) {
 	std::string basePath = "Resources/Simple polyhedra/";
 	std::string modelPath;
@@ -248,14 +248,17 @@ void writeSimplePolyhedra(const std::vector<p3>& model, const std::vector<p3>& n
 	std::ofstream outFile(path, std::ios::binary);
 	if (outFile) 
 	{
+		//model
 		size_t size = model.size();
 		outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
 		outFile.write(reinterpret_cast<const char*>(model.data()), size * sizeof(p3));
 
+		//normals
 		size = normals.size();
 		outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
 		outFile.write(reinterpret_cast<const char*>(normals.data()), size * sizeof(p3));
 
+		//indices
 		size = indices.size();
 		outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
 		outFile.write(reinterpret_cast<const char*>(indices.data()), size * sizeof(unsigned int));
@@ -293,4 +296,111 @@ void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::
 		std::cerr << "Error opening file for reading." << std::endl;
 	}
 	inFile.close();
+}
+
+
+//I've made as an intermediate step to modify the csv data of the map, maybe delete it in the future?
+//It's in a weird format, in my head it makes much more sense to store all positions sizes at the start and then all the positions
+//, but I need to modify a lot of data, so here we are
+void writeVectorOfVectors(const vector<vector<p2>>& model) {
+	std::string path = "Resources/Borrar/map.txt";
+
+	std::cout << "Setting model in: " << path << std::endl;
+
+	std::ofstream outFile(path, std::ios::binary);
+	if (outFile)
+	{
+		for (size_t i = 0; i < model.size(); i++)
+		{
+			size_t size = model[i].size();
+			outFile.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
+			outFile.write(reinterpret_cast<const char*>(model[i].data()), size * sizeof(p2));
+		}	
+	}
+	else
+	{
+		std::cout << "Error opening file for writing." << std::endl;
+	}
+	outFile.close();
+}
+
+void writeVectorOfVectorsAscii(const std::vector<std::vector<p2>>& model)
+{
+	std::string path = "Resources/Borrar/map.txt";
+	std::ofstream outFile(path);
+	if (!outFile)
+	{
+		std::cout << "Error opening file for writing.\n";
+		return;
+	}
+
+
+	for (size_t i = 0; i < model.size(); ++i)
+	{
+		outFile << model[i].size()<<" ";
+
+		for (size_t j = 0; j < model[i].size(); ++j)
+		{
+			outFile << model[i][j].x << " " << model[i][j].y <<", ";
+		}
+
+		outFile << "\n";
+	}
+
+	outFile.close();
+}
+
+void readVectorOfVectorsAscii(std::vector<std::vector<p2>>& model)
+{	
+	std::string path = "Resources/Borrar/map.txt";
+
+	std::ifstream inFile(path);
+	if (!inFile)
+	{
+		std::cerr << "Error opening file for reading: " << path << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inFile, line))
+	{
+		if (line.empty())
+			continue;
+
+		std::stringstream ss(line);
+
+		size_t sizeOfInner = 0;
+		if (!(ss >> sizeOfInner))
+		{
+			// If we can't read size, format might be wrong or we reached EOF
+			continue;
+		}
+
+		std::vector<p2> innerVec;
+		innerVec.reserve(sizeOfInner);
+
+		for (size_t i = 0; i < sizeOfInner; ++i)
+		{
+			p2 point;
+			if (!(ss >> point.x >> point.y))
+			{
+				// Couldn’t read two floats—format error or not enough data
+				break;
+			}
+
+			// Safely consume one character (the comma), ignoring spaces
+			// If there is no comma, it might be at the end of the line, etc.
+			// We'll do a small check but won't fail completely if it's missing.
+			if (ss.peek() == ',' || ss.peek() == ' ')
+				ss.ignore(std::numeric_limits<std::streamsize>::max(), ' '); // ignore spaces
+			if (ss.peek() == ',')
+				ss.ignore(1, ','); // ignore the comma character
+
+			// Store the point
+			innerVec.push_back(point);
+		}
+
+		// Add this inner vector to the result
+		model.push_back(std::move(innerVec));
+	}
 }
