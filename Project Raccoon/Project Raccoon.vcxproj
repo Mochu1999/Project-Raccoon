@@ -137,6 +137,7 @@
     <ClCompile Include="Sources\Common.cpp" />
     <ClCompile Include="Sources\glm\detail\glm.cpp" />
     <ClCompile Include="Sources\Polygons.cpp" />
+    <ClCompile Include="Sources\shader.cpp" />
     <ClCompile Include="Sources\Text.cpp" />
     <ClCompile Include="Sources\WettedSurface.cpp" />
   </ItemGroup>

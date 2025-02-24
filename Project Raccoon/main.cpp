@@ -102,7 +102,6 @@ int main(void)
 	Shader shader2D("resources/shaders/shader2D.shader");
 	Shader shader2D_Instanced("resources/shaders/shader2D_Instanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
-	//shader3D.bind();
 
 
 	Camera camera(window);
@@ -302,8 +301,8 @@ int main(void)
 			//3D
 			shader3D.bind();
 			//opaque objects first
-			glEnable(GL_DEPTH_TEST);		//ESTO PUEDE IR ANTES DEL BIND?
-			glDepthMask(GL_TRUE);      //depth writing
+			glEnable(GL_DEPTH_TEST);
+			glDepthMask(GL_TRUE);
 			glDisable(GL_BLEND);
 
 			glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
@@ -415,13 +414,13 @@ int main(void)
 
 		}
 		//isRunning = false;
-		settings.write();
+		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 	}
-
+	settings.write();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
