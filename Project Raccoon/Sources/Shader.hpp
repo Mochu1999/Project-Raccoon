@@ -5,17 +5,17 @@
 
 //Había un void bind() const {} que hay que reexplorar
 
-
+struct ShaderProgramSource {
+	std::string VertexSource;
+	std::string FragmentSource;
+};
 
 struct Shader {
 
 	std::string filePath;
 	unsigned int ID;
 
-	struct ShaderProgramSource {
-		std::string VertexSource;
-		std::string FragmentSource;
-	};
+
 
 	Shader(const std::string& filepath)
 		:filePath(filepath), ID(0) { //we are maintaining filePath only for debugging purpouses
@@ -38,12 +38,57 @@ struct Shader {
 	// Checks if the different Shaders have compiled properly
 	void compileErrors(unsigned int shader, const char* type);
 
-	~Shader() {
-		glDeleteProgram(ID);
-	}
+	~Shader();
 	void bind();
-
 	void unbind();
+
+	////////////////////////////
+	///Look for uniform buffer objects. Used to send a lot of uniforms into a program more efficiently.
+	// I think it let's you share DATA BETWEEN SHADERS
+
+
+	std::unordered_map<std::string, int> locationsMap;
+
+	//If there's no location it will be created, otherwise it will take it from map
+	int getUniformLocation(const std::string& name) {
+
+		//if it is in the map
+		auto it = locationsMap.find(name);
+		if (it != locationsMap.end()) {
+			return it->second;  // Slightly faster than return locationsMap[name], only one lookup is performed
+		}
+		//else
+		int location = glGetUniformLocation(ID, name.c_str());
+		locationsMap[name] = location;
+		return location;
+	}
+
+	//Change to Templates////
+	//1f
+	void setUniform(const std::string& name, float value) {
+		glUniform1f(getUniformLocation(name), value);
+	}
+
+	//3f
+	void setUniform(const std::string& name, float x, float y, float z) {
+		glUniform3f(getUniformLocation(name), x, y, z);
+	}
+	//p3
+	void setUniform(const std::string& name, const p3& vec) {
+		glUniform3f(getUniformLocation(name), vec.x, vec.y, vec.z);
+	}
+	//4f
+	void setUniform(const std::string& name, float x, float y, float z, float w) {
+		glUniform4f(getUniformLocation(name), x, y, z, w);
+	}
+	//1i
+	void setUniform(const std::string& name, int value) {
+		glUniform1i(getUniformLocation(name), value);
+	}
+	//mat4
+	void setUniform(const std::string& name, const std::array<float, 16>& mat) {
+		glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, mat.data());
+	}
 };
 
 

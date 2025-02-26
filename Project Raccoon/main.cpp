@@ -179,106 +179,44 @@ int main(void)
 
 	Graphics grafics;
 
+	Map map(shader2D, camera);
 
 
 
-	//Hola buenos días, objetivo encapsular en map (debería llamarse Autopilot?) todo esto. Para ello había pensado en primero
-	//  encapsular todas las locations en una struct llamada locations y pasarle referencia a map para actualizar model color, shaders?.
-	//  Va a ser un tema. Seguidamente hay que crear un background, un texto que siga el cursor y para mañana sería ideal dejar a que
-	//  elijas o zoom o prototipo de ruta entre barcelona e ibiza con geodésicas.
-	//  Muy buena suerte, tú puedes fácil con ello si te pones. Fuerzate un poquito al principio, rodará y acabarás féliz
-
-	vector<vector<p2>> mapVectorOfVectors;
-	Lines2D mercator;
-	readVectorOfVectorsAscii(mapVectorOfVectors);
-
-	for (auto& p : mapVectorOfVectors)
-	{
-		vector<p2>interm = lonLatTo2D(p);
-		mercator.addSet(interm);
-		//mercator.addSet(p);
-		//print(interm);
-
-	}
+	
 
 
 
-	//The region in 
-	p2 point0 = mercator.positions[0];
-	print(mercator.positions[0]);
-
-	//the ratio width/height of the map square is:
-	float totalX = mercator.positions[1].x - mercator.positions[0].x;
-	float totalY = mercator.positions[2].y - mercator.positions[1].y;
-	float naturalRatio = totalX / totalY;
-	print(totalX); //4.22809e+06
-	print(totalY); //3.52124e+06
-	print(naturalRatio); //1.20074
-
-	//first the arbitrary scaling, which is going to be that x is 1000 pixels long
-	float scalingFactor = 1 / totalX * 1000;
-	p2 mapCorner = { 200,100 }; //the coordinates of the bottom left coordinate of the map that will be applied after centering
-	p2 translationFactor = { -point0.x * scalingFactor, -point0.y * scalingFactor }; //centering
-	translationFactor += mapCorner;
+	
 
 
 
 
 
 
-
-	//////////////
-	//Locations. They don't need to be binded to a shader in the creation but they do need to be binded when assigning the data
-	///Look for uniform buffer objects. Used to send a lot of uniforms into a program more efficiently. I think it let's you share DATA BETWEEN SHADERS
-
-	//3D
-	int locationPerspective = glGetUniformLocation(shader3D.ID, "u_Perspective");
-	int locationModel = glGetUniformLocation(shader3D.ID, "u_Model");
-	int locationView = glGetUniformLocation(shader3D.ID, "u_View");
-	int locationFragment = glGetUniformLocation(shader3D.ID, "u_fragmentMode");
-	int locationCamPos = glGetUniformLocation(shader3D.ID, "u_CamPos");
-	int locationColor3D = glGetUniformLocation(shader3D.ID, "u_Color");
-	int locationLightPos = glGetUniformLocation(shader3D.ID, "u_lightPos");
-
-	//2D
-	int locationOrtho = glGetUniformLocation(shader2D.ID, "u_OrthoProjection");
-	int locationModel2D = glGetUniformLocation(shader2D.ID, "u_Model2D");
-	int locationColor2D = glGetUniformLocation(shader2D.ID, "u_Color");
-
-	//2D_Instanced
-	int locationOrtho_Instanced = glGetUniformLocation(shader2D_Instanced.ID, "u_OrthoProjection");
-	int locationColor2D_Instanced = glGetUniformLocation(shader2D_Instanced.ID, "u_Color");
-
-	//Text
-	int locationOrthoText = glGetUniformLocation(shaderText.ID, "u_OrthoProjection");
-
-
-	//////////////
-	//INITIALAZING
 	//3D
 	shader3D.bind();
-	glUniform3f(locationLightPos, lightPos.x, lightPos.y, lightPos.z);
-	glUniformMatrix4fv(locationPerspective, 1, GL_FALSE, camera.perspectiveMatrix.data());
-	glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+	shader3D.setUniform("u_lightPos", lightPos);
+	shader3D.setUniform("u_Perspective", camera.perspectiveMatrix);
+	//shader3D.setUniform("u_Model", camera.modelMatrix);
 
 	//2D
 	shader2D.bind();
-	glUniformMatrix4fv(locationOrtho, 1, GL_FALSE, camera.orthoMatrix.data());
-	camera.model2DMatrix = camera.createModel2DMatrix(translationFactor, 0, scalingFactor);
-	glUniformMatrix4fv(locationModel2D, 1, GL_FALSE, camera.model2DMatrix.data());
-
+	shader2D.setUniform("u_OrthoProjection", camera.orthoMatrix);
+	
 
 	//2D_Instanced
 	shader2D_Instanced.bind();
-	glUniformMatrix4fv(locationOrtho_Instanced, 1, GL_FALSE, camera.orthoMatrix.data());
+	shader2D_Instanced.setUniform("u_OrthoProjection", camera.orthoMatrix);
 
 	//Text
 	shaderText.bind();
-	glUniformMatrix4fv(locationOrthoText, 1, GL_FALSE, camera.orthoMatrix.data());
+	shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
+
 
 
 	float angle = 0;
-	AllPointers allPointers(&camera, &mercator);
+	AllPointers allPointers(&camera, &map.mercator);
 	glfwSetWindowUserPointer(window, &allPointers);
 	//getPos(window);
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -310,41 +248,41 @@ int main(void)
 
 
 			glLineWidth(2); //this is deprecated and platform dependent
-			glUniform1i(locationFragment, 1);
+			shader3D.setUniform("u_fragmentMode", 1);
+			
 			//axis
-			glUniform4f(locationColor3D, 1.0, 0.0, 0.0, 1.0);
+			shader3D.setUniform("u_Color", 1.0, 0.0, 0.0, 1.0);
 			xLine.draw();
-			glUniform4f(locationColor3D, 0.0, 1.0, 0.0, 1.0);
+			shader3D.setUniform("u_Color", 0.0, 1.0, 0.0, 1.0);
 			yLine.draw();
-			glUniform4f(locationColor3D, 0.0, 0.0, 1.0, 1.0);
+			shader3D.setUniform("u_Color", 0.0, 0.0, 1.0, 1.0);
 			zLine.draw();
 
-
-			glUniform4f(locationColor3D, 1, 1, 1, 1.0);
+			shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
 			light.draw();
 			glLineWidth(1);
 			camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
-			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+			shader3D.setUniform("u_Model", camera.modelMatrix);
 
 			globe.draw();
 			camera.modelMatrix = camera.identityMatrix;
-			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+			shader3D.setUniform("u_Model", camera.modelMatrix);
 			//gestionar location desde camera, más opciones de modelMatrix, una solo para escalar, solo rotar o solo transladar
 			//  y combinaciones
 
 
 			//model
-			glUniform1i(locationFragment, 0);
+			shader3D.setUniform("u_fragmentMode", 0);
 
 			camera.modelMatrix = camera.createModelMatrix({ 40,0,0 }, angle, { 1,0,0 }, 1);
+			camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
 			//angle++;
-			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
-			glUniform4f(locationColor3D, 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
+			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();
-			glUniform4f(locationColor3D, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
+			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
 			modelo.draw();
 			camera.modelMatrix = camera.identityMatrix;
-			glUniformMatrix4fv(locationModel, 1, GL_FALSE, camera.modelMatrix.data());
+			shader3D.setUniform("u_Model", camera.modelMatrix);
 
 
 
@@ -364,17 +302,18 @@ int main(void)
 			shader2D.bind();
 
 			glLineWidth(5);
-			glUniform4f(locationColor2D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
 			//arc.draw();
 			glLineWidth(1);
-			mercator.draw();
-
+			
+			map.draw();
+			
+			
+			//2d instanced
 			shader2D_Instanced.bind();
 			glLineWidth(1);
-			glUniform4f(locationColor2D_Instanced, 1, 1, 1, 1);
+			shader2D.setUniform("u_Color", 1, 1, 1, 1);
 			//lines2D_Instanced.draw();
 			//grafics.draw();
-
 
 
 
@@ -393,22 +332,15 @@ int main(void)
 
 
 
-			shader3D.bind();
 
 
 
 			keyboardRealTimePolls(window, camera);
 			camera.updateCamera();
-			glUniform3f(locationCamPos, camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-			glUniformMatrix4fv(locationView, 1, GL_FALSE, camera.viewMatrix.data());
 
-
-
-
-
-
-			/*print(camera.forward);
-			print(camera.cameraPos);*/
+			shader3D.bind();
+			shader3D.setUniform("u_CamPos", camera.cameraPos);
+			shader3D.setUniform("u_View", camera.viewMatrix);
 
 			//break;
 
