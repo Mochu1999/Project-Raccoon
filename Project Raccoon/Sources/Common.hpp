@@ -276,11 +276,11 @@ float magnitude3(const vec3<T>& v) {
 
 /////////////////////////////////////////////
 // Declarations of global variables
-extern p2 cursor;
 extern float windowHeight;
 extern float windowWidth;
 extern bool isRunning;
 inline vector<p3> model;
+extern p2 mPos;
 
 
 

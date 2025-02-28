@@ -104,14 +104,6 @@ struct Camera {
 
 
 
-	float xpos, ypos;
-	double xpos1, ypos1;
-
-	void getPos(GLFWwindow* window) {
-		glfwGetCursorPos(window, &xpos1, &ypos1);
-		ypos1 = windowHeight - ypos1;
-		xpos = (float)xpos1;
-		ypos = (float)ypos1;
-	}
+	
 };
 

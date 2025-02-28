@@ -142,6 +142,7 @@
     <ClCompile Include="Sources\WettedSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\Axis.hpp" />
     <ClInclude Include="Sources\Globe.hpp" />
     <ClInclude Include="Sources\Lines2D_Instanced.hpp" />
     <ClInclude Include="Sources\Arrows.hpp" />

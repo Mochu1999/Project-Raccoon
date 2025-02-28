@@ -48,7 +48,9 @@
 #include "Graphics.hpp"
 
 #include "Globe.hpp"
+
 #include "Map.hpp"
+#include "Axis.hpp"
 
 
 using namespace std::chrono;
@@ -117,27 +119,16 @@ int main(void)
 	light.addSet(lightPos);
 
 
-
+	Axis axis(shader3D);
 
 
 
 	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
 	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
 	text.addText({ 10,950 }, timeStruct.fps, " fps");
-	/*text.addText("abcp 100,200.521", { 100, 100 });
-	text.substituteText(1, "qwerqwetqwrtertqerggsdfggdfhslolE", { 100,100 });*/
 	text.fillVertexBuffer();
 
-	Lines3D xLine2;
-	xLine2.addSet({ {0,0,0},{5,0,0} });
-	Lines3D xLine;
-	xLine.addSet({ {-100,0,0},{100,0,0} });
-	Lines3D yLine;
-	yLine.addSet({ {0,-100,0},{0,100,0} });
-	Lines3D zLine;
-	zLine.addSet({ {0,0,-100},{0,0,100} });
-	Lines3D zLine2;
-	zLine2.addSet({ {0,0,0},{0,0,5} });
+
 
 	Polygons2D polygon2D; //Faltan reserves
 	polygon2D.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
@@ -163,10 +154,7 @@ int main(void)
 
 	Lines2D_Instanced lines2D_Instanced;
 	/*lines2D_Instanced.addSet({ {0,0},{100,0} });
-	lines2D_Instanced.addInstances({
-	{ {190, 100},  0, {10, 1} },
-	{ {500, 100},  0, {1, 1} }
-		});*/
+	lines2D_Instanced.addInstances({{ {190, 100},  0, {10, 1} },{ {500, 100},  0, {1, 1} }});*/
 
 	Lines3D globe;
 	for (float i = -90; i <= 90; i += 10)
@@ -183,45 +171,38 @@ int main(void)
 
 
 
-	
 
 
 
-	
+	//Locations initializers
+	{
+		//3D
+		shader3D.bind();
+		shader3D.setUniform("u_lightPos", lightPos);
+		shader3D.setUniform("u_Perspective", camera.perspectiveMatrix);
+		shader3D.setUniform("u_Model", camera.modelMatrix);
+
+		//2D
+		shader2D.bind();
+		shader2D.setUniform("u_OrthoProjection", camera.orthoMatrix);
 
 
+		//2D_Instanced
+		shader2D_Instanced.bind();
+		shader2D_Instanced.setUniform("u_OrthoProjection", camera.orthoMatrix);
 
-
-
-
-	//3D
-	shader3D.bind();
-	shader3D.setUniform("u_lightPos", lightPos);
-	shader3D.setUniform("u_Perspective", camera.perspectiveMatrix);
-	//shader3D.setUniform("u_Model", camera.modelMatrix);
-
-	//2D
-	shader2D.bind();
-	shader2D.setUniform("u_OrthoProjection", camera.orthoMatrix);
-	
-
-	//2D_Instanced
-	shader2D_Instanced.bind();
-	shader2D_Instanced.setUniform("u_OrthoProjection", camera.orthoMatrix);
-
-	//Text
-	shaderText.bind();
-	shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
+		//Text
+		shaderText.bind();
+		shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
+	}
 
 
 
 	float angle = 0;
-	AllPointers allPointers(&camera, &map.mercator);
+	AllPointers allPointers(&camera, &map);
 	glfwSetWindowUserPointer(window, &allPointers);
-	//getPos(window);
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyboardEventCallback);
+	glfwSetMouseButtonCallback(window, mouseEventCallback);
 
 
 
@@ -230,37 +211,26 @@ int main(void)
 	//system("cls");
 	while (!glfwWindowShouldClose(window))
 	{
+		getPos(window, mPos);
 		if (isRunning)
 		{
+
 			timeStruct.update();
-			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
 
 			/////////////
 			//3D
 			shader3D.bind();
-			//opaque objects first
-			glEnable(GL_DEPTH_TEST);
-			glDepthMask(GL_TRUE);
-			glDisable(GL_BLEND);
+			//must opaque objects go before transparents?
+			opaque3D();
 
-			glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
+			glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f); //glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-			glLineWidth(2); //this is deprecated and platform dependent
-			shader3D.setUniform("u_fragmentMode", 1);
-			
-			//axis
-			shader3D.setUniform("u_Color", 1.0, 0.0, 0.0, 1.0);
-			xLine.draw();
-			shader3D.setUniform("u_Color", 0.0, 1.0, 0.0, 1.0);
-			yLine.draw();
-			shader3D.setUniform("u_Color", 0.0, 0.0, 1.0, 1.0);
-			zLine.draw();
-
+			axis.draw();
 			shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
 			light.draw();
-			glLineWidth(1);
+
 			camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
 			shader3D.setUniform("u_Model", camera.modelMatrix);
 
@@ -275,7 +245,9 @@ int main(void)
 			shader3D.setUniform("u_fragmentMode", 0);
 
 			camera.modelMatrix = camera.createModelMatrix({ 40,0,0 }, angle, { 1,0,0 }, 1);
-			camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
+			//camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
+			shader3D.setUniform("u_Model", camera.modelMatrix);
+
 			//angle++;
 			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
 			timon.draw();
@@ -299,15 +271,18 @@ int main(void)
 
 			/////////////
 			///2d objects
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(GL_FALSE);
 			shader2D.bind();
 
 			glLineWidth(5);
 			//arc.draw();
 			glLineWidth(1);
-			
+
 			map.draw();
-			
-			
+
+
 			//2d instanced
 			shader2D_Instanced.bind();
 			glLineWidth(1);
@@ -325,6 +300,7 @@ int main(void)
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			shaderText.bind();
 			text.sDraw();
+			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
 
 
 
@@ -346,7 +322,7 @@ int main(void)
 
 		}
 		//isRunning = false;
-		
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

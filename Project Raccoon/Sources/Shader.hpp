@@ -96,6 +96,7 @@ struct Shader {
 //Initializes glfw and glew
 GLFWwindow* initialize();
 
+void opaque3D();
 
 
 

@@ -159,3 +159,9 @@ GLFWwindow* initialize() {
 
 	return window;
 }
+
+void opaque3D() {
+	glDepthMask(GL_TRUE);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+}

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Globe.hpp"
+#include "Map.hpp"
 
 //POR QUE COÑO NO REQUIERE INCLUDES?
 
@@ -9,11 +10,10 @@ int counter = 5;
 
 //Pointers can be re-seated while references cannot. But we are not re seating anything so whatever
 struct AllPointers {
-	//BinariesManager* binariesManager;
-	Lines2D* lines2D;
 	Camera* camera;
+	Map* map;
 
-	AllPointers( Camera* c, Lines2D* l):camera(c),lines2D(l){}
+	AllPointers(Camera* camera_, Map* map_) :camera(camera_), map(map_) {}
 };
 
 //The standard is to use callbacks for one-time event (typing, increase something once per press) and another function
@@ -23,6 +23,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
+	Map* map = allPointers->map;
 
 	if (action == GLFW_PRESS)
 	{
@@ -36,48 +37,14 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			counter++;
 
 			break;
+		case GLFW_KEY_S:
+			if (map->show)
+				map->show = 0;
+			else
+				map->show = 1;
 
 
-			/*case GLFW_KEY_ESCAPE:
-				if (binariesManager->currentProgramType == 1) {
-					polygon->clear();
-					polygon->addSet(model);
-				}
-				else if (binariesManager->currentProgramType == 0) {
-					if (polygon->indices.size()) {
-						polygon->clear();
-						polygon->addSet(currentModel);
-					}
-					else {
-						polygon->clear();
-					}
-				}
-				counterI = 0;
-				break;
-
-			case GLFW_KEY_C:
-				if (counterI < polygon->Points.size()) {
-					polygon->sweepTriangulation();
-					counterI++;
-				}
-				break;
-
-			case GLFW_KEY_Q:
-				switchOnePosition(model);
-				break;
-
-			case GLFW_KEY_SPACE:
-				for (size_t i = 0; i < polygon->Points.size(); ++i) {
-					polygon->sweepTriangulation();
-				}
-				printv2(polygon->positions);
-				printflat3(polygon->indices);
-				isRunning = true;
-				break;
-
-			case GLFW_KEY_O:
-				binariesManager->readConfig();
-				break;*/
+			break;
 
 		}
 
@@ -88,52 +55,11 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			{
 			case GLFW_KEY_N:
 
-				binariesManager->writeConfig();
 
-				if (binariesManager->currentProgramType == 1)
-				{
-					polygon->lines.cadMode = false;
-					modelPositions = binariesManager->readModel();
-
-
-					polygon->clear();
-					model = convertPositions(modelPositions);
-					polygon->addSet(model);
-
-					isRunning = true;
-				}
-				else if (binariesManager->currentProgramType == 0)
-				{
-					polygon->clear();
-					polygon->lines.cadAddSet(cursor);
-
-					polygon->lines.cadMode = true;
-					modelPositions.clear();
-
-
-				}
-				counterI = 0;
-
-				break;
-
-			case GLFW_KEY_S:
-				auto oldFormatPositions = inverseTransforming(polygon->positions);
-				printflat2(oldFormatPositions);
-				binariesManager->writeModel(oldFormatPositions);
-				break;
 
 			}
 		}*/
 	}
-
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
-		switch (key) {
-		case GLFW_KEY_W:
-			camera->cameraPos += camera->forward * camera->translationSpeed;
-			break;
-			// etc...
-		}
-
 }
 
 
@@ -177,54 +103,25 @@ void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
 }
 
 
-//void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-////	AllPointers* allpointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
-////
-////	Polygons* polygon = allpointers->polygon;
-////	BinariesManager* binariesManager = allpointers->binariesManager;
-////
-////
-////
-////	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-////	{
-////		if (binariesManager->currentProgramType == binariesManager->CAD)
-////		{
-////			if (polygon->lines.cadMode && polygon->positions.size() > 2
-////				&& polygon->positions.front() == polygon->positions.back())
-////			{
-////
-////				polygon->lines.cadMode = false;
-////
-////				currentModel = polygon->positions;
-////
-////				polygon->clear();
-////
-////				polygon->addSet(currentModel);
-////			}
-////			else
-////			{
-////				if (polygon->lines.cadMode == false)
-////				{
-////					polygon->lines.cadMode = true;
-////					polygon->lines.cadAddSet(cursor);
-////				}
-////
-////
-////
-////				polygon->lines.cadAddSet(cursor);
-////
-////
-////			}
-////
-////			//cout << "cursorX: " << cursorX << ", cursorY: " << cursorY << endl;
-////			printv2(polygon->lines.positions);
-////			printflat2(polygon->lines.indices);
-////
-////
-////		}
-////
-////	}
-//}
+
+void getPos(GLFWwindow* window, p2& mPos) {
+	double xpos1, ypos1;
+	glfwGetCursorPos(window, &xpos1, &ypos1);
+
+	mPos = { (float)xpos1,(float)(windowHeight - ypos1) };
+}
+
+void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
+	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
+	Map* map = allPointers->map;
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
+		print(mPos);
+
+		
+	}
+}
 
 
 
@@ -265,7 +162,7 @@ struct KeyBindingsManager {
 		};
 	}
 
-	
+
 	void pollBindings(GLFWwindow* window) {
 		for (auto& binding : keyBindings) {
 			if (glfwGetKey(window, binding.key) == GLFW_PRESS) {
@@ -275,7 +172,7 @@ struct KeyBindingsManager {
 	}
 
 
-	
+
 };
 */
 //initialized as
