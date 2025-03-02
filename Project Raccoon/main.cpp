@@ -280,7 +280,7 @@ int main(void)
 			//arc.draw();
 			glLineWidth(1);
 
-			map.draw();
+			//map.draw();
 
 
 			//2d instanced
