@@ -51,19 +51,14 @@
 
 #include "Map.hpp"
 #include "Axis.hpp"
-
-
-using namespace std::chrono;
-
-// to not render what is not visible to the camera:
-//glEnable(GL_CULL_FACE);       // Enable face culling
-//glCullFace(GL_BACK);          // Cull back faces
-//glFrontFace(GL_CCW);          // Counter-clockwise winding is front-facing
-
-//instance rendering for the future
+#include "Ship.hpp"
 
 
 
+
+
+
+//POLYHEDRA TAMBIÉN FUE MODIFICADO Y NECESITA ARREGLARSE ANTES DE DIVIDIR EL PROYECTO
 
 
 
@@ -77,23 +72,8 @@ int main(void)
 	//BinariesManager binariesManager;
 
 
+	
 
-
-
-	/*Polyhedra stl, bin;
-
-	TimeCounter tc1;
-	readSTL(stl.positions, stl.normals, "Eiffel.STL");
-	tc1.endCounter();
-
-	stl.simpleIndices();
-
-
-	TimeCounter tc2;
-	readSimplePolyhedra(bin.positions, bin.normals, bin.indices, "Eiffel.bin");
-	tc2.endCounter();
-
-	print( tc1.endTime/ tc2.endTime);*/
 
 
 
@@ -107,7 +87,6 @@ int main(void)
 
 
 	Camera camera(window);
-	camera.updateCamera();
 
 	Settings settings(camera);
 
@@ -143,9 +122,7 @@ int main(void)
 	Circles circle(20, 4);
 	circle.addSet({ {210,210},{300,500} });
 
-	Polyhedra stl, timon, modelo;
-	readSimplePolyhedra(timon.positions, timon.normals, timon.indices, "timon.bin");
-	readSimplePolyhedra(modelo.positions, modelo.normals, modelo.indices, "modelo.bin");
+	
 
 	Lines2D arc;
 	//vector<p2> a = createArc({ 300,300 }, 100, radians(270), radians(360));
@@ -164,7 +141,7 @@ int main(void)
 
 
 
-
+	Ship ship(shader3D,camera);
 	Graphics grafics;
 
 	Map map(shader2D, camera);
@@ -180,7 +157,7 @@ int main(void)
 		shader3D.bind();
 		shader3D.setUniform("u_lightPos", lightPos);
 		shader3D.setUniform("u_Perspective", camera.perspectiveMatrix);
-		shader3D.setUniform("u_Model", camera.modelMatrix);
+		shader3D.setUniform("u_Model", camera.model3DMatrix);
 
 		//2D
 		shader2D.bind();
@@ -198,7 +175,7 @@ int main(void)
 
 
 
-	float angle = 0;
+	
 	AllPointers allPointers(&camera, &map);
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
@@ -220,8 +197,7 @@ int main(void)
 			/////////////
 			//3D
 			shader3D.bind();
-			//must opaque objects go before transparents?
-			opaque3D();
+			opaque();
 
 			glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f); //glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -231,40 +207,23 @@ int main(void)
 			shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
 			light.draw();
 
-			camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
-			shader3D.setUniform("u_Model", camera.modelMatrix);
+			camera.model3DMatrix = camera.create3DModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
+			shader3D.setUniform("u_Model", camera.model3DMatrix);
 
-			globe.draw();
-			camera.modelMatrix = camera.identityMatrix;
-			shader3D.setUniform("u_Model", camera.modelMatrix);
+			//globe.draw();
+			camera.model3DMatrix = camera.identityMatrix;
+			shader3D.setUniform("u_Model", camera.model3DMatrix);
 			//gestionar location desde camera, más opciones de modelMatrix, una solo para escalar, solo rotar o solo transladar
 			//  y combinaciones
 
 
-			//model
-			shader3D.setUniform("u_fragmentMode", 0);
 
-			camera.modelMatrix = camera.createModelMatrix({ 40,0,0 }, angle, { 1,0,0 }, 1);
-			//camera.modelMatrix = camera.createModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
-			shader3D.setUniform("u_Model", camera.modelMatrix);
-
-			//angle++;
-			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1);
-			timon.draw();
-			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
-			modelo.draw();
-			camera.modelMatrix = camera.identityMatrix;
-			shader3D.setUniform("u_Model", camera.modelMatrix);
+			ship.draw();
 
 
 
 
-			////transparent objects
-			//glEnable(GL_BLEND);
-			//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			//glDepthMask(GL_FALSE);
-			//glUniform1i(locationFragment, 0);
-			//glUniform4f(locationColor3D, 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 0.6);
+			
 
 
 

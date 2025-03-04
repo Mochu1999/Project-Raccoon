@@ -3,6 +3,7 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 #include "Common.hpp"
+#include "Polyhedra.hpp"
 
 //A lo mejor meter esto en binaries manager. En la versión 2d queda más bonito
 
@@ -85,7 +86,13 @@ std::vector<p3> readModel(const std::string modelPath) {
 }
 
 // Function to read ASCII STL file similar to your custom style
-void readSTL(std::vector<p3>& positions, std::vector<p3>& normals, const std::string& filepath) {
+void readSTL(Polyhedra& stl, const std::string& filepath) {
+
+	stl.clear();
+
+	std::vector<p3>& positions = stl.positions;
+	std::vector<p3>& normals = stl.normals;
+
 	std::string basePath = "Resources/stl models/";
 	std::ifstream inFile(basePath + filepath);
 
@@ -118,12 +125,14 @@ void readSTL(std::vector<p3>& positions, std::vector<p3>& normals, const std::st
 			iss >> vertex.x >> vertex.y >> vertex.z;
 			vector<p3> interm;
 			interm.push_back(vertex);
-			positions.insert(positions.end(), { interm[0].x / 100,interm[0].y / 100,interm[0].z / 100 });
+			positions.insert(positions.end(), { interm[0].x * 10,interm[0].y * 10,interm[0].z * 10 });
 			//print(vertex);
 		}
 	}
 
 	inFile.close();
+
+	stl.simpleIndices();
 }
 
 
@@ -161,7 +170,7 @@ void readWKT(/*std::vector<p2>& positions,*/ vector<vector<p2>> & final, const s
 		std::cerr << "Unable to open file: " << filepath << std::endl;
 		return;
 	}
-	
+
 	std::string line;
 	while (std::getline(inFile, line)) {
 		// For simplicity, check if we have LINESTRING or MULTILINESTRING
@@ -230,23 +239,28 @@ void readWKT(/*std::vector<p2>& positions,*/ vector<vector<p2>> & final, const s
 
 
 // Function to write a 3D polyhedra without dividing its surfaces in polygons (positions, normals and indices)
-void writeSimplePolyhedra(const std::vector<p3>& model, const std::vector<p3>& normals, const std::vector<unsigned int>& indices) {
-	std::string basePath = "Resources/Simple polyhedra/";
-	std::string modelPath;
+void writeSimplePolyhedra(Polyhedra& stl, string modelPath) {
 
-	// List available models in the directory
-	std::cout << "Current models: " << std::endl;
-	for (const auto& entry : fs::directory_iterator(basePath)) 
-	{
-		std::cout << "     " << entry.path().filename() << std::endl;
-	}
-	std::cout << "Enter model name: ";
-	std::cin >> modelPath;
+	const std::vector<p3>& model = stl.positions; 
+	const std::vector<p3>& normals = stl.normals;
+	const std::vector<unsigned int>& indices = stl.indices;
+
+	std::string basePath = "Resources/Simple polyhedra/";
+	//std::string modelPath;
+
+	//// List available models in the directory
+	//std::cout << "Current models: " << std::endl;
+	//for (const auto& entry : fs::directory_iterator(basePath))
+	//{
+	//	std::cout << "     " << entry.path().filename() << std::endl;
+	//}
+	/*std::cout << "Enter model name: ";
+	std::cin >> modelPath;*/
 	std::string path = basePath + modelPath;
 	std::cout << "Setting model in: " << path << std::endl;
 
 	std::ofstream outFile(path, std::ios::binary);
-	if (outFile) 
+	if (outFile)
 	{
 		//model
 		size_t size = model.size();
@@ -263,19 +277,24 @@ void writeSimplePolyhedra(const std::vector<p3>& model, const std::vector<p3>& n
 		outFile.write(reinterpret_cast<const char*>(&size), sizeof(size));
 		outFile.write(reinterpret_cast<const char*>(indices.data()), size * sizeof(unsigned int));
 	}
-	else 
+	else
 	{
 		std::cerr << "Error opening file for writing." << std::endl;
 	}
 	outFile.close();
 }
 
-void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::vector<unsigned int>& indices, const std::string& modelPath) {
+void readSimplePolyhedra(Polyhedra& polyhedra, const std::string& modelPath) {
+
+	std::vector<p3>& model = polyhedra.positions;
+	std::vector<p3>& normals = polyhedra.normals;
+	std::vector<unsigned int>& indices = polyhedra.indices;
+
 	std::string basePath = "Resources/Simple polyhedra/";
 	std::string path = basePath + modelPath;
 
 	std::ifstream inFile(path, std::ios::binary);
-	if (inFile) 
+	if (inFile)
 	{
 		size_t size;
 
@@ -291,7 +310,7 @@ void readSimplePolyhedra(std::vector<p3>& model, std::vector<p3>& normals, std::
 		indices.resize(size);
 		inFile.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int));
 	}
-	else 
+	else
 	{
 		std::cerr << "Error opening file for reading." << std::endl;
 	}
@@ -315,7 +334,7 @@ void writeVectorOfVectors(const vector<vector<p2>>& model) {
 			size_t size = model[i].size();
 			outFile.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
 			outFile.write(reinterpret_cast<const char*>(model[i].data()), size * sizeof(p2));
-		}	
+		}
 	}
 	else
 	{
@@ -337,11 +356,11 @@ void writeVectorOfVectorsAscii(const std::vector<std::vector<p2>>& model)
 
 	for (size_t i = 0; i < model.size(); ++i)
 	{
-		outFile << model[i].size()<<" ";
+		outFile << model[i].size() << " ";
 
 		for (size_t j = 0; j < model[i].size(); ++j)
 		{
-			outFile << model[i][j].x << " " << model[i][j].y <<", ";
+			outFile << model[i][j].x << " " << model[i][j].y << ", ";
 		}
 
 		outFile << "\n";
@@ -351,7 +370,7 @@ void writeVectorOfVectorsAscii(const std::vector<std::vector<p2>>& model)
 }
 
 void readVectorOfVectorsAscii(std::vector<std::vector<p2>>& model)
-{	
+{
 	std::string path = "Resources/Borrar/map.txt";
 
 	std::ifstream inFile(path);

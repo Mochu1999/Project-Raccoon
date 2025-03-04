@@ -452,6 +452,7 @@
     <ClInclude Include="Sources\Settings.hpp" />
     <ClInclude Include="Sources\shader.h" />
     <ClInclude Include="Sources\Shader.hpp" />
+    <ClInclude Include="Sources\Ship.hpp" />
     <ClInclude Include="Sources\Spheres.hpp" />
     <ClInclude Include="Sources\SweepTriangulation.hpp" />
     <ClInclude Include="Sources\Text.hpp" />

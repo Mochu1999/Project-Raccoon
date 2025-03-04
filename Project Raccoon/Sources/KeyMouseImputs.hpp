@@ -117,7 +117,7 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-		print(mPos);
+		//print(mPos);
 
 		
 	}

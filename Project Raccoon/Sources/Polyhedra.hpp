@@ -149,6 +149,12 @@ struct Polyhedra {
 	//	glBindVertexArray(0);
 	//}
 	
+	void clear() {
+		positions.clear();
+		indices.clear();
+		normals.clear();
+	}
+
 	~Polyhedra() {
 		glDeleteVertexArrays(1, &vertexArray);
 		glDeleteBuffers(1, &vertexBuffer);

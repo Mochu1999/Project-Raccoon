@@ -989,6 +989,9 @@
     <ClInclude Include="Sources\Axis.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Ship.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Sources\glm\detail\func_common.inl">

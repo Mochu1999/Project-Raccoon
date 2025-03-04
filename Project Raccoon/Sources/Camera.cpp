@@ -1,4 +1,4 @@
-#include "Camera.hpp"
+﻿#include "Camera.hpp"
 
 std::array<float, 16> Camera::createScalingMatrix(float scaleX, float scaleY, float scaleZ) {
 	std::array<float, 16> scalingMatrix = { 0 };
@@ -35,7 +35,7 @@ array<float, 16> Camera::createPerspectiveMatrix() {
 	array<float, 16> perspectiveMatrix = {};
 
 	float tanHalfFov = tan(fov / 2);
-	
+
 	perspectiveMatrix[0] = 1 / (aspectRatio * tanHalfFov);
 	perspectiveMatrix[5] = 1 / (tanHalfFov);
 	perspectiveMatrix[10] = -(farZ + nearZ) / (farZ - nearZ);
@@ -80,8 +80,125 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 	return viewMatrix;
 }
 
-// Creates model matrix by applying a translation and a rotation of a given axis
-std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDeg, p3 axis, float scale){ //scale defaulted to 1
+
+
+std::array<float, 16> Camera::createIdentityMatrix() {
+
+	return std::array<float, 16>{
+		1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+	};
+
+}
+
+
+
+
+
+void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis) {
+	p3 intermForward;
+
+	intermForward = normalize3(rotatePoint(forward, rotationSpeed, rotationAxis));
+
+	if (abs(intermForward.y) < 0.99)
+		forward = intermForward;
+}
+
+
+
+void Camera::updateCamera() {
+
+	//The quaternion method is intentionally incomplete. The true method would calculate the f and u for pitch and f and r for yaw
+	// But instead of calculating everything there we are only calculating f and here forcing right to be with respect of the referenceUp
+	// of the world and up is calculated from there
+	right = normalize3(cross3(forward, { 0,1,0 }));
+	up = cross3(right, forward);
+
+	viewMatrix = createViewMatrix(right, up, forward, cameraPos);
+
+	vpMatrix = multiplyMatrices(perspectiveMatrix, viewMatrix);
+
+}
+
+
+
+
+
+
+
+std::array<float, 16> Camera::create3DModelMatrix(const p3 translation) {
+
+	std::array<float, 16> modelMatrix = createIdentityMatrix();
+
+	//Translation components in the fourth column
+	modelMatrix[12] = translation.x;
+	modelMatrix[13] = translation.y;
+	modelMatrix[14] = translation.z;
+
+	return modelMatrix;
+}
+
+std::array<float, 16> Camera::create3DModelMatrix(const float angleDeg, p3 axis) {
+
+	std::array<float, 16> modelMatrix = createIdentityMatrix();
+
+	float theta = radians(angleDeg);
+
+	axis = normalize3(axis);
+	float x = axis.x;
+	float y = axis.y;
+	float z = axis.z;
+
+	float c = std::cos(theta);
+	float s = std::sin(theta);
+	float oneMinusC = 1.0f - c;
+
+	// 4) Fill the 3x3 rotation in column-major order
+	//    Using the formula:
+	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
+	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
+	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
+
+
+	// Column 0
+	modelMatrix[0] = x * x * oneMinusC + c;    // r_xx
+	modelMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
+	modelMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
+
+	// Column 1
+	modelMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
+	modelMatrix[5] = y * y * oneMinusC + c;    // r_yy
+	modelMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
+
+	// Column 2
+	modelMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
+	modelMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
+	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
+
+
+
+	return modelMatrix;
+}
+
+
+
+std::array<float, 16> Camera::create3DModelMatrix(const float scale) {
+
+	std::array<float, 16> modelMatrix = createIdentityMatrix();
+
+
+	modelMatrix[0] *= scale;
+	modelMatrix[5] *= scale;
+	modelMatrix[10] *= scale;
+
+
+	return modelMatrix;
+}
+
+
+std::array<float, 16> Camera::create3DModelMatrix(const p3 translation,const float angleDeg, p3 axis,const float scale) { //scale defaulted to 1
 
 	std::array<float, 16> modelMatrix = createIdentityMatrix();
 
@@ -119,13 +236,13 @@ std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDe
 	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
 
 	// Column 3 (translation)
-	modelMatrix[12] = position.x;
-	modelMatrix[13] = position.y;
-	modelMatrix[14] = position.z;
+	modelMatrix[12] = translation.x;
+	modelMatrix[13] = translation.y;
+	modelMatrix[14] = translation.z;
 
 	if (scale != 1)
 	{
-		//apply uniform scale to the 3�3 rotation block
+		//apply uniform scale to the 3×3 rotation block
 		modelMatrix[0] *= scale;
 		modelMatrix[1] *= scale;
 		modelMatrix[2] *= scale;
@@ -140,58 +257,28 @@ std::array<float, 16> Camera::createModelMatrix(const p3 position, float angleDe
 	return modelMatrix;
 }
 
-std::array<float, 16> Camera::createIdentityMatrix() {
 
-	return std::array<float, 16>{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	};
+std::array<float, 16> Camera::create2DModelMatrix(const p2& translation, float angleDeg, float scale) {
+	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
+	float theta = radians(angleDeg);
+	float c = std::cos(theta);
+	float s = std::sin(theta);
 
-}
 
-std::array<float, 16> Camera::createModelMatrix(const p3& position) {
+	// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
+	modelMatrix[0] = scale * c;
+	modelMatrix[1] = scale * s;
 
-	std::array<float, 16> modelMatrix = createIdentityMatrix();
+	// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
+	modelMatrix[4] = -scale * s;
+	modelMatrix[5] = scale * c;
 
-	//Translation components in the fourth column
-	modelMatrix[12] = position.x;  // X translation
-	modelMatrix[13] = position.y;  // Y translation
-	modelMatrix[14] = position.z;  // Z translation
+	// Column 2: [0, 0, 1, 0] 
+
+	// Column 3: [translation.x, translation.y, 0, 1]
+	modelMatrix[12] = translation.x;
+	modelMatrix[13] = translation.y;
 
 	return modelMatrix;
 }
-
-
-
-void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis) {
-	p3 intermForward;
-
-	intermForward = normalize3(rotatePoint(forward, rotationSpeed, rotationAxis));
-
-	if (abs(intermForward.y) < 0.99)
-		forward = intermForward;
-}
-
-
-
-void Camera::updateCamera() {
-
-	//The quaternion method is intentionally incomplete. The true method would calculate the f and u for pitch and f and r for yaw
-	// But instead of calculating everything there we are only calculating f and here forcing right to be with respect of the referenceUp
-	// of the world and up is calculated from there
-	right = normalize3(cross3(forward, { 0,1,0 }));
-	up = cross3(right, forward);
-
-	viewMatrix = createViewMatrix(right, up, forward, cameraPos);
-
-	vpMatrix = multiplyMatrices(perspectiveMatrix, viewMatrix);
-
-}
-
-
-
-
-
 

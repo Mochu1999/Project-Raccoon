@@ -2,7 +2,12 @@
 
 #include "Common.hpp"
 
-//UNIFICAR NOMBRES MATRICES
+/*
+0  4  8  12
+1  5  9  13
+2  6  10 14
+3  7  11 15
+*/
 
 struct Camera {
 
@@ -19,8 +24,8 @@ struct Camera {
 
 	std::array<float, 16> perspectiveMatrix;
 	std::array<float, 16> viewMatrix;
-	std::array<float, 16> modelMatrix;
 	std::array<float, 16> model2DMatrix;
+	std::array<float, 16> model3DMatrix;
 	std::array<float, 16> identityMatrix;
 	std::array<float, 16> vpMatrix;
 
@@ -43,10 +48,11 @@ struct Camera {
 		float angle = 3.14159f * 0.25f; // 45 degrees in radians
 		p3 rotAxis = { 0.0f, 1.0f, 0.0f }; // Y axis
 
-		//modelMatrix = createModelMatrix(objPos, angle, rotAxis);
+		//modelMatrix = create3DModelMatrix(objPos, angle, rotAxis);
 		identityMatrix = createIdentityMatrix();
-		modelMatrix = identityMatrix;
+		model3DMatrix = identityMatrix;
 
+		updateCamera();
 	}
 
 
@@ -60,34 +66,20 @@ struct Camera {
 
 	std::array<float, 16> createViewMatrix(const p3& right, const p3& up, p3 forward, const p3& cameraPos);
 
-	//AQUÍ PONDRÍA TRANSLATION EN VEZ DE POSITION Y CREARÍA MUCHAS FUNCIONES CON DISTINTOS INPUT
-	std::array<float, 16> createModelMatrix(const p3& position);
-	std::array<float, 16> createModelMatrix(const p3 position, float angleDeg, p3 axis, float scale = 1);
 	std::array<float, 16> createIdentityMatrix();
 
-	std::array<float, 16> createModel2DMatrix(const p2 position, float angleDeg, float scale) {
-		std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
-		float theta = radians(angleDeg);
-		float c = std::cos(theta);
-		float s = std::sin(theta);
+	//Some do not have implementation yet, create them if needed
+	std::array<float, 16> create3DModelMatrix(const p3 translation);
+	std::array<float, 16> create3DModelMatrix(const p3 translation, float angleDeg, p3 axis);
+	std::array<float, 16> create3DModelMatrix(const p3 translation, const float scale);
+	std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis);
+	std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis, const float scale);
+	std::array<float, 16> create3DModelMatrix(const float scale);
+	std::array<float, 16> create3DModelMatrix(const p3 translation, const float angleDeg, p3 axis,const float scale);
 
-		
-		// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
-		modelMatrix[0] = scale * c;
-		modelMatrix[1] = scale * s;
 
-		// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
-		modelMatrix[4] = -scale * s;
-		modelMatrix[5] = scale * c;
 
-		// Column 2: [0, 0, 1, 0] 
-
-		// Column 3: [translation.x, translation.y, 0, 1]
-		modelMatrix[12] = position.x;
-		modelMatrix[13] = position.y;
-
-		return modelMatrix;
-	}
+	std::array<float, 16> create2DModelMatrix(const p2& translation, float angleDeg, float scale);
 
 
 	//the rotations create a new forward vector and the other 2 are deduced from it

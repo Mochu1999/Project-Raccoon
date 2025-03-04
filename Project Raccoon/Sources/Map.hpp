@@ -84,7 +84,7 @@ struct Map {
 
 		}
 
-		camera.model2DMatrix = camera.createModel2DMatrix(translationFactor, 0, scalingFactor);
+		camera.model2DMatrix = camera.create2DModelMatrix(translationFactor, 0, scalingFactor);
 		shader2D.setUniform("u_Model2D", camera.model2DMatrix);
 
 		shader2D.setUniform("u_Color", 0.035f, 0.065f, 0.085f, 1.0f);
@@ -97,7 +97,7 @@ struct Map {
 
 		if (isInsideFrame && show)
 		{
-			camera.model2DMatrix = camera.createModel2DMatrix(mPos, 0, 1);
+			camera.model2DMatrix = camera.create2DModelMatrix(mPos, 0, 1);
 			shader2D.setUniform("u_Model2D", camera.model2DMatrix);
 
 			shader2D.setUniform("u_Color", 1, 1, 1, 1);
