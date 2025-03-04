@@ -82,16 +82,7 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 
 
 
-std::array<float, 16> Camera::createIdentityMatrix() {
 
-	return std::array<float, 16>{
-		1, 0, 0, 0,
-			0, 1, 0, 0,
-			0, 0, 1, 0,
-			0, 0, 0, 1
-	};
-
-}
 
 
 
@@ -128,157 +119,243 @@ void Camera::updateCamera() {
 
 
 
-std::array<float, 16> Camera::create3DModelMatrix(const p3 translation) {
-
-	std::array<float, 16> modelMatrix = createIdentityMatrix();
-
-	//Translation components in the fourth column
-	modelMatrix[12] = translation.x;
-	modelMatrix[13] = translation.y;
-	modelMatrix[14] = translation.z;
-
-	return modelMatrix;
-}
-
-std::array<float, 16> Camera::create3DModelMatrix(const float angleDeg, p3 axis) {
-
-	std::array<float, 16> modelMatrix = createIdentityMatrix();
-
-	float theta = radians(angleDeg);
-
-	axis = normalize3(axis);
-	float x = axis.x;
-	float y = axis.y;
-	float z = axis.z;
-
-	float c = std::cos(theta);
-	float s = std::sin(theta);
-	float oneMinusC = 1.0f - c;
-
-	// 4) Fill the 3x3 rotation in column-major order
-	//    Using the formula:
-	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
-	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
-	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
-
-
-	// Column 0
-	modelMatrix[0] = x * x * oneMinusC + c;    // r_xx
-	modelMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
-	modelMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
-
-	// Column 1
-	modelMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
-	modelMatrix[5] = y * y * oneMinusC + c;    // r_yy
-	modelMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
-
-	// Column 2
-	modelMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
-	modelMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
-	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
-
-
-
-	return modelMatrix;
-}
-
-
-
-std::array<float, 16> Camera::create3DModelMatrix(const float scale) {
-
-	std::array<float, 16> modelMatrix = createIdentityMatrix();
-
-
-	modelMatrix[0] *= scale;
-	modelMatrix[5] *= scale;
-	modelMatrix[10] *= scale;
-
-
-	return modelMatrix;
-}
-
-
-std::array<float, 16> Camera::create3DModelMatrix(const p3 translation,const float angleDeg, p3 axis,const float scale) { //scale defaulted to 1
-
-	std::array<float, 16> modelMatrix = createIdentityMatrix();
-
-	float theta = radians(angleDeg);
-
-	axis = normalize3(axis);
-	float x = axis.x;
-	float y = axis.y;
-	float z = axis.z;
-
-	float c = std::cos(theta);
-	float s = std::sin(theta);
-	float oneMinusC = 1.0f - c;
-
-	// 4) Fill the 3x3 rotation in column-major order
-	//    Using the formula:
-	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
-	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
-	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
+//std::array<float, 16> Camera::create3DModelMatrix(const p3 translation) {
+//
+//	std::array<float, 16> modelMatrix = createIdentityMatrix();
+//
+//	//Translation components in the fourth column
+//	modelMatrix[12] = translation.x;
+//	modelMatrix[13] = translation.y;
+//	modelMatrix[14] = translation.z;
+//
+//	return modelMatrix;
+//}
+//
+//std::array<float, 16> Camera::create3DModelMatrix(const float angleDeg, p3 axis) {
+//
+//	std::array<float, 16> modelMatrix = createIdentityMatrix();
+//
+//	float theta = radians(angleDeg);
+//
+//	axis = normalize3(axis);
+//	float x = axis.x;
+//	float y = axis.y;
+//	float z = axis.z;
+//
+//	float c = std::cos(theta);
+//	float s = std::sin(theta);
+//	float oneMinusC = 1.0f - c;
+//
+//	// 4) Fill the 3x3 rotation in column-major order
+//	//    Using the formula:
+//	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
+//	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
+//	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
+//
+//
+//	// Column 0
+//	modelMatrix[0] = x * x * oneMinusC + c;    // r_xx
+//	modelMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
+//	modelMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
+//
+//	// Column 1
+//	modelMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
+//	modelMatrix[5] = y * y * oneMinusC + c;    // r_yy
+//	modelMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
+//
+//	// Column 2
+//	modelMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
+//	modelMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
+//	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
+//
+//
+//
+//	return modelMatrix;
+//}
+//
+//
+//
+//std::array<float, 16> Camera::create3DModelMatrix(const float scale) {
+//
+//	std::array<float, 16> modelMatrix = createIdentityMatrix();
+//
+//
+//	modelMatrix[0] *= scale;
+//	modelMatrix[5] *= scale;
+//	modelMatrix[10] *= scale;
+//
+//
+//	return modelMatrix;
+//}
 
 
-	// Column 0
-	modelMatrix[0] = x * x * oneMinusC + c;    // r_xx
-	modelMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
-	modelMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
+void Camera::create3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_, const float scale_) {
 
-	// Column 1
-	modelMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
-	modelMatrix[5] = y * y * oneMinusC + c;    // r_yy
-	modelMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
-
-	// Column 2
-	modelMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
-	modelMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
-	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
-
-	// Column 3 (translation)
-	modelMatrix[12] = translation.x;
-	modelMatrix[13] = translation.y;
-	modelMatrix[14] = translation.z;
-
-	if (scale != 1)
+	if (translation != translation_)
 	{
-		//apply uniform scale to the 3×3 rotation block
-		modelMatrix[0] *= scale;
-		modelMatrix[1] *= scale;
-		modelMatrix[2] *= scale;
-		modelMatrix[4] *= scale;
-		modelMatrix[5] *= scale;
-		modelMatrix[6] *= scale;
-		modelMatrix[8] *= scale;
-		modelMatrix[9] *= scale;
-		modelMatrix[10] *= scale;
+		print(translation);
+		print(translation_);
+		translate3DModelMatrix(model3DMatrix, translation_);
+		translation = translation_;
 	}
 
-	return modelMatrix;
+	if (scale != scale_)
+	{
+		print(scale);
+		print(scale_);
+		//scaling goes always at the end
+		scale3DModelMatrix(model3DMatrix, scale_);
+		//scale = scale_;
+	}
+
+
 }
 
-
-std::array<float, 16> Camera::create2DModelMatrix(const p2& translation, float angleDeg, float scale) {
-	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
+void Camera::rotate3DModelMatrix(std::array<float, 16>& model3DMatrix, const float angleDeg, p3 axis) {
 	float theta = radians(angleDeg);
+
+	axis = normalize3(axis);
+	float x = axis.x;
+	float y = axis.y;
+	float z = axis.z;
+
 	float c = std::cos(theta);
 	float s = std::sin(theta);
+	float oneMinusC = 1.0f - c;
+
+	// 4) Fill the 3x3 rotation in column-major order
+	//    Using the formula:
+	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
+	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
+	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
 
 
-	// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
-	modelMatrix[0] = scale * c;
-	modelMatrix[1] = scale * s;
+	// Column 0
+	model3DMatrix[0] = x * x * oneMinusC + c;    // r_xx
+	model3DMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
+	model3DMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
 
-	// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
-	modelMatrix[4] = -scale * s;
-	modelMatrix[5] = scale * c;
+	// Column 1
+	model3DMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
+	model3DMatrix[5] = y * y * oneMinusC + c;    // r_yy
+	model3DMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
 
-	// Column 2: [0, 0, 1, 0] 
+	// Column 2
+	model3DMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
+	model3DMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
+	model3DMatrix[10] = z * z * oneMinusC + c;    // r_zz
 
-	// Column 3: [translation.x, translation.y, 0, 1]
-	modelMatrix[12] = translation.x;
-	modelMatrix[13] = translation.y;
-
-	return modelMatrix;
 }
+
+void Camera::translate3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_) {
+
+	//Translation components in the fourth column
+	model3DMatrix[12] = translation_.x;
+	model3DMatrix[13] = translation_.y;
+	model3DMatrix[14] = translation_.z;
+}
+
+//Esto está mal, es acumulativo, no puede ir sin un rotate
+void Camera::scale3DModelMatrix(std::array<float, 16>& model3DMatrix, const float scale_) {
+
+	model3DMatrix[0] *= scale_;
+	model3DMatrix[5] *= scale_;
+	model3DMatrix[10] *= scale_;
+
+	//mirar si esto se usa en rotadas
+	//modelMatrix[0] *= scale_;
+	//		modelMatrix[1] *= scale_;
+	//		modelMatrix[2] *= scale_;
+	//		modelMatrix[4] *= scale_;
+	//		modelMatrix[5] *= scale_;
+	//		modelMatrix[6] *= scale_;
+	//		modelMatrix[8] *= scale_;
+	//		modelMatrix[9] *= scale_;
+	//		modelMatrix[10] *= scale_;
+}
+
+
+//std::array<float, 16> Camera::create3DModelMatrix(const p3 translation,const float angleDeg, p3 axis,const float scale) { //scale defaulted to 1
+//
+//	std::array<float, 16> modelMatrix = createIdentityMatrix();
+//
+//	float theta = radians(angleDeg);
+//
+//	axis = normalize3(axis);
+//	float x = axis.x;
+//	float y = axis.y;
+//	float z = axis.z;
+//
+//	float c = std::cos(theta);
+//	float s = std::sin(theta);
+//	float oneMinusC = 1.0f - c;
+//
+//	// 4) Fill the 3x3 rotation in column-major order
+//	//    Using the formula:
+//	//      r_xx = x*x*(1-c)+c,   r_xy = x*y*(1-c)-z*s,   r_xz = x*z*(1-c)+y*s
+//	//      r_yx = y*x*(1-c)+z*s, r_yy = y*y*(1-c)+c,     r_yz = y*z*(1-c)-x*s
+//	//      r_zx = z*x*(1-c)-y*s, r_zy = z*y*(1-c)+x*s,   r_zz = z*z*(1-c)+c
+//
+//
+//	// Column 0
+//	modelMatrix[0] = x * x * oneMinusC + c;    // r_xx
+//	modelMatrix[1] = y * x * oneMinusC + z * s;  // r_yx
+//	modelMatrix[2] = z * x * oneMinusC - y * s;  // r_zx
+//
+//	// Column 1
+//	modelMatrix[4] = x * y * oneMinusC - z * s;  // r_xy
+//	modelMatrix[5] = y * y * oneMinusC + c;    // r_yy
+//	modelMatrix[6] = z * y * oneMinusC + x * s;  // r_zy
+//
+//	// Column 2
+//	modelMatrix[8] = x * z * oneMinusC + y * s;  // r_xz
+//	modelMatrix[9] = y * z * oneMinusC - x * s;  // r_yz
+//	modelMatrix[10] = z * z * oneMinusC + c;    // r_zz
+//
+//	// Column 3 (translation)
+//	modelMatrix[12] = translation.x;
+//	modelMatrix[13] = translation.y;
+//	modelMatrix[14] = translation.z;
+//
+//	if (scale != 1)
+//	{
+//		//apply uniform scale to the 3×3 rotation block
+//		modelMatrix[0] *= scale;
+//		modelMatrix[1] *= scale;
+//		modelMatrix[2] *= scale;
+//		modelMatrix[4] *= scale;
+//		modelMatrix[5] *= scale;
+//		modelMatrix[6] *= scale;
+//		modelMatrix[8] *= scale;
+//		modelMatrix[9] *= scale;
+//		modelMatrix[10] *= scale;
+//	}
+//
+//	return modelMatrix;
+//}
+//
+//
+//std::array<float, 16> Camera::create2DModelMatrix(const p2& translation, float angleDeg, float scale) {
+//	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
+//	float theta = radians(angleDeg);
+//	float c = std::cos(theta);
+//	float s = std::sin(theta);
+//
+//
+//	// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
+//	modelMatrix[0] = scale * c;
+//	modelMatrix[1] = scale * s;
+//
+//	// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
+//	modelMatrix[4] = -scale * s;
+//	modelMatrix[5] = scale * c;
+//
+//	// Column 2: [0, 0, 1, 0] 
+//
+//	// Column 3: [translation.x, translation.y, 0, 1]
+//	modelMatrix[12] = translation.x;
+//	modelMatrix[13] = translation.y;
+//
+//	return modelMatrix;
+//}
 

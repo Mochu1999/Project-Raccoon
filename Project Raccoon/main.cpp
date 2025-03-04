@@ -66,16 +66,6 @@ int main(void)
 {
 	GLFWwindow* window = initialize();
 
-	/*glDebugMessageCallback(MessageCallback, nullptr);
-	glEnable(GL_DEBUG_OUTPUT);*/
-
-	//BinariesManager binariesManager;
-
-
-	
-
-
-
 
 
 	TimeStruct timeStruct;
@@ -85,20 +75,15 @@ int main(void)
 	Shader shader2D_Instanced("resources/shaders/shader2D_Instanced.shader");
 	Shader shaderText("resources/shaders/shaderText.shader");
 
-
-	Camera camera(window);
+	//main reason to add all the shaders there is to initialize the associated matrices in an encapsulated way
+	Camera camera(window,shader3D, shader2D, shader2D_Instanced, shaderText);
 
 	Settings settings(camera);
 
 
 
 
-	Sphere light(3);
-	p3 lightPos = { 30,25,40 };
-	light.addSet(lightPos);
 
-
-	Axis axis(shader3D);
 
 
 
@@ -109,18 +94,10 @@ int main(void)
 
 
 
-	Polygons2D polygon2D; //Faltan reserves
-	polygon2D.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
-	polygon2D.addSet({ {600,600},{800,600},{800,800},{600,800},{600,600} });
+	
 
 
-	Lines2D lines2d;
-	//lines2d.addSet({ {36,64},{960,64},{960,420},{36,420},{36,64 } });
-	lines2d.addSet({ {200,200 },{400,200},{400,400},{200,400},{200,200} });
-
-
-	Circles circle(20, 4);
-	circle.addSet({ {210,210},{300,500} });
+	
 
 	
 
@@ -140,8 +117,12 @@ int main(void)
 		globe.addSet(createLongitude(radians(i)));
 
 
-
+	Axis axis(shader3D, camera); //I'm also adding light here and plan to add all general things here
 	Ship ship(shader3D,camera);
+	Ship shipOld(shader3D,camera);
+	shipOld.shipTranslation = { 10,0,0 }; 
+	shipOld.shipScale = 10;
+
 	Graphics grafics;
 
 	Map map(shader2D, camera);
@@ -150,28 +131,6 @@ int main(void)
 
 
 
-
-	//Locations initializers
-	{
-		//3D
-		shader3D.bind();
-		shader3D.setUniform("u_lightPos", lightPos);
-		shader3D.setUniform("u_Perspective", camera.perspectiveMatrix);
-		shader3D.setUniform("u_Model", camera.model3DMatrix);
-
-		//2D
-		shader2D.bind();
-		shader2D.setUniform("u_OrthoProjection", camera.orthoMatrix);
-
-
-		//2D_Instanced
-		shader2D_Instanced.bind();
-		shader2D_Instanced.setUniform("u_OrthoProjection", camera.orthoMatrix);
-
-		//Text
-		shaderText.bind();
-		shaderText.setUniform("u_OrthoProjection", camera.orthoMatrix);
-	}
 
 
 
@@ -191,76 +150,47 @@ int main(void)
 		getPos(window, mPos);
 		if (isRunning)
 		{
-
-			timeStruct.update();
-
-			/////////////
-			//3D
-			shader3D.bind();
-			opaque();
+			timeStruct.update();	
 
 			glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f); //glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+
 			axis.draw();
-			shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
-			light.draw();
-
-			camera.model3DMatrix = camera.create3DModelMatrix({ 0,0,0 }, 0, { 0,0,0 }, 10);
-			shader3D.setUniform("u_Model", camera.model3DMatrix);
-
-			//globe.draw();
-			camera.model3DMatrix = camera.identityMatrix;
-			shader3D.setUniform("u_Model", camera.model3DMatrix);
-			//gestionar location desde camera, más opciones de modelMatrix, una solo para escalar, solo rotar o solo transladar
-			//  y combinaciones
-
-
-
 			ship.draw();
+			//shipOld.draw();
 
 
 
 
-			
+			///////////////
+			/////2d objects
+			//transparent();
+			//shader2D.bind();
+
+			//glLineWidth(5);
+			////arc.draw();
+			//glLineWidth(1);
+
+			////map.draw();
 
 
-
-
-			/////////////
-			///2d objects
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glDepthMask(GL_FALSE);
-			shader2D.bind();
-
-			glLineWidth(5);
-			//arc.draw();
-			glLineWidth(1);
-
-			//map.draw();
-
-
-			//2d instanced
-			shader2D_Instanced.bind();
-			glLineWidth(1);
-			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-			//lines2D_Instanced.draw();
-			//grafics.draw();
-
-
+			////2d instanced
+			//shader2D_Instanced.bind();
+			//glLineWidth(1);
+			//shader2D.setUniform("u_Color", 1, 1, 1, 1);
+			////lines2D_Instanced.draw();
+			////grafics.draw();
 
 
 			/////////////
 			//text
-			glDisable(GL_DEPTH_TEST);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			transparent();
 			shaderText.bind();
 			text.sDraw();
 			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
-
+			opaque();
 
 
 

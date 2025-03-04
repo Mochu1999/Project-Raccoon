@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Common.hpp"
-
+#include "Shader.hpp"
 /*
 0  4  8  12
 1  5  9  13
@@ -9,27 +9,22 @@
 3  7  11 15
 */
 
+/// IDENTITY MATRIX NO DEBERÍA SER UNA VARIABLE AQUÍ SI NO UNA VARIABLE GLOBAL PARA EVITAR QUE CLASES COMO AXIS COJAN CAMERA AT ALL,
+// PERO NO SÉ DE QUE TIPO DEBERÍA DE SER ESA VARIABLE
+
 struct Camera {
 
-	float rotationSpeed = 0.05f;
-	float translationSpeed = 0.3f;
+	float translationSpeed = 0.03f, rotationSpeed = 0.05f;
 
 	GLFWwindow* window;
+	Shader& shader3D, shader2D, shader2D_Instanced, shaderText;
 
-	
 	float fov = 45.0f * PI / 180;
 	float aspectRatio = windowWidth / windowHeight;
 	float nearZ = 0.1f;
 	float farZ = 3000.0f;
 
-	std::array<float, 16> perspectiveMatrix;
-	std::array<float, 16> viewMatrix;
-	std::array<float, 16> model2DMatrix;
-	std::array<float, 16> model3DMatrix;
-	std::array<float, 16> identityMatrix;
-	std::array<float, 16> vpMatrix;
-
-	std::array<float, 16> orthoMatrix;
+	std::array<float, 16> perspectiveMatrix, viewMatrix, model2DMatrix, vpMatrix, orthoMatrix, identityMatrix;
 
 	p3 cameraPos;
 
@@ -38,8 +33,12 @@ struct Camera {
 	p3 right; //0 because are gettin recalculated anyways
 	p3 up;
 
+	p3 translation;
+	float scale = 1;
 
-	Camera(GLFWwindow* window_) :window(window_) {
+
+	Camera(GLFWwindow* window_, Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_)
+		:window(window_), shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_) {
 
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();
@@ -50,9 +49,29 @@ struct Camera {
 
 		//modelMatrix = create3DModelMatrix(objPos, angle, rotAxis);
 		identityMatrix = createIdentityMatrix();
-		model3DMatrix = identityMatrix;
 
 		updateCamera();
+
+
+		//Locations initializers
+		{
+			//3D
+			shader3D.bind();
+			shader3D.setUniform("u_Perspective", perspectiveMatrix);
+
+			//2D
+			shader2D.bind();
+			shader2D.setUniform("u_OrthoProjection", orthoMatrix);
+
+
+			//2D_Instanced
+			shader2D_Instanced.bind();
+			shader2D_Instanced.setUniform("u_OrthoProjection", orthoMatrix);
+
+			//Text
+			shaderText.bind();
+			shaderText.setUniform("u_OrthoProjection", orthoMatrix);
+		}
 	}
 
 
@@ -66,18 +85,20 @@ struct Camera {
 
 	std::array<float, 16> createViewMatrix(const p3& right, const p3& up, p3 forward, const p3& cameraPos);
 
-	std::array<float, 16> createIdentityMatrix();
+	
 
-	//Some do not have implementation yet, create them if needed
-	std::array<float, 16> create3DModelMatrix(const p3 translation);
-	std::array<float, 16> create3DModelMatrix(const p3 translation, float angleDeg, p3 axis);
-	std::array<float, 16> create3DModelMatrix(const p3 translation, const float scale);
-	std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis);
+
+	/*std::array<float, 16> create3DModelMatrix(const p3 translation);
+	std::array<float, 16> create3DModelMatrix(const p3 translation, float angleDeg, p3 axis);*/
+	void create3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_, const float scale_);
+	/*std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis);
 	std::array<float, 16> create3DModelMatrix(const float angleDeg, p3 axis, const float scale);
 	std::array<float, 16> create3DModelMatrix(const float scale);
-	std::array<float, 16> create3DModelMatrix(const p3 translation, const float angleDeg, p3 axis,const float scale);
+	std::array<float, 16> create3DModelMatrix(const p3 translation, const float angleDeg, p3 axis,const float scale);*/
 
-
+	void rotate3DModelMatrix(std::array<float, 16>& model3DMatrix, const float angleDeg, p3 axis);
+	void translate3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_);
+	void scale3DModelMatrix(std::array<float, 16>& model3DMatrix, const float scale_);
 
 	std::array<float, 16> create2DModelMatrix(const p2& translation, float angleDeg, float scale);
 
@@ -96,6 +117,6 @@ struct Camera {
 
 
 
-	
+
 };
 

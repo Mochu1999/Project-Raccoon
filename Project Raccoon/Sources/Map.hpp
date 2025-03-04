@@ -103,6 +103,6 @@ struct Map {
 			shader2D.setUniform("u_Color", 1, 1, 1, 1);
 			boxPositions.draw();
 		}
-		shader2D.setUniform("u_Model2D", camera.createIdentityMatrix());
+		shader2D.setUniform("u_Model2D", camera.identityMatrix);
 	}
 };

@@ -450,3 +450,5 @@ float radians(float input);
 
 
 float degrees(float input);
+
+std::array<float, 16> createIdentityMatrix();

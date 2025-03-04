@@ -164,3 +164,14 @@ float radians(float input) {
 float degrees(float input) {
 	return input * 180 / invPI;
 }
+
+std::array<float, 16> createIdentityMatrix() {
+
+	return std::array<float, 16>{
+		1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1
+	};
+
+}

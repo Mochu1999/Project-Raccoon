@@ -241,9 +241,10 @@ void readWKT(/*std::vector<p2>& positions,*/ vector<vector<p2>> & final, const s
 // Function to write a 3D polyhedra without dividing its surfaces in polygons (positions, normals and indices)
 void writeSimplePolyhedra(Polyhedra& stl, string modelPath) {
 
-	const std::vector<p3>& model = stl.positions; 
+	 std::vector<p3>& model = stl.positions; 
 	const std::vector<p3>& normals = stl.normals;
 	const std::vector<unsigned int>& indices = stl.indices;
+
 
 	std::string basePath = "Resources/Simple polyhedra/";
 	//std::string modelPath;
