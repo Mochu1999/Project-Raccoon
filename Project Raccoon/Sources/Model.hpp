@@ -125,7 +125,7 @@ void readSTL(Polyhedra& stl, const std::string& filepath) {
 			iss >> vertex.x >> vertex.y >> vertex.z;
 			vector<p3> interm;
 			interm.push_back(vertex);
-			positions.insert(positions.end(), { interm[0].x * 10,interm[0].y * 10,interm[0].z * 10 });
+			positions.insert(positions.end(), { interm[0].x,interm[0].y,interm[0].z });
 			//print(vertex);
 		}
 	}
@@ -241,7 +241,7 @@ void readWKT(/*std::vector<p2>& positions,*/ vector<vector<p2>> & final, const s
 // Function to write a 3D polyhedra without dividing its surfaces in polygons (positions, normals and indices)
 void writeSimplePolyhedra(Polyhedra& stl, string modelPath) {
 
-	 std::vector<p3>& model = stl.positions; 
+	std::vector<p3>& model = stl.positions;
 	const std::vector<p3>& normals = stl.normals;
 	const std::vector<unsigned int>& indices = stl.indices;
 

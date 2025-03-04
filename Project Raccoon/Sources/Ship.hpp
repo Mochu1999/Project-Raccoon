@@ -12,13 +12,13 @@ struct Ship {
 	std::array<float, 16> shipModel3DMatrix = camera.identityMatrix;
 
 
-
-	Polyhedra casco1, casco2, tapa1, tapa2, caja, timon, helice, motor, mecha, arbots
+	Polyhedra stl;
+	Polyhedra casco1, casco2, tapa1, tapa2, tapa3, caja, timon, helice, motor, mecha, arbots
 		, foilPopa, foilEstribor, foildBabor, aux, solar1, solar2;
 
 	p3 shipTranslation = { 0,0,0 };
 	//rotation for the full ship?
-	float rudderAngle = 0; int rudderIncrease = 1;
+	float rudderAngle = 0; float rudderIncrease = 0.3;
 	float shipScale = 1;//borrar
 
 	Ship(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_) {
@@ -36,6 +36,7 @@ struct Ship {
 		readSimplePolyhedra(helice, "helice.bin");
 		readSimplePolyhedra(motor, "motor.bin");
 		readSimplePolyhedra(mecha, "mecha.bin");
+		readSimplePolyhedra(tapa3, "tapa3.bin");
 
 		readSimplePolyhedra(foilPopa, "foilPopa.bin");
 		readSimplePolyhedra(foilEstribor, "foilEstribor.bin");
@@ -45,21 +46,18 @@ struct Ship {
 		readSimplePolyhedra(solar2, "solar2.bin");
 
 
-
 	}
 
 	void draw() {
 
 
-		if (rudderAngle >= 70)
-			rudderIncrease = -1;
-		if (rudderAngle <= -70)
-			rudderIncrease = 1;
+		if (rudderAngle >= 20 || rudderAngle <= -20)
+			rudderIncrease = -rudderIncrease;
 		rudderAngle += rudderIncrease;
 
 		//u_model is being always changed to shipModel3DMatrix, but shipModel3DMatrix is only being created if input is changed
 		//camera.create3DModelMatrix(shipModel3DMatrix, shipTranslation, shipScale);
-		
+
 
 		shader3D.setUniform("u_Model", camera.identityMatrix);
 
@@ -88,7 +86,7 @@ struct Ship {
 		{
 			camera.rotate3DModelMatrix(shipModel3DMatrix, rudderAngle, { 0,1,0 });
 			shader3D.setUniform("u_Model", shipModel3DMatrix);
-			
+
 
 			shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
 			timon.draw();
@@ -102,6 +100,9 @@ struct Ship {
 			shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
 			foilPopa.draw();
 
+			shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
+			tapa3.draw();
+
 			shader3D.setUniform("u_Model", camera.identityMatrix);
 
 		}
@@ -113,10 +114,10 @@ struct Ship {
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
 		foildBabor.draw();
 
-		
 
 
-		transparent();
+
+		//transparent();
 		shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.5f);
 		solar1.draw();
 
