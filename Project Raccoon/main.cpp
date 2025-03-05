@@ -97,7 +97,8 @@ int main(void)
 	
 
 
-	
+	Lines2D a;
+	a.addSet({ {0,0},{1000,1000} });
 
 	
 
@@ -119,9 +120,6 @@ int main(void)
 
 	Axis axis(shader3D, camera); //I'm also adding light here and plan to add all general things here
 	Ship ship(shader3D,camera);
-	Ship shipOld(shader3D,camera);
-	shipOld.shipTranslation = { 10,0,0 }; 
-	shipOld.shipScale = 10;
 
 	Graphics grafics;
 
@@ -167,21 +165,24 @@ int main(void)
 			///////////////
 			/////2d objects
 			//transparent();
-			//shader2D.bind();
+			shader2D.bind();
 
-			//glLineWidth(5);
-			////arc.draw();
-			//glLineWidth(1);
+			shader2D.setUniform("u_Color", 1, 1, 1, 1);
+
+			glLineWidth(5);
+			arc.draw();
+			a.draw();
+			glLineWidth(1);
 
 			////map.draw();
 
 
-			////2d instanced
-			//shader2D_Instanced.bind();
-			//glLineWidth(1);
-			//shader2D.setUniform("u_Color", 1, 1, 1, 1);
-			////lines2D_Instanced.draw();
-			////grafics.draw();
+			//2d instanced
+			shader2D_Instanced.bind();
+			glLineWidth(1);
+			shader2D.setUniform("u_Color", 1, 1, 1, 1);
+			//lines2D_Instanced.draw();
+			//grafics.draw();
 
 
 			/////////////

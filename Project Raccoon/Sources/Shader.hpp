@@ -57,6 +57,7 @@ struct Shader {
 	std::unordered_map<std::string, int> locationsMap;
 
 	//If there's no location it will be created, otherwise it will take it from map
+	//DOES A MAP ELIMINATE THE IF??
 	int getUniformLocation(const std::string& name) {
 
 		//if it is in the map

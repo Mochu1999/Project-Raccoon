@@ -212,6 +212,9 @@ void Camera::create3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 
 }
 
 void Camera::rotate3DModelMatrix(std::array<float, 16>& model3DMatrix, const float angleDeg, p3 axis) {
+
+	model3DMatrix = identityMatrix; //CREO QUE NO SIEMPRE HACE FALTA// O SI? NO SÉ SI ES IRRELEVANTE
+
 	float theta = radians(angleDeg);
 
 	axis = normalize3(axis);
