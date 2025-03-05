@@ -166,7 +166,8 @@ void opaque() {
 	glDisable(GL_BLEND);
 }
 
-void transparent() {
+//CREO QUE BLENDING NO ES QUE SEA TRANSPARENTE, ES QUE PUEDES CONCATENAR COSAS, QUE SEA TR DEPENDE DE ALPHA
+void transparent() { 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//deactivates the depth buffer, if activated the objects behind it won't be rendered

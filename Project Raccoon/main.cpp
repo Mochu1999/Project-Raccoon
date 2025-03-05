@@ -52,7 +52,7 @@
 #include "Map.hpp"
 #include "Axis.hpp"
 #include "Ship.hpp"
-
+#include "Overlay2D.hpp"
 
 
 
@@ -97,34 +97,13 @@ int main(void)
 	
 
 
-	Lines2D a;
-	a.addSet({ {0,0},{1000,1000} });
-
-	
-
-	Lines2D arc;
-	//vector<p2> a = createArc({ 300,300 }, 100, radians(270), radians(360));
-	arc.addSet(createRoundedSquare(500, 0.1));
-	//print(arc.positions);
-
-	Lines2D_Instanced lines2D_Instanced;
-	/*lines2D_Instanced.addSet({ {0,0},{100,0} });
-	lines2D_Instanced.addInstances({{ {190, 100},  0, {10, 1} },{ {500, 100},  0, {1, 1} }});*/
-
-	Lines3D globe;
-	for (float i = -90; i <= 90; i += 10)
-		globe.addSet(createLatitude(radians(i)));
-	for (float i = -90; i <= 90; i += 10)
-		globe.addSet(createLongitude(radians(i)));
-
-
 	Axis axis(shader3D, camera); //I'm also adding light here and plan to add all general things here
 	Ship ship(shader3D,camera);
 
-	Graphics grafics;
+	Overlay2D overlay(shader2D,camera);
+	Graphic graphic(shader2D,shader2D_Instanced,camera,ship);
 
 	Map map(shader2D, camera);
-
 
 
 
@@ -157,32 +136,15 @@ int main(void)
 
 			axis.draw();
 			ship.draw();
-			//shipOld.draw();
+
+
+			overlay.draw();
+			graphic.draw();
+			//map.draw();
 
 
 
 
-			///////////////
-			/////2d objects
-			//transparent();
-			shader2D.bind();
-
-			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-
-			glLineWidth(5);
-			arc.draw();
-			a.draw();
-			glLineWidth(1);
-
-			////map.draw();
-
-
-			//2d instanced
-			shader2D_Instanced.bind();
-			glLineWidth(1);
-			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-			//lines2D_Instanced.draw();
-			//grafics.draw();
 
 
 			/////////////
@@ -192,11 +154,6 @@ int main(void)
 			text.sDraw();
 			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
 			opaque();
-
-
-
-
-
 
 
 

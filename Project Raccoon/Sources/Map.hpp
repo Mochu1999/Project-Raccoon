@@ -14,15 +14,16 @@ struct Map {
 	Polygons2D background;
 	Polygons2D boxPositions; //ESTABLECER QUE ES DINÁMICO
 
+	std::array<float, 16> mapModel2DMatrix;
+
 	float totalX, totalY, naturalRatio, scalingFactor;
 	p2 mapCorner, translationFactor;
 	vector<p2> frame;
 	vector<float> frameLimits; //[0] x left, [1] x right, [2] y bottom, [3] y up
-	bool isInsideFrame =0;
+	bool isInsideFrame = 0;
 	bool show = 0;
 
 	Map(Shader& shader2D_, Camera& camera_) :shader2D(shader2D_), camera(camera_) {
-
 
 
 		vector<vector<p2>> mapVectorOfVectors;
@@ -55,7 +56,7 @@ struct Map {
 		translationFactor = { -point0.x * scalingFactor, -point0.y * scalingFactor }; //centering
 		translationFactor += mapCorner;
 
-		for (auto& p : frame) 
+		for (auto& p : frame)
 		{
 
 			p *= scalingFactor;
@@ -83,9 +84,9 @@ struct Map {
 			isInsideFrame = 0;
 
 		}
-
-		camera.model2DMatrix = camera.create2DModelMatrix(translationFactor, 0, scalingFactor);
-		shader2D.setUniform("u_Model2D", camera.model2DMatrix);
+		transparent();
+		mapModel2DMatrix = camera.create2DModelMatrix(translationFactor, 0, scalingFactor);
+		shader2D.setUniform("u_Model2D", mapModel2DMatrix);
 
 		shader2D.setUniform("u_Color", 0.035f, 0.065f, 0.085f, 1.0f);
 		background.draw();
@@ -97,8 +98,8 @@ struct Map {
 
 		if (isInsideFrame && show)
 		{
-			camera.model2DMatrix = camera.create2DModelMatrix(mPos, 0, 1);
-			shader2D.setUniform("u_Model2D", camera.model2DMatrix);
+			mapModel2DMatrix = camera.create2DModelMatrix(mPos, 0, 1);
+			shader2D.setUniform("u_Model2D", mapModel2DMatrix);
 
 			shader2D.setUniform("u_Color", 1, 1, 1, 1);
 			boxPositions.draw();

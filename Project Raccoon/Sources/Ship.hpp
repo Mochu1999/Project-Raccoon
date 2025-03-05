@@ -72,7 +72,7 @@ struct Ship {
 
 		std::array<float, 16> rudderMatrix, propellerMatrix, foilAftMatrix, foilStarboardMatrix, foilPortMatrix, rp, rf;
 
-		if (rudderAngle >= 45 || rudderAngle <= -45)
+		if (rudderAngle >= 20 || rudderAngle <= -20)
 			rudderIncrease = -rudderIncrease;
 
 		if (foilAftAngle >= 20 || foilAftAngle <= -20)

@@ -992,6 +992,9 @@
     <ClInclude Include="Sources\Ship.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Overlay2D.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Sources\glm\detail\func_common.inl">

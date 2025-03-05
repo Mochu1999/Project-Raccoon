@@ -7,6 +7,8 @@ layout(location = 3) in vec2 scale;
 
 uniform mat4 u_OrthoProjection;
 
+uniform mat4 u_Model; //HABER AÑADIDO ESTA LINEA ANULA LA ESPECIALIDAD EN INSTANCING DE ESTE SHADER, cambiale el nombre a lo que sea
+                        //que haga cuando leas esto, en mi caso es grids y me sobra rotation
 
 void main() {
     // Scale, Rotate and translate in that order
@@ -19,7 +21,7 @@ void main() {
 
     vec2 pos = rotated + translation;
 
-    gl_Position = u_OrthoProjection * vec4(pos, 0.0, 1.0);
+    gl_Position = u_OrthoProjection * u_Model * vec4(pos, 0.0, 1.0);
 }
 
 

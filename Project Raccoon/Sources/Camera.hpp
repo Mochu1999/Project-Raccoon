@@ -24,7 +24,7 @@ struct Camera {
 	float nearZ = 0.1f;
 	float farZ = 3000.0f;
 
-	std::array<float, 16> perspectiveMatrix, viewMatrix, model2DMatrix, vpMatrix, orthoMatrix, identityMatrix;
+	std::array<float, 16> perspectiveMatrix, viewMatrix, vpMatrix, orthoMatrix, identityMatrix;
 
 	p3 cameraPos;
 
@@ -50,6 +50,7 @@ struct Camera {
 		//modelMatrix = create3DModelMatrix(objPos, angle, rotAxis);
 		identityMatrix = createIdentityMatrix();
 
+
 		updateCamera();
 
 
@@ -58,10 +59,12 @@ struct Camera {
 			//3D
 			shader3D.bind();
 			shader3D.setUniform("u_Perspective", perspectiveMatrix);
+			shader3D.setUniform("u_Model3D", identityMatrix);
 
 			//2D
 			shader2D.bind();
 			shader2D.setUniform("u_OrthoProjection", orthoMatrix);
+			shader2D.setUniform("u_Model2D", identityMatrix);
 
 
 			//2D_Instanced
@@ -100,8 +103,8 @@ struct Camera {
 	void translate3DModelMatrix(std::array<float, 16>& model3DMatrix, const p3 translation_);
 	void scale3DModelMatrix(std::array<float, 16>& model3DMatrix, const float scale_);
 
-	std::array<float, 16> create2DModelMatrix(const p2& translation, float angleDeg, float scale);
-
+	std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, float scale);
+	std::array<float, 16> create2DModelMatrix(const p2 translation, float angleDeg, const p2 scale);
 
 	//the rotations create a new forward vector and the other 2 are deduced from it
 	void calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis);

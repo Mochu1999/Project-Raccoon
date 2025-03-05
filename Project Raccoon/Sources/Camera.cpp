@@ -338,27 +338,50 @@ void Camera::scale3DModelMatrix(std::array<float, 16>& model3DMatrix, const floa
 //}
 //
 //
-//std::array<float, 16> Camera::create2DModelMatrix(const p2& translation, float angleDeg, float scale) {
-//	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
-//	float theta = radians(angleDeg);
-//	float c = std::cos(theta);
-//	float s = std::sin(theta);
-//
-//
-//	// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
-//	modelMatrix[0] = scale * c;
-//	modelMatrix[1] = scale * s;
-//
-//	// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
-//	modelMatrix[4] = -scale * s;
-//	modelMatrix[5] = scale * c;
-//
-//	// Column 2: [0, 0, 1, 0] 
-//
-//	// Column 3: [translation.x, translation.y, 0, 1]
-//	modelMatrix[12] = translation.x;
-//	modelMatrix[13] = translation.y;
-//
-//	return modelMatrix;
-//}
+std::array<float, 16> Camera::create2DModelMatrix(const p2 translation, float angleDeg, float scale) {
+	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
+	float theta = radians(angleDeg);
+	float c = std::cos(theta);
+	float s = std::sin(theta);
 
+
+	// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
+	modelMatrix[0] = scale * c;
+	modelMatrix[1] = scale * s;
+
+	// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
+	modelMatrix[4] = -scale * s;
+	modelMatrix[5] = scale * c;
+
+	// Column 2: [0, 0, 1, 0] 
+
+	// Column 3: [translation.x, translation.y, 0, 1]
+	modelMatrix[12] = translation.x;
+	modelMatrix[13] = translation.y;
+
+	return modelMatrix;
+}
+
+std::array<float, 16> Camera::create2DModelMatrix(const p2 translation, float angleDeg, p2 scale) {
+	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
+	float theta = radians(angleDeg);
+	float c = std::cos(theta);
+	float s = std::sin(theta);
+
+
+	// Column 0: [scale * cosθ, scale * sinθ, 0, 0]
+	modelMatrix[0] = scale.x * c;
+	modelMatrix[1] = scale.x * s;
+
+	// Column 1: [-scale * sinθ, scale * cosθ, 0, 0]
+	modelMatrix[4] = -scale.y * s;
+	modelMatrix[5] = scale.y * c;
+
+	// Column 2: [0, 0, 1, 0] 
+
+	// Column 3: [translation.x, translation.y, 0, 1]
+	modelMatrix[12] = translation.x;
+	modelMatrix[13] = translation.y;
+
+	return modelMatrix;
+}

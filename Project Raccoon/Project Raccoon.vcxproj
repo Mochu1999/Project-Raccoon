@@ -445,6 +445,7 @@
     <ClInclude Include="Sources\Lines3d.hpp" />
     <ClInclude Include="Sources\Map.hpp" />
     <ClInclude Include="Sources\Model.hpp" />
+    <ClInclude Include="Sources\Overlay2D.hpp" />
     <ClInclude Include="Sources\Polygons.hpp" />
     <ClInclude Include="Sources\Polygons2D.hpp" />
     <ClInclude Include="Sources\Polyhedra.hpp" />
