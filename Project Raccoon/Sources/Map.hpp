@@ -84,6 +84,7 @@ struct Map {
 			isInsideFrame = 0;
 
 		}
+		shader2D.bind();
 		transparent();
 		mapModel2DMatrix = camera.create2DModelMatrix(translationFactor, 0, scalingFactor);
 		shader2D.setUniform("u_Model2D", mapModel2DMatrix);
@@ -94,7 +95,7 @@ struct Map {
 
 		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
 
-		mercator.draw();
+		//mercator.draw();
 
 		if (isInsideFrame && show)
 		{

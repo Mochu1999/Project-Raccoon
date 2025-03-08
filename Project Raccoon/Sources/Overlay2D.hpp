@@ -16,7 +16,7 @@ struct Overlay2D {
 	void draw() {
 		shader2D.bind();
 		transparent();
-
+		shader2D.setUniform("u_Model2D", camera.identityMatrix);
 		shader2D.setUniform("u_Color", 0.035f, 0.065f, 0.085f, 1.0f);
 
 		background.draw();
