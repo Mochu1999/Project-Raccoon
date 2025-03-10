@@ -9,8 +9,8 @@ struct Overlay2D {
 
 	Overlay2D(Shader& shader2D_, Camera& camera_) :shader2D(shader2D_), camera(camera_) {
 
-		background.addSet({ {windowWidth / 2,0}, {windowWidth,0},{windowWidth,windowHeight}
-							,{windowWidth/2,windowHeight},{windowWidth / 2,0} });
+		background.addSet({ {windowWidth / 2 - 50,0}, {windowWidth,0},{windowWidth,windowHeight}
+							,{windowWidth/2 - 50,windowHeight},{windowWidth / 2 - 50,0} });
 	}
 
 	void draw() {

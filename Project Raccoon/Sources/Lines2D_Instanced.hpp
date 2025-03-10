@@ -2,7 +2,18 @@
 
 #include "Common.hpp"
 
+struct InstanceAttributes {
+	p2 translation;
+	float cosTheta;
+	float sinTheta;
+	p2 scale;
 
+	InstanceAttributes(p2 translation_, float angle_, p2 scale_)
+		: translation(translation_),
+		cosTheta(cos(angle_)),
+		sinTheta(sin(angle_)),
+		scale(scale_) {}
+};
 
 //In instance drawing you have one single set to draw multiple times with addSet, which here, isn't accumulative
 struct Lines2D_Instanced {
@@ -11,18 +22,7 @@ struct Lines2D_Instanced {
 
 	bool isBufferUpdated = false;
 
-	struct InstanceAttributes {
-		p2 translation;
-		float cosTheta;
-		float sinTheta;
-		p2 scale;
-
-		InstanceAttributes(p2 translation_, float angle_, p2 scale_)
-			: translation(translation_),
-			cosTheta(cos(angle_)),
-			sinTheta(sin(angle_)),
-			scale(scale_) {}
-	};
+	
 
 	vector<p2> positions;
 	vector <unsigned int> indices;

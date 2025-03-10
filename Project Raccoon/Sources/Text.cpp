@@ -207,16 +207,16 @@ void Text::fillVertexBuffer() {
 	indexOffset = 0;
 
 	
-	for (size_t i = 0; i < textData.textToDraw.size(); i++)
+	for (size_t i = 0; i <  textToDraw.size(); i++)
 	{
 
 		//bottom left coordinates of the string to render
-		int x = textData.textPosition[i].x;
-		int y = textData.textPosition[i].y;
+		int x =  textPosition[i].x;
+		int y =  textPosition[i].y;
 
-		for (size_t j = 0; j < textData.textToDraw[i].size(); ++j) {
+		for (size_t j = 0; j <  textToDraw[i].size(); ++j) {
 
-			char c = textData.textToDraw[i][j];
+			char c =  textToDraw[i][j];
 			GlyphMetrics metrics = glyphMetricsMap[c];
 
 			//logic is sound

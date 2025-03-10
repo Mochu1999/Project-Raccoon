@@ -68,7 +68,7 @@ int main(void)
 
 
 
-	TimeStruct timeStruct;
+	TimeStruct tm;
 
 	Shader shader3D("resources/shaders/shader3D.shader");
 	Shader shader2D("resources/shaders/shader2D.shader");
@@ -76,7 +76,7 @@ int main(void)
 	Shader shaderText("resources/shaders/shaderText.shader");
 
 	//main reason to add all the shaders there is to initialize the associated matrices in an encapsulated way
-	Camera camera(window,shader3D, shader2D, shader2D_Instanced, shaderText);
+	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText);
 
 	Settings settings(camera);
 
@@ -87,10 +87,8 @@ int main(void)
 
 
 
-	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
 	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
-	text.addText({ 10,950 }, timeStruct.fps, " fps");
-	text.fillVertexBuffer();
+	text.addText({ {{ 10,950 }, tm.fps, " fps"},{{10,1000},tm.currentTime, " s"} });
 
 
 
@@ -101,7 +99,7 @@ int main(void)
 	Ship ship(shader3D,camera);
 
 	Overlay2D overlay(shader2D,camera);
-	Graphic graphic(shader2D,shader2D_Instanced,camera,ship);
+	Graphic graphic(shader2D,shader2D_Instanced,shaderText,camera,ship,tm);
 
 	Map map(shader2D, camera);
 
@@ -119,7 +117,7 @@ int main(void)
 
 
 
-
+	int counter = 0;
 
 	//system("cls");
 	while (!glfwWindowShouldClose(window))
@@ -127,7 +125,7 @@ int main(void)
 		getPos(window, mPos);
 		if (isRunning)
 		{
-			timeStruct.update();	
+			tm.update();	
 
 			glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f); //glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -151,8 +149,10 @@ int main(void)
 			//text
 			transparent();
 			shaderText.bind();
-			text.sDraw();
-			text.substituteText(0, { 10,950 }, round2d(timeStruct.fps), " fps"); // si no especificas position que no se mueva
+			text.draw();
+			//text.substituteText(0, round2d(tm.fps), " fps");
+			text.substituteText(0, { { 10,950 }, round2d(tm.fps), " fps" });
+			text.substituteText(1, round1d(tm.currentTime), " s");
 			opaque();
 
 

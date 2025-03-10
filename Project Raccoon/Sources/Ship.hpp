@@ -69,6 +69,7 @@ struct Ship {
 	}
 
 	void draw() {
+		opaque();
 
 		std::array<float, 16> rudderMatrix, propellerMatrix, foilAftMatrix, foilStarboardMatrix, foilPortMatrix, rp, rf;
 

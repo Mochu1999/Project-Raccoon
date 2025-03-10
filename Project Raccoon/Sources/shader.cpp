@@ -110,11 +110,11 @@ void Shader::compileErrors(unsigned int shader, const char* type) {
 Shader::~Shader() {
 	glDeleteProgram(ID);
 }
-void Shader::bind(){
+void Shader::bind() {
 	glUseProgram(ID);
 }
 
-void Shader::unbind(){
+void Shader::unbind() {
 	glUseProgram(0);
 }
 
@@ -136,23 +136,32 @@ GLFWwindow* initialize() {
 
 	glfwWindowHint(GLFW_SAMPLES, 4);  // Request 4x MSAA for antialiasing
 	glEnable(GL_MULTISAMPLE);
+
+	
+	//fullscreen
+	//GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", glfwGetPrimaryMonitor(), NULL);
+	
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", NULL, NULL);
+
+	/* this will be useful to save width and height
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "PR0JET R4CC00N", NULL, NULL);
+	*/
 
 
 	glfwMakeContextCurrent(window);
 	//glewExperimental = GL_TRUE;
 	glewInit();
-	glfwSwapInterval(1);
-
-	////depth buffering
-	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LESS);
+	glfwSwapInterval(1); //0 is vsync disable
 
 	glEnable(GL_LINE_SMOOTH);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-	glEnable(GL_BLEND);//blend for alpha opacity, lets blending pixels in the same position
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 
@@ -167,10 +176,10 @@ void opaque() {
 }
 
 //CREO QUE BLENDING NO ES QUE SEA TRANSPARENTE, ES QUE PUEDES CONCATENAR COSAS, QUE SEA TR DEPENDE DE ALPHA
-void transparent() { 
+void transparent() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//deactivates the depth buffer, if activated the objects behind it won't be rendered
 	//, irrelevant if there aren't multiple layers of transparent
-	glDepthMask(GL_FALSE); 
+	glDepthMask(GL_FALSE);
 }

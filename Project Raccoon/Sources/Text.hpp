@@ -19,6 +19,22 @@ No kerning, it can improve spacing between glyphs for specific pairs, like AA vs
 
 */
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	//Falta poner texto estático, dinámico y multiples inputs en text to draw, texto en dpis, reserves
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+struct Line {
+	p2 pos;
+	string text;
+
+	template <typename... Args>
+	Line(p2 pos_, Args&&... body) : pos(pos_)
+	{
+		std::ostringstream oss;
+		(oss << ... << body);
+		text = oss.str();
+	}
+};
 
 
 struct Text {
@@ -52,64 +68,102 @@ struct Text {
 	};
 	std::map<char, GlyphMetrics> glyphMetricsMap; //will store all the metrics
 
-	struct TextData {
 
-		vector<string> textToDraw;
-		vector<p2> textPosition; //positions in the screen where the text will be rendered
-	};
-	TextData textData;
 
-	
-	
-	Text(string glyphPath_, int fontPixelSize_) :glyphPath(glyphPath_), fontPixelSize(fontPixelSize_){
+
+
+	Text(string glyphPath_, int fontPixelSize_) :glyphPath(glyphPath_), fontPixelSize(fontPixelSize_) {
 
 		initializeFreeType(glyphPath, fontPixelSize);
 		initializeBuffer();
 		createAtlasTexture();
-		
+
 
 	}
+
+
+
+
+
+
+	vector<p2> textPosition;
+	vector<string> textToDraw;
+
+
+
 	
-	/*void addText(string textToDraw_, p2 textPosition_) {
+	//Hazte un resumen comentario de en que formato se llama cada función, no?
+	////Currently if you use substituteText in a while loop it will be equivalent to using addDynamicText, that can't be right
 
-		textData.textToDraw.push_back(textToDraw_);
-		textData.textPosition.push_back(textPosition_);
-
-		
-	};*/
-
-	//If performance becomes an issue working only with concatenated strings is an option
-	template <typename... Args> //Variadic arguments
-	void addText(p2 textPosition_, Args&&... args)
+	//meant to be the initial push for static text. It wont delete previous entries. Accepts vector a single Line format
+	void addText(vector<Line> line)
 	{
-		// We'll build the final string from all the variadic arguments.
-		std::ostringstream oss;
-		// Fold expression: essentially does (oss << args) for each argument.
-		(oss << ... << args);
-		textData.textToDraw.push_back(oss.str());
-
-		textData.textPosition.push_back(textPosition_);
-	}
-
-	/*void substituteText(int index, string textToDraw_, p2 textPosition_) {
-		textData.textToDraw[index] = textToDraw_;
-		textData.textPosition[index] = textPosition_;
-
-		fillVertexBuffer();
-	}*/
-	template <typename... Args> //Variadic arguments
-	void substituteText(int index,p2 textPosition_, Args&&... args)
-	{
-		// We'll build the final string from all the variadic arguments.
-		std::ostringstream oss;
-		// Fold expression: essentially does (oss << args) for each argument.
-		(oss << ... << args);
-
-		textData.textToDraw[index] = oss.str();
-		textData.textPosition[index] = textPosition_;
+		for (auto& l : line)
+		{
+			textPosition.push_back(l.pos);
+			textToDraw.push_back(l.text);
+		}
 
 		fillVertexBuffer();
 	}
+	//line must go inside {} in the call, in the vector call and Dybamic the format is: {{},{}};
+	void addText(Line line)
+	{
+
+		textPosition.push_back(line.pos);
+		textToDraw.push_back(line.text);
+
+
+		fillVertexBuffer();
+	}
+
+	//meant to substitute a single entry
+	void substituteText(unsigned int i, Line line)
+	{
+
+		textPosition[i] = line.pos;
+		textToDraw[i] = line.text;
+
+
+		fillVertexBuffer();
+	}
+	//fancy function if you don't want to change the position. Here you call it with (index, oss) instead of (index,{p2,oss})
+	template <typename... Args>
+	void substituteText(unsigned int i, Args&&... body)
+	{
+		std::ostringstream oss;
+		(oss << ... << body);
+
+		textToDraw[i] = oss.str();
+
+		fillVertexBuffer();
+	}
+
+	void addDynamicText(vector<Line> line)
+	{
+		textPosition.clear();
+		textToDraw.clear();
+
+		for (auto& l : line)
+		{
+			textPosition.push_back(l.pos);
+			textToDraw.push_back(l.text);
+		}
+
+		fillVertexBuffer();
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//Creates and sets the texture of the atlas first without data
 	void initializeAtlasTexture(const float atlasWidth, const float atlasHeight);
@@ -120,23 +174,26 @@ struct Text {
 
 	//main function that includes the initialization of the texture and the call of storeGlyph to end with the final Atlas
 	void createAtlasTexture();
-	
 
-	
+
+
 
 	//fills the vertex buffer with the final quad positions and with the coordinates of the glyph in the atlas
 	void fillVertexBuffer();
 
 	int indexOffset = 0; //to separate different textToDraws
-	//2 triangles per each quad in the order {0,1,2 , 0,2,3}
 	void createIndices(size_t i);
-
 
 
 	void initializeBuffer();
 
+
+
+
+
+
 	//static draw //NOT WORKING///////////////////////
-	void sDraw() {
+	void draw() {
 		glBindVertexArray(0);
 		glBindVertexArray(vertexArray);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
