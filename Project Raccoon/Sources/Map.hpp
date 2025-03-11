@@ -3,6 +3,7 @@
 //Pero tío, por que no hay que incluir nada?
 
 #include "Model.hpp"
+#include "Circles.hpp"
 
 //CAMERA ESTÁ SOLO PARA LAS MODEL MATRICES, PLANTEATE SI TE INTERESA TENER una referencia de camera, porque bien podría solo tener
 // una matriz aquí local y hacer la función que la crea global
@@ -13,17 +14,22 @@ struct Map {
 	Lines2D mercator;
 	Polygons2D background;
 	Polygons2D boxPositions; //ESTABLECER QUE ES DINÁMICO
+	
+	Circles circle;
 
 	std::array<float, 16> mapModel2DMatrix;
 
-	float totalX, totalY, naturalRatio, scalingFactor;
-	p2 mapCorner, translationFactor;
+	p2 point0;
+	float totalX, totalY, naturalRatio, scalingFactor, scalingLocal = 1000 * 6;
+	p2 mapCorner, translationTotal, translationFrame, translationLocal;
 	vector<p2> frame;
 	vector<float> frameLimits; //[0] x left, [1] x right, [2] y bottom, [3] y up
 	bool isInsideFrame = 0;
 	bool show = 0;
 
-	Map(Shader& shader2D_, Camera& camera_) :shader2D(shader2D_), camera(camera_) {
+
+
+	Map(Shader& shader2D_, Camera& camera_) :shader2D(shader2D_), camera(camera_), circle(100) {
 
 
 		vector<vector<p2>> mapVectorOfVectors;
@@ -39,7 +45,7 @@ struct Map {
 		background.addSet(frame);
 
 		//bottom left corner
-		p2 point0 = mercator.positions[0];
+		point0 = mercator.positions[0];
 
 
 		//the ratio width/height of the map square is:
@@ -50,17 +56,25 @@ struct Map {
 		//print(totalY); //3.52124e+06
 		//print(naturalRatio); //1.20074
 
-		//first the arbitrary scaling, which is going to be that x is 1000 pixels long
-		scalingFactor = 1 / totalX * 1000;
-		mapCorner = { 200,100 }; //the coordinates of the bottom left coordinate of the map that will be applied after centering
-		translationFactor = { -point0.x * scalingFactor, -point0.y * scalingFactor }; //centering
-		translationFactor += mapCorner;
+		circle.addSet({ {1000,500} });
+
+		update();
+	}
+
+	void update() {
+
+		//x is 1000 pixels long
+
+		scalingFactor = 1 / totalX * scalingLocal; //scalingLocal is how many pixels of width the rendered map has
+		mapCorner = { windowWidth/2-scalingLocal/2,windowHeight/2- scalingLocal / 2 }; //the coordinates of the bottom left coordinate of the map that will be applied after centering
+		translationFrame = { -point0.x * scalingFactor, -point0.y * scalingFactor }; //moves the left corner to {0,0}
+		translationFrame += mapCorner;
 
 		for (auto& p : frame)
 		{
 
 			p *= scalingFactor;
-			p += translationFactor;
+			p += translationFrame;
 		}
 		frameLimits.push_back(frame[0].x);
 		frameLimits.push_back(frame[1].x);
@@ -71,6 +85,10 @@ struct Map {
 
 		//corner in top left, moved with model matrix
 		boxPositions.addSet({ {0,100}, {0,0},{100,0},{100,100},{0,100} });
+
+		translationTotal = translationFrame + translationLocal;
+
+
 	}
 
 	void draw() {
@@ -86,7 +104,9 @@ struct Map {
 		}
 		shader2D.bind();
 		transparent();
-		mapModel2DMatrix = camera.create2DModelMatrix(translationFactor, 0, scalingFactor);
+
+
+		mapModel2DMatrix = camera.create2DModelMatrix(translationTotal, 0, scalingFactor);
 		shader2D.setUniform("u_Model2D", mapModel2DMatrix);
 
 		shader2D.setUniform("u_Color", 0.035f, 0.065f, 0.085f, 1.0f);
@@ -94,8 +114,7 @@ struct Map {
 
 
 		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
-
-		//mercator.draw();
+		mercator.draw();
 
 		if (isInsideFrame && show)
 		{
@@ -106,5 +125,8 @@ struct Map {
 			boxPositions.draw();
 		}
 		shader2D.setUniform("u_Model2D", camera.identityMatrix);
+
+		shader2D.setUniform("u_Color", 1, 0, 0, 1);
+		circle.drawInterior();
 	}
 };

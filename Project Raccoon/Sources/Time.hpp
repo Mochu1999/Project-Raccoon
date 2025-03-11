@@ -25,7 +25,7 @@ struct TimeCounter {
 
 
 
-
+//if isRunning = 0 the counter keeps summing, if you want to stop it create a variable pausedTime that only adds time if paused and is always been rest from the sum
 
 struct TimeStruct {
 	std::chrono::high_resolution_clock::time_point lastFrameTime;
@@ -36,8 +36,7 @@ struct TimeStruct {
 	float fps = 0.0f;
 	float frameCount = 0.0f;
 	float timeAccumulator = 0.0f;
-	float deltaTime = 0.0f;
-
+	
 	float plotTimeAccumulator = 0.0f;
 	const float plotUpdateInterval = 0.01f;
 
@@ -51,7 +50,7 @@ struct TimeStruct {
 
 		currentTime = std::chrono::duration<float>(currentFrameTime - startElapsedTime).count();
 
-		deltaTime = std::chrono::duration_cast<std::chrono::duration<float>>(currentFrameTime - lastFrameTime).count();
+		float  deltaTime = std::chrono::duration_cast<std::chrono::duration<float>>(currentFrameTime - lastFrameTime).count();
 		lastFrameTime = currentFrameTime;
 
 		frameCount++;

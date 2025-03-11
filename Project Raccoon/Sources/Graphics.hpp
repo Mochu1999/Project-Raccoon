@@ -36,7 +36,7 @@ struct Graphic {
 	float minDataX = 0, maxDataX = 0, minDataY = 0, maxDataY = 0;
 	float scaleY = 1;
 	float gridWidth = 400, gridHeight = 200;
-	float currentX;
+	float currentX = 0,currentY =0;
 
 	Graphic(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, Ship& ship_, TimeStruct& tm_)
 		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
@@ -68,7 +68,7 @@ struct Graphic {
 
 		arc.addSet(createRoundedSquare(100, 0.2));
 
-		
+
 		//text.add({{gridCorner, 0," ",counter} });
 		//text.addText(gridCorner, 0," ",counter);
 		text.fillVertexBuffer();
@@ -78,59 +78,58 @@ struct Graphic {
 
 	void updateText() {
 
-		
+
 		lines = {
 				{{gridCorner.x - 30,gridCorner.y - minDataY * scaleY}, 0},
 				{{gridCorner.x - 30,gridCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
 				{{gridCorner.x - 30,gridCorner.y }, round1d(minDataY)},
 		};
-		vector<Line> currentData = { { {gridCorner.x + currentX,gridCorner.y-20},tm.currentTime } };
+		vector<Line> currentData = { { {gridCorner.x + currentX - maxDataX,gridCorner.y - 20},round1d(tm.currentTime) },
+										{ {gridCorner.x + currentX - maxDataX,gridCorner.y - minDataY * scaleY / gridHeight + currentY*scaleY},round1d(currentY) }
+	};
 
-		//interm = {{{gridCorner.x - 30,gridCorner.y - minDataY * scaleY}, 0}};
-		lines.insert(lines.end(),currentData.begin(),currentData.end());
+		lines.insert(lines.end(), currentData.begin(), currentData.end());
 		text.addDynamicText(lines);
 	}
 
 	void update() {
-		pushData(c());
+		c();
+		pushData(currentY);
 
-		dataCorner = gridCorner - p2{ maxDataX,minDataY * scaleY };
+		dataCorner = gridCorner -p2{ maxDataX,minDataY * scaleY };
 
 		updateText();
-		
+
 
 	}
 
 	void draw() {
-		if (tm.bUpdatePlot())update();
-
-		
-
+		if (tm.bUpdatePlot())
+			update();
 
 
 
-			transparent();
 
 
-			shader2D.bind();
+		//roundedSquare
+		transparent();
+		shader2D.bind();
+		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+		glLineWidth(3);
+		graphicModel2DMatrix = camera.create2DModelMatrix({ gridCorner.x - 50,gridCorner.y - 50 }, 0, { 5,3 });
+		shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
+		arc.draw();
+		glLineWidth(1);
 
-			shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
 
-
-			glLineWidth(3);
-			graphicModel2DMatrix = camera.create2DModelMatrix({ gridCorner.x - 50,gridCorner.y - 50 }, 0, { 5,3 });
-			shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
-			arc.draw();
-			glLineWidth(1);
-
-
-			graphicModel2DMatrix = camera.create2DModelMatrix(dataCorner, 0, { 1,scaleY });
-			shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
-			glEnable(GL_SCISSOR_TEST); //You'll need to try deque method just for potencial memory leaks
-			glScissor(gridCorner.x, 0, 400, windowWidth);
-			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-			data.draw();
-			glDisable(GL_SCISSOR_TEST);
+		//Data
+		graphicModel2DMatrix = camera.create2DModelMatrix(dataCorner, 0, { 1,scaleY });
+		shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
+		glEnable(GL_SCISSOR_TEST); //You'll need to try deque method just for potencial memory leaks
+		glScissor(gridCorner.x, 0, 400, windowWidth);
+		shader2D.setUniform("u_Color", 1, 1, 1, 1);
+		data.draw();
+		glDisable(GL_SCISSOR_TEST);
 
 
 
@@ -139,47 +138,46 @@ struct Graphic {
 
 
 
+		//Grid
+		shader2D_Instanced.bind();
 
-			shader2D_Instanced.bind();
+		graphicModel2DMatrix = camera.create2DModelMatrix(gridCorner, 0, { gridWidth,gridHeight });
+		shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
 
-			graphicModel2DMatrix = camera.create2DModelMatrix(gridCorner, 0, { gridWidth,gridHeight });
-			shader2D_Instanced.setUniform("u_Model", graphicModel2DMatrix);
+		shader2D.setUniform("u_Color", 1, 1, 1, 1);
+		gridStatic.draw();
 
-			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-
-			gridStatic.draw();
-
-			shader2D.setUniform("u_Color", 0.5, 0.5, 0.5, 0.5);
-			gridDynamic.addInstances({ { {0, -minDataY * scaleY / gridHeight},  0, {1, 1} } });
-			gridDynamic.draw();
-
+		shader2D.setUniform("u_Color", 0.5, 0.5, 0.5, 0.5);
+		gridDynamic.addInstances({ { {0, -minDataY * scaleY / gridHeight},  0, {1, 1} } });
+		gridDynamic.draw();
 
 
 
 
-			shaderText.bind();
-			//Este no va dividido por gridHeight, entiendo que por la carencia de model en Text, pero no termino de conectar el porqué
-			//No sé como hacer para que round de siempre los mismos decimales
-			//Haría una function que saque los 3 puntos, solo dibuje si hay suficiente separación e intermedios
-			//linea al extremo superior
-			
-			text.draw();
-		
+
+		shaderText.bind();
+		//Este no va dividido por gridHeight, entiendo que por la carencia de model en Text, pero no termino de conectar el porqué
+		//No sé como hacer para que round de siempre los mismos decimales
+		//Haría una function que saque los 3 puntos, solo dibuje si hay suficiente separación e intermedios
+		//linea al extremo superior
+
+		text.draw();
+
 	}
 
 	int counter2 = 0;
-	float c() {
+	void c() {
 		counter2 += 3;
-		return (1 + counter2 / 10) * cos(radians(counter2));
+		currentY =  (1 + counter2 / 10) * cos(radians(counter2));
 	}
 
 	void pushData(float f) {
-
+		//float deltaT, 
 		currentX = tm.currentTime * 50;
 
 		if (f < minDataY) minDataY = f;
 		if (f > maxDataY) maxDataY = f;
-		if (currentX > gridWidth) maxDataX++;
+		if (currentX > gridWidth) maxDataX = currentX-400;
 		if (maxDataY - minDataY > gridHeight) scaleY = gridHeight / (maxDataY - minDataY);
 
 		data.positions.push_back({ currentX,f });

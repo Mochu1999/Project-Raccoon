@@ -46,20 +46,33 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 			break;
 
+
+		case GLFW_KEY_O:
+			map->scalingLocal *= 1.2;
+			map->update();
+
+			break;
+		case GLFW_KEY_L:
+			map->scalingLocal /= 1.2;
+			map->update();
+
+
+			break;
 		}
 
-		///CTRL
-		/*if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			switch (key)
-			{
-			case GLFW_KEY_N:
-
-
-
-			}
-		}*/
 	}
+	///CTRL
+	/*if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		switch (key)
+		{
+		case GLFW_KEY_N:
+
+
+
+		}
+	}*/
+
 }
 
 
@@ -119,12 +132,17 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	{
 		//print(mPos);
 
-		
+
 	}
 }
 
 
-
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+	//AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
+	//if (allPointers) {
+	//	allPointers->scrollOffset = yoffset;  // Save scroll value
+	//}
+}
 
 
 

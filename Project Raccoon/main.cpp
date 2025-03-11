@@ -105,7 +105,8 @@ int main(void)
 
 
 
-
+	Lines2D line;
+	line.addSet({ {0,0},{1000,500} });
 
 
 
@@ -132,17 +133,20 @@ int main(void)
 
 
 
-			axis.draw();
-			ship.draw();
+			//axis.draw();
+			//ship.draw();
 
 
-			overlay.draw();
-			graphic.draw();
+			//overlay.draw();
+			//graphic.draw();
+			transparent();
 			//map.draw();
 
 
-
-
+			shader2D.bind();
+			shader2D.setUniform("u_Model2D", camera.identityMatrix);
+			shader2D.setUniform("u_Color", 1, 0, 0, 1);
+			line.draw();
 
 
 			/////////////
