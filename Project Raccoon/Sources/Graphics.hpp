@@ -4,8 +4,6 @@
 #include "Lines2D_Instanced.hpp"
 #include "Ship.hpp"
 #include "Text.hpp"
-//Vamos a hacer las lineas con instancing. Partir de una única línea y enviar a la gpu toda la información para crear todas las instances.
-//Ni de coña esto es más eficiente para crear lineas que van a ser casi siempre estáticas, pero tampoco es ningún drama y así practicamos
 
 vector<p2> createRoundedSquare(float length, float roundedPercentage, p2 startingPos = { 0,0 });
 
@@ -38,6 +36,7 @@ struct Graphic {
 	float minDataX = 0, maxDataX = 0, minDataY = 0, maxDataY = 0;
 	float scaleY = 1;
 	float gridWidth = 400, gridHeight = 200;
+	float currentX;
 
 	Graphic(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, Ship& ship_, TimeStruct& tm_)
 		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
@@ -85,6 +84,10 @@ struct Graphic {
 				{{gridCorner.x - 30,gridCorner.y + (maxDataY - minDataY) * scaleY}, round1d(maxDataY)},
 				{{gridCorner.x - 30,gridCorner.y }, round1d(minDataY)},
 		};
+		vector<Line> currentData = { { {gridCorner.x + currentX,gridCorner.y-20},tm.currentTime } };
+
+		//interm = {{{gridCorner.x - 30,gridCorner.y - minDataY * scaleY}, 0}};
+		lines.insert(lines.end(),currentData.begin(),currentData.end());
 		text.addDynamicText(lines);
 	}
 
@@ -172,13 +175,14 @@ struct Graphic {
 
 	void pushData(float f) {
 
+		currentX = tm.currentTime * 50;
+
 		if (f < minDataY) minDataY = f;
 		if (f > maxDataY) maxDataY = f;
-		if (counter > 400) maxDataX++;
-		if (maxDataY - minDataY > 200) scaleY = 200 / (maxDataY - minDataY);
+		if (currentX > gridWidth) maxDataX++;
+		if (maxDataY - minDataY > gridHeight) scaleY = gridHeight / (maxDataY - minDataY);
 
-		data.positions.push_back({ counter,f });
-		counter++;
+		data.positions.push_back({ currentX,f });
 
 		createIndices();
 		data.isBufferUpdated = true;
