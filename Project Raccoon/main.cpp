@@ -3,11 +3,8 @@
 #include "Common.hpp"
 
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "Shader.hpp"
+#include "Time.hpp"
 
 #include "Lines3D.hpp"
 #include "Lines2D.hpp"
@@ -53,12 +50,16 @@
 #include "Axis.hpp"
 #include "Ship.hpp"
 #include "Overlay2D.hpp"
+#include "ProgressBar.hpp"
 
 
 
-
-
-//POLYHEDRA TAMBIÉN FUE MODIFICADO Y NECESITA ARREGLARSE ANTES DE DIVIDIR EL PROYECTO
+float c = 1;
+float graf1Val= 0;
+float cactus(float& c) {
+	c += 2.5;
+	return (1 * c / 10) * cos(radians(c));
+}
 
 
 
@@ -91,7 +92,8 @@ int main(void)
 	text.addText({ {{ 10,950 }, tm.fps, " fps"},{{10,1000},tm.currentTime, " s"} });
 
 
-
+	Lines2D arc;
+	arc.addSet({ {0,0}, { 100,0 },{100,100},{0,100},{0,0} });
 	
 
 
@@ -99,14 +101,13 @@ int main(void)
 	Ship ship(shader3D,camera);
 
 	Overlay2D overlay(shader2D,camera);
-	Graphic graphic(shader2D,shader2D_Instanced,shaderText,camera,ship,tm);
+	Graphic graphic(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, "A*cos(x)", { 1400,100 }, graf1Val);
+	Graphic graphic2(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, "rudderAngle", { 1400,400 }, ship.rudderAngle);
+	ProgressBar pb(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, { 1400-50,700 });
 
 	Map map(shader2D, camera);
 
 
-
-	Lines2D line;
-	line.addSet({ {0,0},{1000,500} });
 
 
 
@@ -133,20 +134,19 @@ int main(void)
 
 
 
-			//axis.draw();
-			//ship.draw();
+			axis.draw();
+			ship.draw();
 
 
-			//overlay.draw();
-			//graphic.draw();
-			transparent();
+			overlay.draw();
+
+			graf1Val = cactus(c);
+			graphic.draw();
+			graphic2.draw();
+			pb.draw();
+
 			//map.draw();
 
-
-			shader2D.bind();
-			shader2D.setUniform("u_Model2D", camera.identityMatrix);
-			shader2D.setUniform("u_Color", 1, 0, 0, 1);
-			line.draw();
 
 
 			/////////////
@@ -154,7 +154,6 @@ int main(void)
 			transparent();
 			shaderText.bind();
 			text.draw();
-			//text.substituteText(0, round2d(tm.fps), " fps");
 			text.substituteText(0, { { 10,950 }, round2d(tm.fps), " fps" });
 			text.substituteText(1, round1d(tm.currentTime), " s");
 			opaque();

@@ -33,12 +33,35 @@ struct Polyhedra {
 		genBuffers();
 	}
 
-	void addSet() {
+	void addPolyhedra(const std::string& modelPath) {
 
-	}
+		clear();
 
-	void calculateNormals() {
+		std::string basePath = "Resources/Simple polyhedra/";
+		std::string path = basePath + modelPath;
 
+		std::ifstream inFile(path, std::ios::binary);
+		if (inFile)
+		{
+			size_t size;
+
+			inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+			positions.resize(size);
+			inFile.read(reinterpret_cast<char*>(positions.data()), size * sizeof(p3));
+
+			inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+			normals.resize(size);
+			inFile.read(reinterpret_cast<char*>(normals.data()), size * sizeof(p3));
+
+			inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+			indices.resize(size);
+			inFile.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int));
+		}
+		else
+		{
+			std::cerr << "Error opening file for reading." << std::endl;
+		}
+		inFile.close();
 	}
 
 	void simpleIndices() {
@@ -49,65 +72,32 @@ struct Polyhedra {
 		}
 	}
 
-
-	void draw() {
+	//polyhedras that were stl before, with the same .size() for positions, indices and normals
+	//  ,but the size of indices in floats while the others in p3
+	//indices in order in triangles {1,2,3,4,5,6,7,8,9}
+	void stlDraw() {
 
 		glBindVertexArray(vertexArray);
 
-		/*if (isBufferUpdated)
+		//the buffer is not expected to be updated at all. Can use data instead of subdata
+		if (isBufferUpdated)
 		{
-			currentPositionsDataSize = positions.size() * sizeof(p3);
-			currentIndicesDataSize = indices.size() * sizeof(unsigned int);
-
-			if (currentPositionsDataSize > currentPositionsBufferSize || currentIndicesDataSize > currentIndicesBufferSize)
-			{
-				currentPositionsBufferSize = currentPositionsDataSize * 2;
-				currentIndicesBufferSize = currentIndicesDataSize * 2;
-
-				glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-				glBufferData(GL_ARRAY_BUFFER, currentPositionsBufferSize, nullptr, usageHint);
-
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndicesBufferSize, nullptr, usageHint);
-
-				glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-				glBufferData(GL_ARRAY_BUFFER, currentPositionsBufferSize, nullptr, usageHint);
-
-			}
+			float stlSize = positions.size() * sizeof(p3);
 
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, currentPositionsDataSize, positions.data());
+			glBufferData(GL_ARRAY_BUFFER, stlSize, positions.data(), GL_DYNAMIC_DRAW);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, currentIndicesDataSize, indices.data());
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, stlSize / 3, indices.data(), GL_DYNAMIC_DRAW);
 
 			glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, currentPositionsDataSize, normals.data());
+			glBufferData(GL_ARRAY_BUFFER, stlSize, normals.data(), GL_DYNAMIC_DRAW);
 
 			isBufferUpdated = false;
-		}*/
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3) , positions.data(), GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(p3), normals.data(), GL_DYNAMIC_DRAW);
-
+		}
 
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
-		/*
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3), positions.data(), GL_DYNAMIC_DRAW);
-
-		//glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-		glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(p3), normals.data(), GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
-		*/
 	}
 
 
@@ -130,25 +120,8 @@ struct Polyhedra {
 
 		glBindVertexArray(0);
 	}
-	//void genBuffers() {
-	//	glGenVertexArrays(1, &vertexArray);
-	//	glBindVertexArray(vertexArray);
 
-	//	glGenBuffers(1, &vertexBuffer);
-	//	glGenBuffers(1, &indexBuffer);
-	//	//glGenBuffers(1, &normalsBuffer);
 
-	//	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	//	glEnableVertexAttribArray(0);
-	//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-
-	//	//glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-	//	glEnableVertexAttribArray(1);
-	//	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(2 * sizeof(float)));
-
-	//	glBindVertexArray(0);
-	//}
-	
 	void clear() {
 		positions.clear();
 		indices.clear();

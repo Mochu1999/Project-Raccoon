@@ -25,7 +25,6 @@ using namespace std;
 #include <list>
 #include <deque>
 
-#include "Time.hpp"
 #include <functional>
 #include <random>
 
@@ -74,6 +73,10 @@ struct vec2 {
 
 	vec2 operator *(T scalar) const {
 		return { x * scalar, y * scalar };
+	}
+
+	vec2 operator *(vec2<T> other) const {
+		return { x * other.x, y * other.y};
 	}
 
 	vec2 operator /(T scalar) const {

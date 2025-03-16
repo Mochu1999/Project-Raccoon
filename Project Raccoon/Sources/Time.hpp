@@ -38,7 +38,11 @@ struct TimeStruct {
 	float timeAccumulator = 0.0f;
 	
 	float plotTimeAccumulator = 0.0f;
-	const float plotUpdateInterval = 0.01f;
+	const float plotUpdateInterval = 0.0167f;
+	float fiveSecondsAccumulator = 0; //to update auxVerticalGridLines from the plot
+	unsigned int counterSecondsPlot = 0;
+	unsigned int counterUpdatePlot = 0;
+
 
 	TimeStruct() {
 		lastFrameTime = std::chrono::high_resolution_clock::now();
@@ -56,20 +60,31 @@ struct TimeStruct {
 		frameCount++;
 		timeAccumulator += deltaTime;
 		plotTimeAccumulator += deltaTime;
+		fiveSecondsAccumulator += deltaTime;
 
 		if (timeAccumulator >= 0.5f) {
 			fps = frameCount / timeAccumulator;
 			frameCount = 0;
 			timeAccumulator -= 0.5f;
 		}
+
+		updatePlot();
 	}
 
-	bool bUpdatePlot() {
-		if (plotTimeAccumulator >= plotUpdateInterval) {
+	void updatePlot() {
+		
+		if (plotTimeAccumulator >= plotUpdateInterval) 
+		{
 			plotTimeAccumulator -= plotUpdateInterval; // Reset accumulator
-			return true;
+
+			if (fiveSecondsAccumulator >= 1)
+			{
+				fiveSecondsAccumulator -= 1;
+				++counterSecondsPlot;
+			}
+
+			counterUpdatePlot++;
 		}
-		return false;
 	}
 
 };

@@ -124,3 +124,26 @@ vector<p2> createArc(p2 center, float r, float angle1, float angle2, int segment
 
 	return positions;
 }
+
+vector<p2> createRoundedSquare(p2 startingPos, p2 length, float radius) {
+	vector<p2> positions;
+	//reserve
+
+
+	//bottom left
+	vector<p2> temp = createArc(startingPos + radius, radius, radians(180), radians(270));
+	positions.insert(positions.end(), temp.begin(), temp.end());
+
+	temp = createArc({ startingPos.x + length.x - radius,startingPos.y + radius }, radius, radians(270), 0);
+	positions.insert(positions.end(), temp.begin(), temp.end());
+
+	temp = createArc({ startingPos.x + (length.x - radius),startingPos.y + (length.y - radius) }, radius, 0, radians(90));
+	positions.insert(positions.end(), temp.begin(), temp.end());
+
+	temp = createArc({ startingPos.x + radius,startingPos.y + length.y - radius }, radius, radians(90), radians(180));
+	positions.insert(positions.end(), temp.begin(), temp.end());
+
+	positions.emplace_back(positions.front());
+
+	return positions;
+}

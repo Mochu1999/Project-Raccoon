@@ -285,38 +285,7 @@ void writeSimplePolyhedra(Polyhedra& stl, string modelPath) {
 	outFile.close();
 }
 
-void readSimplePolyhedra(Polyhedra& polyhedra, const std::string& modelPath) {
 
-	std::vector<p3>& model = polyhedra.positions;
-	std::vector<p3>& normals = polyhedra.normals;
-	std::vector<unsigned int>& indices = polyhedra.indices;
-
-	std::string basePath = "Resources/Simple polyhedra/";
-	std::string path = basePath + modelPath;
-
-	std::ifstream inFile(path, std::ios::binary);
-	if (inFile)
-	{
-		size_t size;
-
-		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-		model.resize(size);
-		inFile.read(reinterpret_cast<char*>(model.data()), size * sizeof(p3));
-
-		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-		normals.resize(size);
-		inFile.read(reinterpret_cast<char*>(normals.data()), size * sizeof(p3));
-
-		inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
-		indices.resize(size);
-		inFile.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int));
-	}
-	else
-	{
-		std::cerr << "Error opening file for reading." << std::endl;
-	}
-	inFile.close();
-}
 
 
 //I've made as an intermediate step to modify the csv data of the map, maybe delete it in the future?

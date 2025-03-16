@@ -4,12 +4,12 @@
 layout(location = 0) in vec2 positions;
 
 uniform mat4 u_OrthoProjection;
-uniform mat4 u_Model2D;
+uniform mat4 u_Model;
 
 
 void main() {
 
-	gl_Position = u_OrthoProjection * u_Model2D * vec4(positions, 0.0, 1.0);
+	gl_Position = u_OrthoProjection * u_Model * vec4(positions, 0.0, 1.0);
 
 }
 

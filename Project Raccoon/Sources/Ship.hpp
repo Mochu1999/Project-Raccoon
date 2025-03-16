@@ -14,58 +14,64 @@ struct Ship {
 
 	Polyhedra stl;
 	Polyhedra casco1, casco2, tapa1, tapa2, tapa3, caja, timon, helice, motor, mecha, arbots
-		, foilPopa, foilEstribor, foildBabor, aux, solar1, solar2;
+		, foilPopa, foilEstribor, foildBabor, aux, solar1, solar2, water;
+
+	float waterLength = 10;
 
 	p3 shipHeave = { 0,0.5,0 }; float shipHeaveIncrease = 0.001;
 	//rotation for the full ship?
-	float rudderAngle = 0; float rudderIncrease = 0.3;
+	float rudderAngle = 0; float rudderIncrease = 0.2;
 	float shipScale = 1;//borrar
 	float propellerAngle = 0, propellerIncrease = 0.3;
 	float foilAftAngle = 0, foilAftIncrease = 0.3;
 	float foilStarboardAngle = 0, foilStarboardIncrease = 0.3;
 	float foilPortAngle = 0, foilPortIncrease = 0.3;
-	
+
 
 	Ship(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_) {
 
+		casco1.addPolyhedra("casco1.bin");
+		casco2.addPolyhedra("casco2.bin");
+		tapa1.addPolyhedra("tapa1.bin");
+		tapa2.addPolyhedra("tapa2.bin");
+		caja.addPolyhedra("caja.bin");
+		arbots.addPolyhedra("arbots.bin");
+		aux.addPolyhedra("aux0.bin");
 
-		readSimplePolyhedra(casco1, "casco1.bin");
-		readSimplePolyhedra(casco2, "casco2.bin");
-		readSimplePolyhedra(tapa1, "tapa1.bin");
-		readSimplePolyhedra(tapa2, "tapa2.bin");
-		readSimplePolyhedra(caja, "caja.bin");
-		readSimplePolyhedra(arbots, "arbots.bin");
-		readSimplePolyhedra(aux, "aux0.bin");
+		timon.addPolyhedra("timon.bin");
+		helice.addPolyhedra("helice.bin");
+		////{0,-1.001,0},{0.195, -1.001,0}
+		motor.addPolyhedra("motor.bin");
+		mecha.addPolyhedra("mecha.bin");
+		tapa3.addPolyhedra("tapa3.bin");
+		foilPopa.addPolyhedra("foilAft.bin"); //tienes cosas para borrar como foilPopa
+		////{-0.023, -1.090,0}
 
-		readSimplePolyhedra(timon, "timon.bin");
+		foilEstribor.addPolyhedra("foilStarboard.bin");
+		////{1.640,-1.089, 0.35}
+
+
+		///*readSimplePolyhedra(stl, "foildBabor.bin");
+		//for (auto& p : stl.positions)
+		//{
+		//	p -= {1.639, -1.090, -0.35};
+		//}
+
+		//writeSimplePolyhedra(stl, "foilPort.bin");*/
+		foildBabor.addPolyhedra("foilPort.bin");
+		////{1.639,-1.090,-0.35}
+
+		solar1.addPolyhedra("solar1.bin");
+		solar2.addPolyhedra("solar2.bin");
+
 		
-		readSimplePolyhedra(helice, "helice.bin");
-		//{0,-1.001,0},{0.195, -1.001,0}
-		readSimplePolyhedra(motor, "motor.bin");
-		readSimplePolyhedra(mecha, "mecha.bin");
-		readSimplePolyhedra(tapa3, "tapa3.bin");
-
-		
-		readSimplePolyhedra(foilPopa, "foilAft.bin");
-		//{-0.023, -1.090,0}
-
-		//BORRAR LOS .BIN QUE HAS MODIFICADO?
-		readSimplePolyhedra(foilEstribor, "foilStarboard.bin");
-		//{1.640,-1.089, 0.35}
-
-		/*readSimplePolyhedra(stl, "foildBabor.bin");
-		for (auto& p : stl.positions)
-		{
-			p -= {1.639, -1.090, -0.35};
-		}
-		writeSimplePolyhedra(stl, "foilPort.bin");*/
-		readSimplePolyhedra(foildBabor, "foilPort.bin");
-		//{1.639,-1.090,-0.35}
-
-		readSimplePolyhedra(solar1, "solar1.bin");
-		readSimplePolyhedra(solar2, "solar2.bin");
-
-
+		water.positions = { {0,0,0},{waterLength,0,0},{0,0,waterLength},{waterLength,0,0},{0,0,waterLength},{waterLength,0,waterLength} };
+		water.indices = { 0,1,2 ,3,4,5 };
+		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };
+		//creo que no puedes hacer esto porque el buffer de indices se espera menor, si aun con esas no sale aumentar buffer normals a 6 elementos
+		/*water.positions = { {0,0,0},{100,0,0},{0,0,100},{100,0,100} };
+		water.indices = { 0,1,2 ,1,3,2 };
+		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };*/
 	}
 
 	void draw() {
@@ -98,7 +104,6 @@ struct Ship {
 		//u_model is being always changed to shipModel3DMatrix, but shipModel3DMatrix is only being created if input is changed
 
 		//SOBRAN UN COJON DE OPERACIONES Y LIMPIAR
-		shipModel3DMatrix = camera.identityMatrix;
 		camera.translate3DModelMatrix(shipModel3DMatrix, shipHeave);
 		shader3D.setUniform("u_Model", shipModel3DMatrix); //borrar esta del inicio, solo necesitas la del final
 
@@ -106,60 +111,54 @@ struct Ship {
 		shader3D.setUniform("u_fragmentMode", 0); //illumination
 
 		shader3D.setUniform("u_Color", 0.0f / 255.0f, 127.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-		casco1.draw();
-		casco2.draw();
+		casco1.stlDraw();
+		casco2.stlDraw();
 
 		shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
-		tapa1.draw();
-		tapa2.draw();
+		tapa1.stlDraw();
+		tapa2.stlDraw();
 
 		shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
-		caja.draw();
+		caja.stlDraw();
 
 		shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
-		arbots.draw();
+		arbots.stlDraw();
 
 		shader3D.setUniform("u_Color", 255 / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-		aux.draw();
-		mecha.draw();
+		aux.stlDraw();
+		mecha.stlDraw();
 
-		transparent();
-		shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.5f);
-		solar1.draw();
 
-		shader3D.setUniform("u_Color", 0 / 255.0f, 0 / 255.0f, 0 / 255.0f, 1.0f);
-		solar2.draw();
-		opaque();
 
 
 		//Timon
 		{
 			shipModel3DMatrix = camera.identityMatrix;
-			
+
 			camera.rotate3DModelMatrix(rudderMatrix, rudderAngle, { 0,1,0 });
 			camera.translate3DModelMatrix(rudderMatrix, shipHeave);
 			shader3D.setUniform("u_Model", rudderMatrix);
 
 
 			shader3D.setUniform("u_Color", 113.0f / 255.0f, 10.0f / 255.0f, 87.0f / 255.0f, 1.0f);
-			timon.draw();
+			timon.stlDraw();
 
 			shader3D.setUniform("u_Color", 0.0f / 255.0f, 63.0f / 255.0f, 200.0f / 255.0f, 1.0f);
-			motor.draw();
+			motor.stlDraw();
 
 			shader3D.setUniform("u_Color", 137.0f / 255.0f, 18.0f / 255.0f, 18.0f / 255.0f, 1.0f);
-			tapa3.draw();
+			tapa3.stlDraw();
 
 			camera.rotate3DModelMatrix(propellerMatrix, propellerAngle, { 1,0,0 });
-			rp = multiplyMatrices(rudderMatrix,propellerMatrix);
+			rp = multiplyMatrices(rudderMatrix, propellerMatrix);
 
-			p3 propellerTranslation = { 0, -1.001,0 }; 
+			p3 propellerTranslation = { 0, -1.001,0 };
 			propellerTranslation.x += 0.195 * cos(radians(rudderAngle));
-			propellerTranslation.z -= 0.195*sin(radians(rudderAngle));
-			camera.translate3DModelMatrix(rp, propellerTranslation+shipHeave);
+			propellerTranslation.z -= 0.195 * sin(radians(rudderAngle));
+			camera.translate3DModelMatrix(rp, propellerTranslation + shipHeave);
 			shader3D.setUniform("u_Model", rp);
 			shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
-			helice.draw();
+			helice.stlDraw();
 
 			camera.rotate3DModelMatrix(foilAftMatrix, foilAftAngle, { 0,0,1 });
 			rf = multiplyMatrices(rudderMatrix, foilAftMatrix);
@@ -170,32 +169,55 @@ struct Ship {
 			shader3D.setUniform("u_Model", rf);
 
 			shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-			foilPopa.draw();
+			foilPopa.stlDraw();
 
-			
+
 
 			shader3D.setUniform("u_Model", camera.identityMatrix);
 
 		}
+
+
+
 
 		camera.rotate3DModelMatrix(foilStarboardMatrix, foilStarboardAngle, { 0,0,1 });
 		p3 foilStarboardTranslation = { 1.640,-1.089, 0.35 };
 		camera.translate3DModelMatrix(foilStarboardMatrix, foilStarboardTranslation + shipHeave);
 		shader3D.setUniform("u_Model", foilStarboardMatrix);
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-		foilEstribor.draw();
+		foilEstribor.stlDraw();
 
 		camera.rotate3DModelMatrix(foilPortMatrix, foilPortAngle, { 0,0,1 });
 		p3 foilPortTranslation = { 1.640,-1.089, -0.35 };
 		camera.translate3DModelMatrix(foilPortMatrix, foilPortTranslation + shipHeave);
 		shader3D.setUniform("u_Model", foilPortMatrix);
 		shader3D.setUniform("u_Color", 16.0f / 255.0f, 28.0f / 255.0f, 82.0f / 255.0f, 1.0f);
-		foildBabor.draw();
+		foildBabor.stlDraw();
+
+
+		camera.translate3DModelMatrix(shipModel3DMatrix, shipHeave);
+		shader3D.setUniform("u_Model", shipModel3DMatrix);
+		transparent();
+		shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 0.5f);
+		solar1.stlDraw();
+		shader3D.setUniform("u_Color", 0 / 255.0f, 0 / 255.0f, 0 / 255.0f, 1.0f);
+		solar2.stlDraw();
+
+		
+		shader3D.setUniform("u_Model", camera.identityMatrix);
+		camera.translate3DModelMatrix(shipModel3DMatrix, {-waterLength/2,0,-waterLength/2 });
+		shader3D.setUniform("u_Model", shipModel3DMatrix);
+
+		shader3D.setUniform("u_Color", 40.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 0.15f);
+		shader3D.setUniform("u_Color", 40.0f / 255.0f, 189.9f / 255.0f, 255.0f / 255.0f, 0.2);
+		water.stlDraw();
+
+		opaque();
 
 
 		shader3D.setUniform("u_Model", camera.identityMatrix);
 
-		
+
 
 
 	}

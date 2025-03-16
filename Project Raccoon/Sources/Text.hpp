@@ -52,7 +52,7 @@ struct Text {
 	int fontPixelSize;
 
 	string allGlyphs; //a font is a collection of glyphs
-
+	bool isBufferUpdated = true;
 
 	//initializes the library and loads the font face
 	void initializeFreeType(const std::string& fontPath, const int fontPixelSize);
@@ -115,6 +115,8 @@ struct Text {
 
 
 		fillVertexBuffer();
+		isBufferUpdated = true;
+
 	}
 
 	//meant to substitute a single entry
@@ -126,6 +128,7 @@ struct Text {
 
 
 		fillVertexBuffer();
+		isBufferUpdated = true;
 	}
 	//fancy function if you don't want to change the position. Here you call it with (index, oss) instead of (index,{p2,oss})
 	template <typename... Args>
@@ -137,6 +140,8 @@ struct Text {
 		textToDraw[i] = oss.str();
 
 		fillVertexBuffer();
+		isBufferUpdated = true;
+
 	}
 
 	void addDynamicText(vector<Line> line)
@@ -151,6 +156,8 @@ struct Text {
 		}
 
 		fillVertexBuffer();
+		isBufferUpdated = true;
+
 	}
 
 
@@ -192,18 +199,21 @@ struct Text {
 
 
 
-	//static draw //NOT WORKING///////////////////////
 	void draw() {
-		glBindVertexArray(0);
-		glBindVertexArray(vertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), /*positions.data()*/ nullptr, GL_DYNAMIC_DRAW);
+		//if (isBufferUpdated) 
+		{
+			glBindVertexArray(vertexArray);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), /*positions.data()*/ nullptr, GL_DYNAMIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * 4, indices.data(), GL_DYNAMIC_DRAW);
 
-		glBindTexture(GL_TEXTURE_2D, textAtlasTexture);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * 4, positions.data());
+			glBindTexture(GL_TEXTURE_2D, textAtlasTexture);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * 4, positions.data());
+
+			isBufferUpdated = false;
+		}
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 	}
 
