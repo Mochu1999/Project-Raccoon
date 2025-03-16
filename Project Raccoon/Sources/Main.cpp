@@ -1,56 +1,8 @@
 
 
-#include "Common.hpp"
 
 
-#include "Shader.hpp"
-#include "Time.hpp"
-
-#include "Lines3D.hpp"
-#include "Lines2D.hpp"
-#include "Lines2D_Instanced.hpp"
-
-#include "Circles.hpp"
-
-#include "Fourier.hpp"
-
-#include "Camera.hpp"
-
-#include "auxiliary_elements.hpp"
-
-#include "BinariesManager.hpp"
-#include "KeyMouseImputs.hpp"
-
-#include "Polygons.hpp"
-#include "Polygons2D.hpp"
-
-#include "WettedSurface.hpp"
-
-#include "AuxSquare.hpp"
-
-#include "Spheres.hpp"
-
-#include "Delaunay2D.hpp"
-#include "Arrows.hpp"
-#include "Pyramid.hpp"
-#include "Model.hpp"
-#include "Settings.hpp"
-
-#include "Polyhedra.hpp"
-
-#include "Text.hpp"
-
-#include "auxiliary_elements.hpp"
-
-#include "Graphics.hpp"
-
-#include "Globe.hpp"
-
-#include "Map.hpp"
-#include "Axis.hpp"
-#include "Ship.hpp"
-#include "Overlay2D.hpp"
-#include "ProgressBar.hpp"
+#include "MainIncludes.hpp"
 
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 //common file that does not depend on other files
+//importing Common everywhere might be slow. Look for pre compiled headers and alternatives to Common
 
 using namespace std;
 
