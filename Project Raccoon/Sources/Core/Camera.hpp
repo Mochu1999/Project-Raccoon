@@ -64,7 +64,7 @@ struct Camera {
 			//2D
 			shader2D.bind();
 			shader2D.setUniform("u_OrthoProjection", orthoMatrix);
-			shader2D.setUniform("u_Model2D", identityMatrix);
+			shader2D.setUniform("u_Model", identityMatrix);
 
 
 			//2D_Instanced

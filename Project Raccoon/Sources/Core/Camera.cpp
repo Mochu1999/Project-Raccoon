@@ -339,7 +339,7 @@ void Camera::scale3DModelMatrix(std::array<float, 16>& model3DMatrix, const floa
 //
 //
 std::array<float, 16> Camera::create2DModelMatrix(const p2 translation, float angleDeg, float scale) {
-	std::array<float, 16> modelMatrix = createIdentityMatrix(); // Assume this returns a 4x4 identity matrix
+	std::array<float, 16> modelMatrix = createIdentityMatrix();
 	float theta = radians(angleDeg);
 	float c = std::cos(theta);
 	float s = std::sin(theta);

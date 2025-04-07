@@ -46,6 +46,14 @@ struct Circles {
 
 	}
 
+	void addSet(p2 centerPosition) {
+
+
+		createCircle(centerPosition);
+
+
+	}
+
 	//creates positions and indices of a single circle for both objects
 	void createCircle(const p2& center) {
 		//interts the center, then each segment point and then the second point to close the triangles
@@ -56,7 +64,7 @@ struct Circles {
 		newPositions.reserve(segments + 1);
 
 		//starts in 0º,
-		for (int i = 0; i < segments+1; i++)
+		for (int i = 0; i < segments + 1; i++)
 		{
 			theta = (angleSegment * i);
 			newPositions.push_back(p2{ center.x + r * cos(theta), center.y + r * sin(theta) });

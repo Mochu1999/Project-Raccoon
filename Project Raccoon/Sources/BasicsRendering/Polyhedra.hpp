@@ -2,6 +2,7 @@
 
 #include "Common.hpp"
 #include "Polygons.hpp"
+#include "Polygons2d.hpp"
 
 //To have sharp illumination, you need to repeat positions to have different normals per vertex.
 //If you don't repeat positions you can only have one normal per vertex (soft illumination)
@@ -137,6 +138,22 @@ struct Polyhedra {
 		glDeleteBuffers(1, &indexBuffer);
 	}
 };
+
+//maybe a similar function is repeated somewhere?
+//Passes the data from a polyhedra to a polygon (removing the y data from positions)
+void polyhedraTo2D(Polyhedra polyhedra, Polygons2D& polygon) {
+	vector<p2> positions2d;
+
+	for (auto& pos : polyhedra.positions)
+	{
+		positions2d.push_back({ pos.x,pos.z });
+	}
+	polygon.addSet(positions2d);
+
+	////In this iteration addSet only works for convex
+	polygon.indices = polyhedra.indices;
+}
+
 
 //////////////////
 //From Pyramid.hpp, to check if they have any value. Just delete it if not used by september 2025

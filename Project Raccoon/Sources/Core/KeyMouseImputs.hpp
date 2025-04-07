@@ -3,17 +3,18 @@
 #include "Globe.hpp"
 #include "Map.hpp"
 
-//POR QUE COÑO NO REQUIERE INCLUDES?
 
 
-int counter = 5;
+
+int keyCounter = 5;
 
 //Pointers can be re-seated while references cannot. But we are not re seating anything so whatever
 struct AllPointers {
 	Camera* camera;
 	Map* map;
+	GlobalVariables* gv;
 
-	AllPointers(Camera* camera_, Map* map_) :camera(camera_), map(map_) {}
+	AllPointers(Camera* camera_, Map* map_, GlobalVariables* gv_) :camera(camera_), map(map_), gv(gv_) {}
 };
 
 //The standard is to use callbacks for one-time event (typing, increase something once per press) and another function
@@ -24,17 +25,18 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 	Map* map = allPointers->map;
+	GlobalVariables* gv = allPointers->gv;
 
 	if (action == GLFW_PRESS)
 	{
 		switch (key)
 		{
 		case GLFW_KEY_P:
-			isRunning = !isRunning;
-			print(isRunning);
+			gv->isRunning = !gv->isRunning;
+			print(gv->isRunning);
 			break;
 		case GLFW_KEY_C:
-			counter++;
+			keyCounter++;
 
 			break;
 		case GLFW_KEY_S:
@@ -48,31 +50,32 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 
 		case GLFW_KEY_O:
-			map->scalingLocal *= 1.2;
+			map->totalPixels *= 1.2;
 			map->update();
 
 			break;
 		case GLFW_KEY_L:
-			map->scalingLocal /= 1.2;
+			map->totalPixels /= 1.2;
 			map->update();
 
 
 			break;
 		}
 
-	}
-	///CTRL
-	/*if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		switch (key)
+
+		//CTRL
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		{
-		case GLFW_KEY_N:
+			switch (key)
+			{
+			case GLFW_KEY_1:
+				if (gv->program == 1) gv->program = 0;
+				else if (gv->program == 0) gv->program = 1;
 
-
-
+				break;
+			}
 		}
-	}*/
-
+	}
 }
 
 

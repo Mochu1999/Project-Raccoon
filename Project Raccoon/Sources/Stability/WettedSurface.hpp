@@ -238,7 +238,7 @@ struct WettedSurface
 					//cout << "whileCounter " << whileCounter << endl;
 					if (whileCounter > 20)
 					{
-						isRunning = false;
+						//isRunning = false; //FALLO AL CREAR GlobalVariables
 						cout << "aborting wetted surface: high whileCounter" << endl;
 						return;
 						//std::exit(EXIT_FAILURE);

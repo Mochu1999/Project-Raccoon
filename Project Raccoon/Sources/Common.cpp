@@ -6,8 +6,7 @@
 p2 cursor = { 0, 0 };
 float windowHeight = 1080;
 float windowWidth = 1920;
-bool isRunning = true;
-p2 mPos = { 0,0 };
+
 
 
 float fastInverseSqrt(float number) {
@@ -162,7 +161,7 @@ float radians(float input) {
 
 
 float degrees(float input) {
-	return input * 180 / invPI;
+	return input * 180 * invPI;
 }
 
 std::array<float, 16> createIdentityMatrix() {

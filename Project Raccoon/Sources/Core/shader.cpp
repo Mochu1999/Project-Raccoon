@@ -129,6 +129,7 @@ void Shader::unbind() {
 GLFWwindow* initialize() {
 	glfwInit();
 
+
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -137,11 +138,12 @@ GLFWwindow* initialize() {
 	glfwWindowHint(GLFW_SAMPLES, 4);  // Request 4x MSAA for antialiasing
 	glEnable(GL_MULTISAMPLE);
 
+	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 	
 	//fullscreen
 	//GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", glfwGetPrimaryMonitor(), NULL);
-	
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", NULL, NULL);
+	
 
 	/* this will be useful to save width and height
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();

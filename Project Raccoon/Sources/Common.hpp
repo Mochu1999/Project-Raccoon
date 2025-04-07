@@ -278,17 +278,18 @@ float magnitude3(const vec3<T>& v) {
 
 
 
-/////////////////////////////////////////////
-// Declarations of global variables
+
+// Mover a gv
 extern float windowHeight;
 extern float windowWidth;
-extern bool isRunning;
-inline vector<p3> model;
-extern p2 mPos;
 
 
-
-
+/////////////////////////////////////////////
+struct GlobalVariables {
+	int program = 0; //0 TFG, 1 MRS //to be changed in settings
+	bool isRunning = true;
+	p2 mPos = { 0,0 };
+};
 
 
 

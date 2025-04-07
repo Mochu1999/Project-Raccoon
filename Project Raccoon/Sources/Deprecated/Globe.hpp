@@ -2,7 +2,7 @@
 
 
 #include "Common.hpp"
-//en lonLatTo2D hay un float(pi), hay que modificar PI
+//en lonLatToMercator hay un float(PI), hay que modificar PI
 //RESERVES
 
 //QUITO EL ÚLTIMO PUNTO PARA QUE NO DE LA VUELTA ENTERA
@@ -20,7 +20,7 @@ vector<p3> createLatitude(float angleLatitude, int points = 100) {
 	//the distance from the OY axis to all the circle points
 	float r = cos(angleLatitude);
 
-	for (int i = 0; i <= points; i++) 
+	for (int i = 0; i <= points; i++)
 	{
 		float lon = -PI + i * angleBetweenLongitudes;
 		positions.push_back({ r * cos(lon), y, r * sin(lon) });
@@ -34,19 +34,19 @@ vector<p3> createLatitude(float angleLatitude, int points = 100) {
 //For the middle line starts and ends in the same point as createLatitudes
 vector<p3> createLongitude(float angleLongitude, int points = 100) {
 
-    vector<p3> positions;
-    float angleBetweenLatitudes = 2.0f * PI / points;
+	vector<p3> positions;
+	float angleBetweenLatitudes = 2.0f * PI / points;
 
-    for (int i = 0; i <= points; i++) {
-        float lat = -PI + i * angleBetweenLatitudes;
+	for (int i = 0; i <= points; i++) {
+		float lat = -PI + i * angleBetweenLatitudes;
 
-        float x = cos(lat) * cos(angleLongitude);
-        float y = sin(lat);
-        float z = cos(lat) * sin(angleLongitude);
+		float x = cos(lat) * cos(angleLongitude);
+		float y = sin(lat);
+		float z = cos(lat) * sin(angleLongitude);
 
-        positions.push_back({ x, y, z });
-    }
-    return positions;
+		positions.push_back({ x, y, z });
+	}
+	return positions;
 }
 
 //// .x is longitude, .y is latitude
@@ -66,11 +66,11 @@ float earthRadius = 6378137.0f;
 // In the equator the distances are exact (cilindrical proj) but you lose accuracy the more away you are from it
 // Mercator is only valid for visualization, otherwise use geodesic calculations
 //assumes you wont have latitudes close to +-90 for now. lonlats in degrees
-vector<p2> lonLatTo2D(const vector<p2>& lonLats) {
+vector<p2> lonLatToMercator(const vector<p2> lonLats) {
 	vector<p2> positions;
 	positions.reserve(lonLats.size());
 
-	for (auto& ll: lonLats)
+	for (auto& ll : lonLats)
 	{
 		float lambda = radians(ll.x);   // lon in radians
 		float phi = radians(ll.y);   // lat in radians
@@ -78,10 +78,61 @@ vector<p2> lonLatTo2D(const vector<p2>& lonLats) {
 
 
 		positions.push_back({ earthRadius * lambda, earthRadius * log(tan((3.14159265359f / 4.0f) + (phi / 2.0f))) });
-		//positions.back() *= 10E-6;
 	}
 
 	return positions;
+}
+
+p2 lonLatToMercator(const p2 lonLat) {
+
+	float lambda = radians(lonLat.x);   // lon in radians
+	float phi = radians(lonLat.y);   // lat in radians
+
+	return { earthRadius * lambda, earthRadius * log(tan((3.14159265359f / 4.0f) + (phi / 2.0f))) };
+}
+
+
+//Comprobar
+vector<p2> mercatorToLonLat(const vector<p2> coords) {
+	vector<p2> lonLats;
+	lonLats.reserve(coords.size());
+
+	for (auto& coord : coords) {
+		// Convertir x (Mercator) a longitud (lambda)
+		float lambda = coord.x / earthRadius;
+
+		// Convertir y (Mercator) a latitud (phi)
+		float y = coord.y / earthRadius;
+		float phi = 2.0f * atan(exp(y)) - PI / 2.0f;
+
+		// Convertir radianes a grados
+		float lon = lambda * 180.0f / PI;
+		float lat = phi * 180.0f / PI;
+
+		lonLats.push_back({ lon, lat });
+	}
+
+	return lonLats;
+}
+
+//Comprobar
+p2 mercatorToLonLat(const p2 pos) {
+
+
+	// Convertir x (Mercator) a longitud (lambda)
+	float lambda = pos.x / earthRadius;
+
+	// Convertir y (Mercator) a latitud (phi)
+	float y = pos.y / earthRadius;
+	float phi = 2.0f * atan(exp(y)) - PI / 2.0f;
+
+	// Convertir radianes a grados
+	float lon = lambda * 180.0f / PI;
+	float lat = phi * 180.0f / PI;
+
+
+
+	return { lon, lat };
 }
 
 //the map format that gives you longitudes and latitudes is WGS84 (EPSG:4326)
