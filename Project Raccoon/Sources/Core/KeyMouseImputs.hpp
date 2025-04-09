@@ -48,18 +48,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 			break;
 
-
-		case GLFW_KEY_O:
-			map->totalPixels *= 1.2;
-			map->update();
-
-			break;
-		case GLFW_KEY_L:
-			map->totalPixels /= 1.2;
-			map->update();
-
-
-			break;
 		}
 
 
@@ -141,10 +129,16 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-	//AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
-	//if (allPointers) {
-	//	allPointers->scrollOffset = yoffset;  // Save scroll value
-	//}
+	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
+	Map* map = allPointers->map;
+	if (yoffset > 0) {
+		map->totalPixels *= 1.2;
+		map->update();
+	}
+	else if (yoffset < 0) {
+		map->totalPixels /= 1.2;
+		map->update();
+	}
 }
 
 

@@ -68,7 +68,7 @@ int main(void)
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
 	glfwSetMouseButtonCallback(window, mouseEventCallback);
-
+	glfwSetScrollCallback(window, scrollCallback);
 	
 
 	int counter = 0;

@@ -8,6 +8,7 @@
 #include "Circles.hpp"
 #include "Text.hpp"
 
+//Mirar el tema de los rumbos circulares
 
 //CAMERA ESTÁ SOLO PARA LAS MODEL MATRICES, PLANTEATE SI TE INTERESA TENER una referencia de camera, porque bien podría solo tener
 // una matriz aquí local y hacer la función que la crea global
@@ -107,7 +108,9 @@ struct Map {
 	p2 shipCoordinates = { 2.128842,41.248926 };
 	p2 finishPoint = { 1.25,39.05 };
 
-	float distance;
+	float totalDistance;
+	Lines2D dataBoxOutline;
+	Polygons2D dataBox;
 
 
 	Lines2D courseLine;
@@ -146,7 +149,9 @@ struct Map {
 
 		circle.addSet(lonLatToMercator({ finishPoint }));
 
-		text1.addDynamicText({ {{ 100,750 }, shipCoordinates.x,", ", shipCoordinates.y},{{ 100,650 }, translationTotal.x,", ", translationTotal.y} });
+		dataBoxOutline.addSet(createRoundedSquare({ 0,0 }, { 500,500 }, 50));
+		dataBox.addSet(createRoundedSquare({ 0,0 }, { 500,500 }, 50));
+
 
 		update();
 
@@ -188,8 +193,10 @@ struct Map {
 	void draw() {
 		p2 a = (lonLatToMercator(shipCoordinates) - point0) * scalingFactor + mapCorner;
 		p2 cursorVal = mercatorToLonLat((gv.mPos - translationTotal) / scalingFactor);
+		totalDistance = distanceOnSphere(shipCoordinates, finishPoint);
 
-		shipCoordinates = cursorVal; //en movimiento el barco rota con un delay de un segundo, por qué?
+
+		//shipCoordinates = cursorVal; //en movimiento el barco rota con un delay de un segundo, por qué?
 
 		shader2D.bind();
 		transparent();
@@ -207,7 +214,7 @@ struct Map {
 
 
 
-
+		//print(0.65346 * earthRadius /1000);
 
 
 		//surprisingly it won't work without the lonlat. I don't know why. Point error? Projection?
@@ -250,9 +257,11 @@ struct Map {
 
 		shaderText.bind();
 		//static stuff
-		text1.addDynamicText({ {{ 100,750 }, shipCoordinates.x,", ", shipCoordinates.y} });
+		text1.addDynamicText({
+			{{ 100,750 }, finishPoint.x,", ", finishPoint.y},
+			{{ 100,700 }, shipCoordinates.x,", ", shipCoordinates.y},
+			{ { 100,650 }, totalDistance * 10e-3,"km"} });
 
-		text1.addDynamicText({ {{ 100,750 }, a.x,", ", a.y} });
 		text1.draw();
 
 
@@ -260,19 +269,16 @@ struct Map {
 
 		//text2.draw();
 
+		shader2D.bind();
+		shader2D.setUniform("u_Model", camera.identityMatrix);
+		shader2D.setUniform("u_Color", 0.035f, 0.065f, 0.085f, 1.0f);
+		dataBox.draw();
+		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+
+		glLineWidth(3);
+		dataBoxOutline.draw();
+		glLineWidth(1);
 
 
 	}
 };
-
-void geoToCartesian(const p2& coord, float& x, float& y, float& z) {
-	float lat = degrees(coord.y);
-	float lon = degrees(coord.x);
-	x = std::cos(lat) * std::cos(lon);
-	y = std::cos(lat) * std::sin(lon);
-	z = std::sin(lat);
-}
-
-void distanceLonLat(const p2 point1, const  p2 point2, const  float radius) {
-
-}
