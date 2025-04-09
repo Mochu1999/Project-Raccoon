@@ -27,6 +27,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 	Map* map = allPointers->map;
 	GlobalVariables* gv = allPointers->gv;
 
+	
 	if (action == GLFW_PRESS)
 	{
 		switch (key)
@@ -39,13 +40,14 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			keyCounter++;
 
 			break;
-		case GLFW_KEY_S:
-			if (map->show)
-				map->show = 0;
-			else
-				map->show = 1;
-
-
+		case GLFW_KEY_Q:
+			if (gv->program == 1)
+			{
+				if (map->show)
+					map->show = 0;
+				else
+					map->show = 1;
+			}
 			break;
 
 		}
@@ -69,41 +71,60 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 
 //keys functions gets triggered once per frame
-void keyboardRealTimePolls(GLFWwindow* window, Camera& camera) {
+void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera, Map& map) {
+	
+
+
 	// Rotation
+	if (gv.program == 0)
+	{
+
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, camera.rotationSpeed, camera.right);
+
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.right);
+
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.up);
+
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+			camera.calculateForward(camera.forward, camera.rotationSpeed, camera.up);
 
 
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		camera.calculateForward(camera.forward, camera.rotationSpeed, camera.right);
+		//translation
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos + camera.forward * camera.translationSpeed;
 
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.right);
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos - camera.forward * camera.translationSpeed;
 
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.up);
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos - camera.right * camera.translationSpeed;
 
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		camera.calculateForward(camera.forward, camera.rotationSpeed, camera.up);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			camera.cameraPos = camera.cameraPos + camera.right * camera.translationSpeed;
 
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+			camera.cameraPos.y += camera.translationSpeed;
 
-	//translation
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		camera.cameraPos = camera.cameraPos + camera.forward * camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+			camera.cameraPos.y -= camera.translationSpeed;
+	}
+	else if (gv.program == 1)
+	{
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			map.translationTotal -= {0, 10};
 
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		camera.cameraPos = camera.cameraPos - camera.forward * camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			map.translationTotal += {0, 10};
 
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		camera.cameraPos = camera.cameraPos - camera.right * camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			map.translationTotal += {10,0};
 
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		camera.cameraPos = camera.cameraPos + camera.right * camera.translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		camera.cameraPos.y += camera.translationSpeed;
-
-	if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-		camera.cameraPos.y -= camera.translationSpeed;
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			map.translationTotal -= {10, 0};
+	}
 }
 
 
@@ -132,11 +153,11 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Map* map = allPointers->map;
 	if (yoffset > 0) {
-		map->totalPixels *= 1.2;
+		map->totalPixels *= 1.15;
 		map->update();
 	}
 	else if (yoffset < 0) {
-		map->totalPixels /= 1.2;
+		map->totalPixels /= 1.15;
 		map->update();
 	}
 }

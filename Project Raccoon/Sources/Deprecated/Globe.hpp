@@ -137,87 +137,88 @@ p2 mercatorToLonLat(const p2 pos) {
 
 //the map format that gives you longitudes and latitudes is WGS84 (EPSG:4326)
 
-//Calculates the distanc
-//float calculateDistance(const p2 point1, const p2 point2) {
-//
-//
-//	float lat1 = point1.y;
-//	float lon1 = point1.x;
-//	float lat2 = point2.y;
-//	float lon2 = point2.x;
-//
-//
-//	//θ = arccos(sin(φ1)sin(φ2) + cos(φ1)cos(φ2)cos(Δλ))
-//	float numerator = std::sin(lat1) * std::sin(lat2) + std::cos(lat1) * std::cos(lat2) * std::cos(lon2 - lon1);
-//
-//	// See if this even happens
-//	if (numerator > 1.0f) numerator = 1.0f;
-//	if (numerator < -1.0f) numerator = -1.0f;
-//
-//	float theta = std::acos(numerator);
-//
-//	return earthRadius * theta /1000;
-//}
-//
-//
+//If the distance doesn't make sense dude to very small angles use Haversine formula
+//Calculates the distance of 2 spherical points in meter (input in degrees)
+float calculateDistance(const p2 point1, const p2 point2) {
 
-// Esta función devuelve la distancia sobre la esfera (de radio 'radius')
-// entre el punto1(lat1, lon1) y el punto2(lat2, lon2), 
-// asumiendo que lat1, lon1, lat2, lon2 ya están en radianes.
-double distanceOnSphere(p2 point1,p2 point2)
-{
-	float lon1 = point1.x;
-	float lat1 = point1.y;
-	float lon2 = point2.x;
-	float lat2 = point2.y;
-	//--------------------------------------------------------------------------
-	// 1) Convertir cada punto (lat, lon) en coordenadas esféricas a vector 3D.
-	//    Suponiendo un sistema con:
-	//      - lat = 0 en el ecuador (positivo hacia el norte),
-	//      - lon = 0 en el meridiano principal (positivo hacia el este),
-	//      - radius = distancia desde el centro de la esfera.
-	//--------------------------------------------------------------------------
 
-	// Primer vector (x1, y1, z1)
-	double x1 = earthRadius * std::cos(lat1) * std::cos(lon1);
-	double y1 = earthRadius * std::cos(lat1) * std::sin(lon1);
-	double z1 = earthRadius * std::sin(lat1);
+	float lon1 = radians(point1.x);
+		float lat1 = radians(point1.y);
+		float lon2 = radians(point2.x);
+		float lat2 = radians(point2.y);
 
-	// Segundo vector (x2, y2, z2)
-	double x2 = earthRadius * std::cos(lat2) * std::cos(lon2);
-	double y2 = earthRadius * std::cos(lat2) * std::sin(lon2);
-	double z2 = earthRadius * std::sin(lat2);
 
-	//--------------------------------------------------------------------------
-	// 2) Calcular el producto punto (dot product) de ambos vectores
-	//--------------------------------------------------------------------------
-	double dot = (x1 * x2) + (y1 * y2) + (z1 * z2);
+	//θ = arccos(sin(φ1)sin(φ2) + cos(φ1)cos(φ2)cos(Δλ))
+	float numerator = std::sin(lat1) * std::sin(lat2) + std::cos(lat1) * std::cos(lat2) * std::cos(lon2 - lon1);
 
-	//--------------------------------------------------------------------------
-	// 3) Calcular las magnitudes de cada vector (que idealmente será 'radius' 
-	//    para ambos si no hay errores de redondeo, pues los 2 puntos están 
-	//    en la misma esfera).
-	//--------------------------------------------------------------------------
-	double mag1 = std::sqrt(x1 * x1 + y1 * y1 + z1 * z1);
-	double mag2 = std::sqrt(x2 * x2 + y2 * y2 + z2 * z2);
+	// See if this even happens
+	if (numerator > 1.0f) numerator = 1.0f;
+	if (numerator < -1.0f) numerator = -1.0f;
 
-	//--------------------------------------------------------------------------
-	// 4) Calcular el ángulo entre los dos vectores usando la definición
-	//    dot(A,B) = |A| * |B| * cos(angulo)
-	//--------------------------------------------------------------------------
-	double cosAngle = dot / (mag1 * mag2);
+	float theta = std::acos(numerator);
 
-	// Debido a posibles errores de redondeo, forzamos cosAngle a estar
-	// en el rango [-1, 1] antes de hacer acos
-	if (cosAngle > 1.0)  cosAngle = 1.0;
-	if (cosAngle < -1.0) cosAngle = -1.0;
-
-	double angle = std::acos(cosAngle);
-
-	//--------------------------------------------------------------------------
-	// 5) La distancia sobre la superficie de la esfera es:
-	//         distancia = radio * (ángulo en radianes)
-	//--------------------------------------------------------------------------
-	return earthRadius * angle /1000;
+	return earthRadius * theta ;
 }
+
+
+
+//// Esta función devuelve la distancia sobre la esfera (de radio 'radius')
+//// entre el punto1(lat1, lon1) y el punto2(lat2, lon2), 
+//// asumiendo que lat1, lon1, lat2, lon2 ya están en radianes.
+//double calculateDistance(p2 point1,p2 point2)
+//{
+//	float lon1 = radians(point1.x);
+//	float lat1 = radians(point1.y);
+//	float lon2 = radians(point2.x);
+//	float lat2 = radians(point2.y);
+//	//--------------------------------------------------------------------------
+//	// 1) Convertir cada punto (lat, lon) en coordenadas esféricas a vector 3D.
+//	//    Suponiendo un sistema con:
+//	//      - lat = 0 en el ecuador (positivo hacia el norte),
+//	//      - lon = 0 en el meridiano principal (positivo hacia el este),
+//	//      - radius = distancia desde el centro de la esfera.
+//	//--------------------------------------------------------------------------
+//
+//	// Primer vector (x1, y1, z1)
+//	double x1 = earthRadius * std::cos(lat1) * std::cos(lon1);
+//	double y1 = earthRadius * std::cos(lat1) * std::sin(lon1);
+//	double z1 = earthRadius * std::sin(lat1);
+//
+//	// Segundo vector (x2, y2, z2)
+//	double x2 = earthRadius * std::cos(lat2) * std::cos(lon2);
+//	double y2 = earthRadius * std::cos(lat2) * std::sin(lon2);
+//	double z2 = earthRadius * std::sin(lat2);
+//
+//	//--------------------------------------------------------------------------
+//	// 2) Calcular el producto punto (dot product) de ambos vectores
+//	//--------------------------------------------------------------------------
+//	double dot = (x1 * x2) + (y1 * y2) + (z1 * z2);
+//
+//	//--------------------------------------------------------------------------
+//	// 3) Calcular las magnitudes de cada vector (que idealmente será 'radius' 
+//	//    para ambos si no hay errores de redondeo, pues los 2 puntos están 
+//	//    en la misma esfera).
+//	//--------------------------------------------------------------------------
+//	double mag1 = std::sqrt(x1 * x1 + y1 * y1 + z1 * z1);
+//	double mag2 = std::sqrt(x2 * x2 + y2 * y2 + z2 * z2);
+//
+//	//--------------------------------------------------------------------------
+//	// 4) Calcular el ángulo entre los dos vectores usando la definición
+//	//    dot(A,B) = |A| * |B| * cos(angulo)
+//	//--------------------------------------------------------------------------
+//	double cosAngle = dot / (mag1 * mag2);
+//
+//	// Debido a posibles errores de redondeo, forzamos cosAngle a estar
+//	// en el rango [-1, 1] antes de hacer acos
+//	if (cosAngle > 1.0)  cosAngle = 1.0;
+//	if (cosAngle < -1.0) cosAngle = -1.0;
+//
+//	double angle = std::acos(cosAngle);
+//
+//	//--------------------------------------------------------------------------
+//	// 5) La distancia sobre la superficie de la esfera es:
+//	//         distancia = radio * (ángulo en radianes)
+//	//--------------------------------------------------------------------------
+//	return earthRadius * angle;
+//}
 

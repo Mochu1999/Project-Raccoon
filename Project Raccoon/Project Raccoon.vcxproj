@@ -166,7 +166,7 @@
     <ClInclude Include="Sources\Stability\Fourier.hpp" />
     <ClInclude Include="Sources\BasicsRendering\Lines2D.hpp" />
     <ClInclude Include="Sources\BasicsRendering\Lines3d.hpp" />
-    <ClInclude Include="Sources\Core\Model.hpp" />
+    <ClInclude Include="Sources\Core\FilesManagement.hpp" />
     <ClInclude Include="Sources\Composites\Overlay2D.hpp" />
     <ClInclude Include="Sources\BasicsRendering\Polygons.hpp" />
     <ClInclude Include="Sources\BasicsRendering\Polygons2D.hpp" />

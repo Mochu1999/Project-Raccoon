@@ -4,7 +4,7 @@
 
 //Pero tío, por que no hay que incluir nada?
 
-#include "Model.hpp"
+#include "FilesManagement.hpp"
 #include "Circles.hpp"
 #include "Text.hpp"
 
@@ -76,7 +76,29 @@ struct IconLight {
 
 };
 
+string formatFloat(float value) {
+	std::ostringstream oss;
+	oss << std::fixed << std::setprecision(2) << value;
+	return oss.str();
+}
 
+string lonLatToString(p2 lonLat)
+{
+	string lonStr, latStr;
+	float lon = lonLat.x, lat = lonLat.y;
+
+	if (lon >= 0)
+		lonStr = formatFloat(lon) + "E";
+	else if (lon < 0)
+		lonStr = formatFloat(-lon) + "W";
+
+	if (lat >= 0)
+		latStr = formatFloat(lat) + "N";
+	else if (lat < 0)
+		latStr = formatFloat(-lat) + "S";
+
+	return "{" + lonStr + ", " + latStr + "}";
+}
 
 //Ver que está en uso, que no, reserves y comentarios
 struct Map {
@@ -86,7 +108,8 @@ struct Map {
 
 	Lines2D mercator;
 	Polygons2D background;
-	Polygons2D boxPositions; //Where the text is after pressing S //ESTABLECER QUE ES DINÁMICO
+
+	
 
 	IconLight icon;
 
@@ -100,9 +123,8 @@ struct Map {
 	float totalPixels = 1000 * 6; //This makes totalX 6000 pixels long
 
 	p2 mapCorner, translationTotal;
-	vector<p2> frame;
 	vector<float> frameLimits; //[0] x left, [1] x right, [2] y bottom, [3] y up
-	bool show = 0;
+	bool show = 1;
 
 	Text text1, text2;
 	p2 shipCoordinates = { 2.128842,41.248926 };
@@ -112,8 +134,11 @@ struct Map {
 	Lines2D dataBoxOutline;
 	Polygons2D dataBox;
 
+	Polygons2D mouseBox;
 
+	Lines2D frame;
 	Lines2D courseLine;
+
 
 	Map(Shader& shader2D_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_)
 		:shader2D(shader2D_), shaderText(shaderText_),
@@ -121,41 +146,44 @@ struct Map {
 		, gv(gv_), icon(shader2D, camera)
 	{
 
-
 		vector<vector<p2>> mapVectorOfVectors;
 		readVectorOfVectorsAscii(mapVectorOfVectors);
 
-		for (auto& p : mapVectorOfVectors)
+		//Starting with the first point after the frame
+		for (size_t i = 1; i < mapVectorOfVectors.size(); i++)
 		{
-			vector<p2>interm = lonLatToMercator(p);
+			vector<p2>interm = lonLatToMercator(mapVectorOfVectors[i]);
 			mercator.addSet(interm);
-
 		}
-		frame = lonLatToMercator(mapVectorOfVectors[0]);
-		background.addSet(frame);
+
+		frame.addSet(lonLatToMercator(mapVectorOfVectors[0]));
+
+		background.addSet(frame.positions);
 
 		//bottom left corner in meters from earth's 0,0 
-		point0 = mercator.positions[0];
+		point0 = frame.positions[0];
 
-
-
-		totalX = mercator.positions[1].x - mercator.positions[0].x;
-		totalY = mercator.positions[2].y - mercator.positions[1].y;
+		totalX = frame.positions[1].x - frame.positions[0].x;
+		totalY = frame.positions[2].y - frame.positions[1].y;
 		//print(totalX); //4.22809e+06
 		//print(totalY); //3.52124e+06
 		//print(totalX / totalY); //1.20074
+
+
 
 		courseLine.addSet({ lonLatToMercator(shipCoordinates),lonLatToMercator(finishPoint) });
 
 		circle.addSet(lonLatToMercator({ finishPoint }));
 
-		dataBoxOutline.addSet(createRoundedSquare({ 0,0 }, { 500,500 }, 50));
-		dataBox.addSet(createRoundedSquare({ 0,0 }, { 500,500 }, 50));
+		dataBoxOutline.addSet(createRoundedSquare({ 80,370 }, { 600,380 }, 30));
+		dataBox.addSet(createRoundedSquare({ 80,370 }, { 600,380 }, 30));
 
 
 		update();
 
-		//If the distance doesn't make sense dude to very small angles use Haversine formula
+
+
+
 
 	}
 
@@ -177,23 +205,18 @@ struct Map {
 		/*print(translationTotal);
 		print(scalingFactor);*/
 
-		for (auto& p : frame)
-		{
-			p *= scalingFactor;
-			p += translationTotal;
-		}
 
-		frameLimits.insert(frameLimits.end(), { frame[0].x, frame[1].x, frame[0].y , frame[2].y });
+		frameLimits.insert(frameLimits.end(), { frame.positions[0].x, frame.positions[1].x, frame.positions[0].y , frame.positions[2].y });
 		//se usa frame para algo? .clear?
 
 
-		boxPositions.addSet({ {0,0},{300,0},{300,100},{0,100},{0,0} });
+		
 	}
 
 	void draw() {
 		p2 a = (lonLatToMercator(shipCoordinates) - point0) * scalingFactor + mapCorner;
 		p2 cursorVal = mercatorToLonLat((gv.mPos - translationTotal) / scalingFactor);
-		totalDistance = distanceOnSphere(shipCoordinates, finishPoint);
+		totalDistance = calculateDistance(shipCoordinates, finishPoint);
 
 
 		//shipCoordinates = cursorVal; //en movimiento el barco rota con un delay de un segundo, por qué?
@@ -211,7 +234,11 @@ struct Map {
 
 		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
 		mercator.draw();
+		shader2D.setUniform("u_Color", 1, 1, 1, 1);
 
+		glLineWidth(3);
+		frame.draw();
+		glLineWidth(1);
 
 
 		//print(0.65346 * earthRadius /1000);
@@ -248,37 +275,44 @@ struct Map {
 		if (show)
 		{
 			mapModel2DMatrix = camera.create2DModelMatrix(gv.mPos, 0, 1);
-			shader2D.setUniform("u_Model", mapModel2DMatrix);
+			shader2D.setUniform("u_Model", camera.identityMatrix);
 
-			shader2D.setUniform("u_Color", 1, 1, 1, 1);
-			boxPositions.draw();
+			shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+			mouseBox.clear();
+			mouseBox.addSet(createRoundedSquare({ gv.mPos.x-4,gv.mPos.y-10 }, { 270,42 }, 10));
+			mouseBox.draw(); //Tío, esto tendría que hacerse con model, no cada vez
+
+			shaderText.bind();
+			text2.addDynamicText({ {gv.mPos, lonLatToString(cursorVal)} });
+			text2.draw();
 		}
 		//shader2D.setUniform("u_Model", camera.identityMatrix);
 
-		shaderText.bind();
-		//static stuff
-		text1.addDynamicText({
-			{{ 100,750 }, finishPoint.x,", ", finishPoint.y},
-			{{ 100,700 }, shipCoordinates.x,", ", shipCoordinates.y},
-			{ { 100,650 }, totalDistance * 10e-3,"km"} });
+		
 
-		text1.draw();
+		
 
+		{
+			shader2D.bind();
+			shader2D.setUniform("u_Model", camera.identityMatrix);
+			shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+			dataBox.draw();
+			shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+			glLineWidth(3);
+			dataBoxOutline.draw();
+			glLineWidth(1);
 
-		text2.addDynamicText({ {gv.mPos, round2d(cursorVal.x),", ", round2d(cursorVal.y)} });
+			shaderText.bind();
+			text1.addDynamicText({
+				{{ 100,700 }, "Ship coordinates:  ", lonLatToString(shipCoordinates)},
+				{ { 100,650 }, "Distance left:  ", totalDistance / 1000 ," km"},
+				{ { 100,600 }, "Speed: ", 0 ,"  km/h"},
+				{ { 100,550 }, "Estimated time left:  si"},
+				{ { 100,500 }, "Errors:  NA"},
+				});
 
-		//text2.draw();
-
-		shader2D.bind();
-		shader2D.setUniform("u_Model", camera.identityMatrix);
-		shader2D.setUniform("u_Color", 0.035f, 0.065f, 0.085f, 1.0f);
-		dataBox.draw();
-		shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
-
-		glLineWidth(3);
-		dataBoxOutline.draw();
-		glLineWidth(1);
-
-
+			text1.draw();
+		}
+		
 	}
 };

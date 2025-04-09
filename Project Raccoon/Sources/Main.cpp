@@ -44,8 +44,11 @@ int main(void)
 	text.addText({ {{ 10,950 }, tm.fps, " fps"},{{10,1000},tm.currentTime, " s"} });
 
 
-	Lines2D arc;
-	arc.addSet({ {0,0}, { 100,0 },{100,100},{0,100},{0,0} });
+	Lines2D centerCross;
+	centerCross.addSet( { 
+		{gv.centerWindow.x - 20,gv.centerWindow.y},{gv.centerWindow.x + 20,gv.centerWindow.y},
+		{gv.centerWindow.x,gv.centerWindow.y - 20},{gv.centerWindow.x,gv.centerWindow.y + 20}});
+	centerCross.indices = { 0,1,2,3 };
 
 
 
@@ -114,10 +117,16 @@ int main(void)
 			text.substituteText(1, round1d(tm.currentTime), " s");
 			opaque();
 
+			transparent();
+			shader2D.bind();
+			shader2D.setUniform("u_Model", camera.identityMatrix);
+			shader2D.setUniform("u_Color", 1, 1, 1, 0.5);
+			glLineWidth(2);
+			centerCross.draw();
+			glLineWidth(1);
+			opaque();
 
-
-
-			keyboardRealTimePolls(window, camera);
+			keyboardRealTimePolls(window,gv, camera, map);
 			camera.updateCamera();
 
 			shader3D.bind();
