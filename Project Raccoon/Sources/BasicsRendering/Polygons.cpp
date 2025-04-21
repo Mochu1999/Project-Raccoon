@@ -102,7 +102,7 @@ void Polygons::addSet(vector<p3> items) {
 	for (auto& pos : xyPositions)
 	{
 		pos -= centroid;
-		pos = rotatePoint(pos, angle, rotationAxis);
+		rotatePoint(pos, angle, rotationAxis);
 		pos += centroid;
 	}
 

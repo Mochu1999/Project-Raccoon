@@ -91,15 +91,84 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis) {
 	p3 intermForward;
 
-	intermForward = normalize3(rotatePoint(forward, rotationSpeed, rotationAxis));
+	rotatePoint(forward, rotationSpeed, rotationAxis);
+	intermForward = normalize3(forward);
 
 	if (abs(intermForward.y) < 0.99)
 		forward = intermForward;
 }
 
+void Camera::centeredRotation() {
 
+}
 
 void Camera::updateCamera() {
+
+	p2 currentMPosVariation = gv.variationMPos - gv.mPos;
+
+
+	if (gv.program == telemetry || gv.program == solar)
+	{
+		if (gv.cameraMode == drag && gv.isLmbPressed == 1)
+		{
+			calculateForward(forward, currentMPosVariation.y * 0.001, right);
+
+			right = normalize3(cross3(forward, { 0,1,0 }));
+			up = cross3(right, forward);
+
+			viewMatrix = createViewMatrix(right, up, forward, cameraPos);
+
+			calculateForward(forward, -currentMPosVariation.x * 0.001, up);
+
+			gv.variationMPos = gv.mPos;
+		}
+		else if (gv.cameraMode == FPS)
+		{
+			calculateForward(forward, -currentMPosVariation.y * 0.003, right);
+
+			right = normalize3(cross3(forward, { 0,1,0 }));
+			up = cross3(right, forward);
+
+			viewMatrix = createViewMatrix(right, up, forward, cameraPos);
+
+			calculateForward(forward, currentMPosVariation.x * 0.003, up);
+
+			gv.variationMPos = gv.mPos;
+		}
+		else if (gv.cameraMode == centered)
+		{
+
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			{
+				rotatePoint(cameraPos, centeredAngleRotation, { 0, 1, 0 });
+				//rotate3D( cameraPos , 0, centeredAngleRotation, 0);
+			}
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+			{
+				rotatePoint(cameraPos, -centeredAngleRotation, { 0, 1, 0 });
+
+			}
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			{
+				rotatePoint(cameraPos, -centeredAngleRotation, right);
+
+				if (up.y <= 0.1 && cameraPos.y > 0)
+					rotatePoint(cameraPos, centeredAngleRotation, right);
+			}
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+			{
+				rotatePoint(cameraPos, centeredAngleRotation, right);
+
+				if (up.y <= 0.1 && cameraPos.y < 0)
+					rotatePoint(cameraPos, -centeredAngleRotation, right);
+			}
+
+
+
+			forward = -normalize3(cameraPos);
+		}
+	}
+
 
 	//The quaternion method is intentionally incomplete. The true method would calculate the f and u for pitch and f and r for yaw
 	// But instead of calculating everything there we are only calculating f and here forcing right to be with respect of the referenceUp
@@ -111,6 +180,10 @@ void Camera::updateCamera() {
 
 	vpMatrix = multiplyMatrices(perspectiveMatrix, viewMatrix);
 
+
+	shader3D.bind();
+	shader3D.setUniform("u_CamPos", cameraPos);
+	shader3D.setUniform("u_View", viewMatrix);
 }
 
 

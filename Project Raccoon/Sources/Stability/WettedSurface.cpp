@@ -24,7 +24,7 @@ bool WettedSurface::isPointInTriangle(const p3& a, const p3& b, const p3& c, con
 }
 
 bool WettedSurface::calculateIntersectionPoint(const p3& a, const p3& b, const p3& c, const p3& l1, const p3& l2, p3& p) {
-	//It is meant to have abc as the wave's triangle, l1 and l2 as the polygon segment and p as output
+	
 
 	p3 normal = cross3(b - a, c - b);
 

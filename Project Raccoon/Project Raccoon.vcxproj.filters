@@ -113,16 +113,16 @@
     <ClInclude Include="Sources\Composites\Axis.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\Graphics.hpp">
+    <ClInclude Include="Sources\Composites\Telemetry\Graphics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\Map.hpp">
+    <ClInclude Include="Sources\Composites\MRS\mainMRS.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\ProgressBar.hpp">
+    <ClInclude Include="Sources\Composites\Telemetry\ProgressBar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\Ship.hpp">
+    <ClInclude Include="Sources\Composites\Telemetry\Ship.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\BinariesManager.hpp">
@@ -147,6 +147,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\MainIncludes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\Solar\SS.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\MRS\Icons.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\MRS\Pathfinding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

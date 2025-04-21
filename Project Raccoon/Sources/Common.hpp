@@ -158,10 +158,16 @@ T dot2(const vec2<T>& v1, const vec2<T>& v2) {
 	return v1.x * v2.x + v1.y * v2.y;
 }
 
-
+//In 2d geometry the cross product is a scalar value, not a vector, it represents the area of their parallelogram
 template<typename T>
 T cross2(const vec2<T>& v1, const vec2<T>& v2) {
 	return v1.x * v2.y - v1.y * v2.x;
+}
+
+template<typename T>
+float magnitude2(const vec2<T>& v) { //modulus
+	float magnitudeSquared = v.x * v.x + v.y * v.y;
+	return sqrt(magnitudeSquared);
 }
 
 
@@ -189,6 +195,10 @@ struct vec3 {
 
 	vec3 operator - (const vec3& other) const {
 		return { x - other.x, y - other.y, z - other.z };
+	}
+
+	vec3 operator-() const {
+		return { -x, -y, -z };
 	}
 
 	vec3 operator *(T scalar) const {
@@ -267,7 +277,7 @@ vec3<T> normalize3(const vec3<T>& v) {
 }
 
 template<typename T>
-float magnitude3(const vec3<T>& v) {
+float magnitude3(const vec3<T>& v) { //modulus
 	float magnitudeSquared = v.x * v.x + v.y * v.y + v.z * v.z;
 	return sqrt(magnitudeSquared);
 }
@@ -283,18 +293,28 @@ float magnitude3(const vec3<T>& v) {
 extern float windowHeight;
 extern float windowWidth;
 
-
+enum Programs { telemetry, MRS, solar };
+enum CameraModes { drag, FPS, centered};
 /////////////////////////////////////////////
-struct GlobalVariables {
-	int program = 0; //0 TFG, 1 MRS //to be changed in settings
+struct GlobalVariables 
+{
+
+
+
+	Programs program = telemetry;//to be changed in settings
+	CameraModes cameraMode = drag;
 	bool isRunning = true;
 	p2 mPos = { 0,0 };
+	p2 variationMPos = { 0,0 };
+	bool isLmbPressed = 0;
 	p2 centerWindow;
 
 	GlobalVariables()
 	{
 		centerWindow = { windowWidth / 2,windowHeight / 2 };
 	}
+
+
 };
 
 
@@ -425,10 +445,9 @@ std::array<float, 4> inverseQuaternion(const std::array<float, 4>& q);
 std::array<float, 4> multiplyQuaternions(const std::array<float, 4>& a, const std::array<float, 4>& b);
 
 // q * p * q^-1
-p3 rotatePoint(const p3& point, const float& angle, const p3& axis);
+void rotatePoint(p3& point, const float& angle, const p3& axis);
 
 void rotate3D(std::vector<p3>& vertices, const p3& centroid, float angleX, float angleY, float angleZ);
-
 void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angleZ);
 
 

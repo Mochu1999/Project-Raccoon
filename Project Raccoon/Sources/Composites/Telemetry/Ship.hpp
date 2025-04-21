@@ -1,13 +1,21 @@
 #pragma once
 
-///////////////////////////////////////////////////////////////////////////////////
-//RENDIMIENTO DE POLYHEDRA TIENE PRIORIDAD
-//UNA VEZ TERMINADA LA OPTIMIZACIÓN JUNTAR COSAS AFINES
+#include "Spheres.hpp"
 
-struct Ship {
+float c = 1;
+float graf1Val = 0;
+float cosPlot(float& c) 
+{
+	c += 2.5;
+	return (1 * c * c / 10000) * cos(radians(c));
+}
+
+struct Ship 
+{
 
 	Shader& shader3D;
 	Camera& camera;
+	Sphere light;
 
 	std::array<float, 16> shipModel3DMatrix = camera.identityMatrix;
 
@@ -27,8 +35,10 @@ struct Ship {
 	float foilStarboardAngle = 0, foilStarboardIncrease = 0.3;
 	float foilPortAngle = 0, foilPortIncrease = 0.3;
 
+	p3 lightPos = { 30,25,40 };
 
-	Ship(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_) {
+	Ship(Shader& shader3D_, Camera& camera_, GlobalVariables gv) :shader3D(shader3D_), camera(camera_), light(3) 
+	{
 
 		casco1.addPolyhedra("casco1.bin");
 		casco2.addPolyhedra("casco2.bin");
@@ -64,7 +74,7 @@ struct Ship {
 		solar1.addPolyhedra("solar1.bin");
 		solar2.addPolyhedra("solar2.bin");
 
-		
+
 		water.positions = { {0,0,0},{waterLength,0,0},{0,0,waterLength},{waterLength,0,0},{0,0,waterLength},{waterLength,0,waterLength} };
 		water.indices = { 0,1,2 ,3,4,5 };
 		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };
@@ -72,9 +82,23 @@ struct Ship {
 		/*water.positions = { {0,0,0},{100,0,0},{0,0,100},{100,0,100} };
 		water.indices = { 0,1,2 ,1,3,2 };
 		water.normals = { {0,1,-0},{0,1,-0},{0,1,-0},{0,1,-0} };*/
+
+		
+		light.addSet(lightPos);
+		if (gv.program == telemetry)
+		{
+			shader3D.bind();
+			shader3D.setUniform("u_lightPos", lightPos);
+		}
 	}
 
-	void draw() {
+	void draw() 
+	{
+		shader3D.bind();
+		shader3D.setUniform("u_Model", camera.identityMatrix);
+		shader3D.setUniform("u_fragmentMode", 1);
+		light.draw();
+
 		opaque();
 
 		std::array<float, 16> rudderMatrix, propellerMatrix, foilAftMatrix, foilStarboardMatrix, foilPortMatrix, rp, rf;
@@ -203,9 +227,9 @@ struct Ship {
 		shader3D.setUniform("u_Color", 0 / 255.0f, 0 / 255.0f, 0 / 255.0f, 1.0f);
 		solar2.stlDraw();
 
-		
+
 		shader3D.setUniform("u_Model", camera.identityMatrix);
-		camera.translate3DModelMatrix(shipModel3DMatrix, {-waterLength/2,0,-waterLength/2 });
+		camera.translate3DModelMatrix(shipModel3DMatrix, { -waterLength / 2,0,-waterLength / 2 });
 		shader3D.setUniform("u_Model", shipModel3DMatrix);
 
 		shader3D.setUniform("u_Color", 40.0f / 255.0f, 100.0f / 255.0f, 255.0f / 255.0f, 0.15f);
@@ -220,5 +244,11 @@ struct Ship {
 
 
 
+	}
+
+	void activateLight()
+	{
+		shader3D.bind();
+		shader3D.setUniform("u_lightPos", lightPos);
 	}
 };

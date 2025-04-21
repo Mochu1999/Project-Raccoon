@@ -2,16 +2,6 @@
 #include "MainIncludes.hpp"
 
 
-
-float c = 1;
-float graf1Val = 0;
-float cactus(float& c) {
-	c += 2.5;
-	return (1 * c / 10) * cos(radians(c));
-}
-
-
-
 int main(void)
 {
 	GlobalVariables gv;
@@ -29,10 +19,9 @@ int main(void)
 
 	//main reason to add all the shaders there is to initialize the associated matrices in an encapsulated way
 		// IT ISN'T REASONABLE TO HAVE THE SHADER INITIALIZATION IN CAMERA, ENCAPSULATE THEM ELSEWHERE
-	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText);
+	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText,gv);
 
-	Settings settings(camera,gv);
-
+	Settings settings(camera, gv);
 
 
 
@@ -42,37 +31,38 @@ int main(void)
 
 	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
 	text.addText({ {{ 10,950 }, tm.fps, " fps"},{{10,1000},tm.currentTime, " s"} });
+	Text textAux("resources/Glyphs/Helvetica/Helvetica.otf", 36);
 
 
 	Lines2D centerCross;
-	centerCross.addSet( { 
+	centerCross.addSet({
 		{gv.centerWindow.x - 20,gv.centerWindow.y},{gv.centerWindow.x + 20,gv.centerWindow.y},
-		{gv.centerWindow.x,gv.centerWindow.y - 20},{gv.centerWindow.x,gv.centerWindow.y + 20}});
+		{gv.centerWindow.x,gv.centerWindow.y - 20},{gv.centerWindow.x,gv.centerWindow.y + 20} });
 	centerCross.indices = { 0,1,2,3 };
 
 
 
-	Axis axis(shader3D, camera); //I'm also adding light here and plan to add all general things here
-	Ship ship(shader3D, camera);
+	Axis axis(shader3D, camera);
+	Ship ship(shader3D, camera, gv);
+	SS ss(shader3D, camera, gv);
 
 	Overlay2D overlay(shader2D, camera);
 	Graphic graphic(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, "A*cos(x)", { 1400,100 }, graf1Val);
 	Graphic graphic2(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, "rudderAngle", { 1400,400 }, ship.rudderAngle);
 	ProgressBar pb(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, { 1400 - 50,700 });
 
-	Map map(shader2D, shaderText, camera,gv);
+	MainMap map(shader2D, shaderText, camera, gv);
 
 
 
 
 
-
-	AllPointers allPointers(&camera, &map, &gv);
+	AllPointers allPointers(&camera, &gv, &map, &ship);
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
 	glfwSetMouseButtonCallback(window, mouseEventCallback);
 	glfwSetScrollCallback(window, scrollCallback);
-	
+
 
 	int counter = 0;
 
@@ -84,29 +74,36 @@ int main(void)
 		{
 			tm.update();
 
-			glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f); //glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			clearScreen(gv);
+			
+			
 
-			if (gv.program == 0)
+
+			switch (gv.program)
 			{
-
+			case telemetry:
 				axis.draw();
 				ship.draw();
 
 
 				overlay.draw();
 
-				graf1Val = cactus(c);
+				graf1Val = cosPlot(c);
 				graphic.draw();
 				graphic2.draw();
 				pb.draw();
-			}
-			else if (gv.program == 1)
-			{
+
+				break;
+			case MRS:
 				map.draw();
+				break;
+
+			case solar:
+				axis.draw();
+				ss.draw();
 			}
 
-			///////////Separar carpeta de composites en TFG y MRS
+
 
 
 			//text
@@ -115,7 +112,14 @@ int main(void)
 			text.draw();
 			text.substituteText(0, { { 10,950 }, round2d(tm.fps), " fps" });
 			text.substituteText(1, round1d(tm.currentTime), " s");
-			opaque();
+			p2 algo = { 0,0 };
+			if(gv.isLmbPressed==1) algo = gv.variationMPos - gv.mPos;
+			textAux.addDynamicText({
+				{{ 100,900 }, "isLmbPressed: ",gv.isLmbPressed},
+				{{ 100,850 }, "distance: ",algo.x,", ",algo.y},
+				});
+
+			//textAux.draw();
 
 			transparent();
 			shader2D.bind();
@@ -126,12 +130,10 @@ int main(void)
 			glLineWidth(1);
 			opaque();
 
-			keyboardRealTimePolls(window,gv, camera, map);
+			keyboardRealTimePolls(window, gv, camera, map);
 			camera.updateCamera();
 
-			shader3D.bind();
-			shader3D.setUniform("u_CamPos", camera.cameraPos);
-			shader3D.setUniform("u_View", camera.viewMatrix);
+			
 
 			//break;
 

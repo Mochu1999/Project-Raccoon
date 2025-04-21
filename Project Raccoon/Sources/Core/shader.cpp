@@ -130,7 +130,7 @@ GLFWwindow* initialize() {
 	glfwInit();
 
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
@@ -143,6 +143,7 @@ GLFWwindow* initialize() {
 	//fullscreen
 	//GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", glfwGetPrimaryMonitor(), NULL);
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "PR0JET R4CC00N", NULL, NULL);
+	
 	
 
 	/* this will be useful to save width and height
@@ -184,4 +185,18 @@ void transparent() {
 	//deactivates the depth buffer, if activated the objects behind it won't be rendered
 	//, irrelevant if there aren't multiple layers of transparent
 	glDepthMask(GL_FALSE);
+}
+
+void clearScreen(GlobalVariables gv)
+{
+	if (gv.program == solar)
+	{
+		glClearColor(0.035f, 0.065f, 0.085f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	else
+	{
+		glClearColor(40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 }

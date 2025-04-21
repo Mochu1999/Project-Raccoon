@@ -7,6 +7,8 @@
 #include "FilesManagement.hpp"
 #include "Circles.hpp"
 #include "Text.hpp"
+#include "Icons.hpp"
+#include "Pathfinding.hpp"
 
 //Mirar el tema de los rumbos circulares
 
@@ -14,73 +16,16 @@
 // una matriz aquí local y hacer la función que la crea global
 	//Crear matrices locales permitirá no recrear la matriz cada vez a coste de mayor memoria y no necesitar camara en muchas structs
 
-struct IconLight {
-
-	Shader& shader2D;
-	Camera& camera;
-
-
-	Polyhedra interm;
-	Polygons2D mainHull, sideHull1, sideHull2, aux1, aux2, aux3;
-	Lines2D auxa, auxb;
-
-	IconLight(Shader& shader2D_, Camera& camera_) :shader2D(shader2D_), camera(camera_)
-	{
-
-		readSTL(interm, "C:/dev/Project-Raccoon/Project Raccoon/Resources/stl models/mainHull.stl");
-		polyhedraTo2D(interm, mainHull);
-
-		readSTL(interm, "C:/dev/Project-Raccoon/Project Raccoon/Resources/stl models/sideHull1.stl");
-		polyhedraTo2D(interm, sideHull1);
-
-		readSTL(interm, "C:/dev/Project-Raccoon/Project Raccoon/Resources/stl models/sideHull2.stl");
-		polyhedraTo2D(interm, sideHull2);
-
-		readSTL(interm, "C:/dev/Project-Raccoon/Project Raccoon/Resources/stl models/aux1.stl");
-		polyhedraTo2D(interm, aux1);
-
-		readSTL(interm, "C:/dev/Project-Raccoon/Project Raccoon/Resources/stl models/aux2.stl");
-		polyhedraTo2D(interm, aux2);
-
-		readSTL(interm, "C:/dev/Project-Raccoon/Project Raccoon/Resources/stl models/aux3.stl");
-		polyhedraTo2D(interm, aux3);
-
-
-		auxa.addSet({ {-5,0},{5,0} });
-		auxb.addSet({ {0,-5},{0,5} });
-
-	}
-
-	void draw() {
-
-		shader2D.bind();
-		/*std::array<float, 16> mapModel2DMatrix = camera.create2DModelMatrix({0,0}, 0, 50);
-		shader2D.setUniform("u_Model", mapModel2DMatrix);*/
-
-		shader2D.setUniform("u_Color", 1, 1, 0, 1);
-		mainHull.draw();
-		sideHull1.draw();
-		sideHull2.draw();
-
-		shader2D.setUniform("u_Color", 1, 1, 1, 1);
-		aux1.draw();
-		aux2.draw();
-		aux3.draw();
-
-		/*shader2D.setUniform("u_Color", 1, 0, 0, 1);
-		glLineWidth(3);
-		auxa.draw();
-		auxb.draw();
-		glLineWidth(1);*/
-	}
-
-};
-
-string formatFloat(float value) {
+string formatFloat(float value) 
+{
 	std::ostringstream oss;
 	oss << std::fixed << std::setprecision(2) << value;
 	return oss.str();
 }
+
+
+
+
 
 string lonLatToString(p2 lonLat)
 {
@@ -101,14 +46,29 @@ string lonLatToString(p2 lonLat)
 }
 
 //Ver que está en uso, que no, reserves y comentarios
-struct Map {
+struct MainMap 
+{
 	Shader& shader2D, shaderText;
 	Camera& camera;
 	GlobalVariables& gv;
 
 	Lines2D mercator;
 	Polygons2D background;
+	
+	struct MapData 
+	{
+		vector<p2> lonLatFrame; 
+		vector<p2> mercatorFrame;
 
+		vector<p2> lonLatPositions;
+		vector<p2> mercatorPositions;
+
+
+		MapData()
+		{
+
+		}
+	};
 	
 
 	IconLight icon;
@@ -124,7 +84,7 @@ struct Map {
 
 	p2 mapCorner, translationTotal;
 	vector<float> frameLimits; //[0] x left, [1] x right, [2] y bottom, [3] y up
-	bool show = 1;
+	bool show = 0;
 
 	Text text1, text2;
 	p2 shipCoordinates = { 2.128842,41.248926 };
@@ -140,7 +100,7 @@ struct Map {
 	Lines2D courseLine;
 
 
-	Map(Shader& shader2D_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_)
+	MainMap(Shader& shader2D_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_)
 		:shader2D(shader2D_), shaderText(shaderText_),
 		camera(camera_), circle(5000, 100), text1("resources/Glyphs/Helvetica/Helvetica.otf", 36), text2("resources/Glyphs/Helvetica/Helvetica.otf", 36)
 		, gv(gv_), icon(shader2D, camera)
@@ -160,7 +120,7 @@ struct Map {
 
 		background.addSet(frame.positions);
 
-		//bottom left corner in meters from earth's 0,0 
+		//bottom left corner in meters (mercator) from earth's 0,0 
 		point0 = frame.positions[0];
 
 		totalX = frame.positions[1].x - frame.positions[0].x;
@@ -293,25 +253,25 @@ struct Map {
 		
 
 		{
-			shader2D.bind();
-			shader2D.setUniform("u_Model", camera.identityMatrix);
-			shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
-			dataBox.draw();
-			shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
-			glLineWidth(3);
-			dataBoxOutline.draw();
-			glLineWidth(1);
+			//shader2D.bind();
+			//shader2D.setUniform("u_Model", camera.identityMatrix);
+			//shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+			//dataBox.draw();
+			//shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+			//glLineWidth(3);
+			//dataBoxOutline.draw();
+			//glLineWidth(1);
 
-			shaderText.bind();
-			text1.addDynamicText({
-				{{ 100,700 }, "Ship coordinates:  ", lonLatToString(shipCoordinates)},
-				{ { 100,650 }, "Distance left:  ", totalDistance / 1000 ," km"},
-				{ { 100,600 }, "Speed: ", 0 ,"  km/h"},
-				{ { 100,550 }, "Estimated time left:  si"},
-				{ { 100,500 }, "Errors:  NA"},
-				});
+			//shaderText.bind();
+			//text1.addDynamicText({
+			//	{{ 100,700 }, "Ship coordinates:  ", lonLatToString(shipCoordinates)},
+			//	{ { 100,650 }, "Distance left:  ", totalDistance / 1000 ," km"},
+			//	{ { 100,600 }, "Speed: ", 0 ,"  km/h"},
+			//	{ { 100,550 }, "Estimated time left:  si"},
+			//	{ { 100,500 }, "Errors:  NA"},
+			//	});
 
-			text1.draw();
+			//text1.draw();
 		}
 		
 	}

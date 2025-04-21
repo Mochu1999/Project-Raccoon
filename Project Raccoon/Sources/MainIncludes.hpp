@@ -33,8 +33,10 @@
 #include "WettedSurface.hpp"
 
 #include "Graphics.hpp"
-#include "Map.hpp"
+#include "mainMRS.hpp"
 #include "Axis.hpp"
 #include "Ship.hpp"
 #include "Overlay2D.hpp"
 #include "ProgressBar.hpp"
+
+#include "SS.hpp"

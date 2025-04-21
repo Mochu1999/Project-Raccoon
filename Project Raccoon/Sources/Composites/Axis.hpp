@@ -7,9 +7,9 @@ struct Axis {
 	Camera& camera;
 	
 	Lines3D xLine, yLine, zLine, xLine2, zLine2;
-	Sphere light;
+	
 
-	Axis(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_), light(3)
+	Axis(Shader& shader3D_, Camera& camera_) :shader3D(shader3D_), camera(camera_)
 	{
 		xLine.addSet({ {-100,0,0},{100,0,0} });
 		yLine.addSet({ {0,-100,0},{0,100,0} });
@@ -19,11 +19,10 @@ struct Axis {
 
 
 		
-		p3 lightPos = { 30,25,40 };
-		light.addSet(lightPos);
+		
+		
 
-		shader3D.bind();
-		shader3D.setUniform("u_lightPos", lightPos);
+		
 	}
 	void draw() {
 
@@ -43,6 +42,6 @@ struct Axis {
 		glLineWidth(1);
 
 		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
-		light.draw();
+		
 	}
 };

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Globe.hpp"
-#include "Map.hpp"
-
-
+#include "mainMRS.hpp"
+#include "Ship.hpp"
+#include "SS.hpp"
 
 
 int keyCounter = 5;
@@ -11,10 +11,12 @@ int keyCounter = 5;
 //Pointers can be re-seated while references cannot. But we are not re seating anything so whatever
 struct AllPointers {
 	Camera* camera;
-	Map* map;
 	GlobalVariables* gv;
+	MainMap* map;
+	Ship* ship;
+	SS* ss;
 
-	AllPointers(Camera* camera_, Map* map_, GlobalVariables* gv_) :camera(camera_), map(map_), gv(gv_) {}
+	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Ship* ship_) :camera(camera_), map(map_), gv(gv_), ship(ship_) {}
 };
 
 //The standard is to use callbacks for one-time event (typing, increase something once per press) and another function
@@ -24,10 +26,11 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
-	Map* map = allPointers->map;
+	MainMap* map = allPointers->map;
+	Ship* ship = allPointers->ship;
 	GlobalVariables* gv = allPointers->gv;
 
-	
+
 	if (action == GLFW_PRESS)
 	{
 		switch (key)
@@ -36,10 +39,10 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			gv->isRunning = !gv->isRunning;
 			print(gv->isRunning);
 			break;
-		case GLFW_KEY_C:
-			keyCounter++;
+			/*case GLFW_KEY_C:
+				keyCounter++;
 
-			break;
+				break;*/
 		case GLFW_KEY_Q:
 			if (gv->program == 1)
 			{
@@ -50,6 +53,21 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			}
 			break;
 
+			//cameraModes
+		case GLFW_KEY_X:
+			gv->cameraMode = drag;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
+		case GLFW_KEY_C:
+			gv->cameraMode = FPS;
+			gv->variationMPos = gv->mPos;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			break;
+		case GLFW_KEY_V:
+			gv->cameraMode = centered;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+			break;
 		}
 
 
@@ -59,11 +77,21 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			switch (key)
 			{
 			case GLFW_KEY_1:
-				if (gv->program == 1) gv->program = 0;
-				else if (gv->program == 0) gv->program = 1;
+				gv->program = telemetry;
+				ship->activateLight();
 
 				break;
+			case GLFW_KEY_2:
+				gv->program = MRS;
+
+				break;
+			case GLFW_KEY_3:
+				gv->program = solar;
+
+				break;
+
 			}
+
 		}
 	}
 }
@@ -71,47 +99,51 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 
 //keys functions gets triggered once per frame
-void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera, Map& map) {
-	
+void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera, MainMap& map) {
 
+	//TIENES ESTO PARTIDO ENTRE AQUÍ Y UPDATECAMERA
 
 	// Rotation
-	if (gv.program == 0)
+	if (gv.program == telemetry || gv.program == solar)
 	{
+		if (gv.cameraMode == drag || gv.cameraMode == FPS)
+		{
+			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+				camera.calculateForward(camera.forward, camera.rotationSpeed, camera.right);
 
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-			camera.calculateForward(camera.forward, camera.rotationSpeed, camera.right);
+			if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+				camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.right);
 
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-			camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.right);
+			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+				camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.up);
 
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-			camera.calculateForward(camera.forward, -camera.rotationSpeed, camera.up);
-
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-			camera.calculateForward(camera.forward, camera.rotationSpeed, camera.up);
+			if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+				camera.calculateForward(camera.forward, camera.rotationSpeed, camera.up);
 
 
-		//translation
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			camera.cameraPos = camera.cameraPos + camera.forward * camera.translationSpeed;
+			//translation
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+				camera.cameraPos = camera.cameraPos + camera.forward * camera.translationSpeed;
 
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			camera.cameraPos = camera.cameraPos - camera.forward * camera.translationSpeed;
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+				camera.cameraPos = camera.cameraPos - camera.forward * camera.translationSpeed;
 
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			camera.cameraPos = camera.cameraPos - camera.right * camera.translationSpeed;
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+				camera.cameraPos = camera.cameraPos - camera.right * camera.translationSpeed;
 
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			camera.cameraPos = camera.cameraPos + camera.right * camera.translationSpeed;
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+				camera.cameraPos = camera.cameraPos + camera.right * camera.translationSpeed;
 
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-			camera.cameraPos.y += camera.translationSpeed;
+			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+				camera.cameraPos.y += camera.translationSpeed;
 
-		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-			camera.cameraPos.y -= camera.translationSpeed;
+			if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+				camera.cameraPos.y -= camera.translationSpeed;
+		}
+
+		
 	}
-	else if (gv.program == 1)
+	else if (gv.program == MRS)
 	{
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			map.translationTotal -= {0, 10};
@@ -120,7 +152,7 @@ void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& came
 			map.translationTotal += {0, 10};
 
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			map.translationTotal += {10,0};
+			map.translationTotal += {10, 0};
 
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 			map.translationTotal -= {10, 0};
@@ -138,28 +170,59 @@ void getPos(GLFWwindow* window, p2& mPos) {
 
 void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
-	Map* map = allPointers->map;
+	GlobalVariables* gv = allPointers->gv;
+	MainMap* map = allPointers->map;
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-		//print(mPos);
-
-
+		gv->isLmbPressed = 1;
+		gv->variationMPos = gv->mPos;
+	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	{
+		gv->isLmbPressed = 0;
 	}
 }
 
 
+
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
-	Map* map = allPointers->map;
-	if (yoffset > 0) {
-		map->totalPixels *= 1.15;
-		map->update();
+	Camera* camera = allPointers->camera;
+	GlobalVariables* gv = allPointers->gv;
+	MainMap* map = allPointers->map;
+
+
+	if (yoffset > 0)
+	{
+		if (gv->program == MRS)
+		{
+			map->totalPixels *= 1.15;
+			map->update();
+		}
+		else if (gv->program == telemetry || gv->program == solar)
+		{
+			camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed*10;
+		}
 	}
-	else if (yoffset < 0) {
-		map->totalPixels /= 1.15;
-		map->update();
+	else if (yoffset < 0)
+	{
+		if (gv->program == MRS)
+		{
+			map->totalPixels /= 1.15;
+			map->update();
+		}
+		else if (gv->program == telemetry || gv->program == solar)
+		{
+			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed*10;
+		}
 	}
+
+	else if (gv->program == telemetry || gv->program == solar)
+	{
+
+	}
+
 }
 
 

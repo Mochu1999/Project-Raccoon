@@ -18,11 +18,16 @@ struct Camera {
 
 	GLFWwindow* window;
 	Shader& shader3D, shader2D, shader2D_Instanced, shaderText;
+	GlobalVariables& gv;
 
 	float fov = 45.0f * PI / 180;
 	float aspectRatio = windowWidth / windowHeight;
 	float nearZ = 0.1f;
 	float farZ = 3000.0f;
+
+	float centeredAngleRotation = 0.1;
+	float centeredRadius = 0;
+
 
 	std::array<float, 16> perspectiveMatrix, viewMatrix, vpMatrix, orthoMatrix, identityMatrix;
 
@@ -37,8 +42,9 @@ struct Camera {
 	float scale = 1;
 
 
-	Camera(GLFWwindow* window_, Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_)
-		:window(window_), shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_) {
+	Camera(GLFWwindow* window_, Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, GlobalVariables& gv_)
+		:window(window_), shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), gv(gv_) 
+	{
 
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();
@@ -77,6 +83,7 @@ struct Camera {
 		}
 	}
 
+	void centeredRotation();
 
 	std::array<float, 16> createScalingMatrix(float scaleX, float scaleY, float scaleZ);
 

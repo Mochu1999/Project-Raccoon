@@ -63,7 +63,7 @@ std::array<float, 4> multiplyQuaternions(const std::array<float, 4>& a, const st
 }
 
 // q * p * q^-1
-p3 rotatePoint(const p3& point, const float& angle, const p3& axis) {
+void rotatePoint(p3& point, const float& angle, const p3& axis) {
 	std::array<float, 4> rotationQuaternion = createQuaternion(angle, axis);
 	//p
 	std::array<float, 4> pointQuat = { 0, point.x, point.y, point.z };
@@ -72,7 +72,7 @@ p3 rotatePoint(const p3& point, const float& angle, const p3& axis) {
 
 	std::array<float, 4> rotatedPointQuat = multiplyQuaternions(multiplyQuaternions(rotationQuaternion, pointQuat), inverseQuat);
 
-	return p3(rotatedPointQuat[1], rotatedPointQuat[2], rotatedPointQuat[3]);
+	point = { rotatedPointQuat[1], rotatedPointQuat[2], rotatedPointQuat[3] };
 }
 
 
@@ -81,9 +81,9 @@ void rotate3D(std::vector<p3>& vertices, const p3& centroid, float angleX, float
 	for (p3& vertex : vertices)
 	{
 		vertex -= centroid;
-		vertex = rotatePoint(vertex, radians(angleX), { 1, 0, 0 });
-		vertex = rotatePoint(vertex, radians(angleY), { 0, 1, 0 });
-		vertex = rotatePoint(vertex, radians(angleZ), { 0, 0, 1 });
+		rotatePoint(vertex, radians(angleX), { 1, 0, 0 });
+		rotatePoint(vertex, radians(angleY), { 0, 1, 0 });
+		rotatePoint(vertex, radians(angleZ), { 0, 0, 1 });
 		vertex += centroid;
 	}
 
@@ -93,9 +93,9 @@ void rotate3D(std::vector<p3>& vertices, float angleX, float angleY, float angle
 
 	for (p3& vertex : vertices)
 	{
-		vertex = rotatePoint(vertex, radians(angleX), { 1, 0, 0 });
-		vertex = rotatePoint(vertex, radians(angleY), { 0, 1, 0 });
-		vertex = rotatePoint(vertex, radians(angleZ), { 0, 0, 1 });
+		rotatePoint(vertex, radians(angleX), { 1, 0, 0 });
+		rotatePoint(vertex, radians(angleY), { 0, 1, 0 });
+		rotatePoint(vertex, radians(angleZ), { 0, 0, 1 });
 	}
 
 }

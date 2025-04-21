@@ -107,6 +107,8 @@ GLFWwindow* initialize();
 void opaque();
 void transparent();
 
+void clearScreen(GlobalVariables gv);
+
 
 //#define CHECK_GL_ERROR() {\
 //    GLenum err = glGetError();\
