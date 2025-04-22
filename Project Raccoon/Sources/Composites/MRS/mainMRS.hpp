@@ -253,25 +253,25 @@ struct MainMap
 		
 
 		{
-			//shader2D.bind();
-			//shader2D.setUniform("u_Model", camera.identityMatrix);
-			//shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
-			//dataBox.draw();
-			//shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
-			//glLineWidth(3);
-			//dataBoxOutline.draw();
-			//glLineWidth(1);
+			shader2D.bind();
+			shader2D.setUniform("u_Model", camera.identityMatrix);
+			shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
+			dataBox.draw();
+			shader2D.setUniform("u_Color", 40.0f / 255.0f, 239.9f / 255.0f, 239.0f / 255.0f, 1);
+			glLineWidth(3);
+			dataBoxOutline.draw();
+			glLineWidth(1);
 
-			//shaderText.bind();
-			//text1.addDynamicText({
-			//	{{ 100,700 }, "Ship coordinates:  ", lonLatToString(shipCoordinates)},
-			//	{ { 100,650 }, "Distance left:  ", totalDistance / 1000 ," km"},
-			//	{ { 100,600 }, "Speed: ", 0 ,"  km/h"},
-			//	{ { 100,550 }, "Estimated time left:  si"},
-			//	{ { 100,500 }, "Errors:  NA"},
-			//	});
+			shaderText.bind();
+			text1.addDynamicText({
+				{{ 100,700 }, "Ship coordinates:  ", lonLatToString(shipCoordinates)},
+				{ { 100,650 }, "Distance left:  ", totalDistance / 1000 ," km"},
+				{ { 100,600 }, "Speed: ", 0 ,"  km/h"},
+				{ { 100,550 }, "Estimated time left:  si"},
+				{ { 100,500 }, "Errors:  NA"},
+				});
 
-			//text1.draw();
+			text1.draw();
 		}
 		
 	}

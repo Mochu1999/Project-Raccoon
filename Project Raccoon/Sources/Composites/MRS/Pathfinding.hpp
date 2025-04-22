@@ -29,12 +29,12 @@ void calculateBoundingBox(vector<std::pair<p2, p2>>& boundingBoxes, const vector
 
 //HOSTIAS, NECESITO QUE NO TOQUE EL PUNTO D O ME CREARÁ 2 PUNTOS SI EN D CHOCAN DOS LINEAS
 
-//wettedSurface.hpp has a calculateIntersectionPoint that works similarly but between p3s, a triangle and a lines, these are 2 2d lines
 //Lines formed up by ab and cd 
+//wettedSurface.hpp has a calculateIntersectionPoint that works similarly but between p3s, a triangle and a lines, these are 2 2d lines
 bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2& d, p2& p)
 {
 	if (a == b || c == d) return false;
-	
+
 	//checking if they bounding boxes collide for an early exit
 	if (std::max(a.x, b.x) < std::min(c.x, d.x) ||
 		std::max(c.x, d.x) < std::min(a.x, b.x) ||
@@ -44,7 +44,7 @@ bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2&
 
 
 	const float epsilon = 1e-6f;
-	
+
 	const p2 ab = { b.x - a.x ,b.y - a.y };
 	const p2 cd = { d.x - c.x ,d.y - c.y };
 	const p2 ac = { c.x - a.x ,c.y - a.y };
@@ -61,7 +61,8 @@ bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2&
 
 
 	const float precalculate = cross2(ab, cd);
-	if (fabs(precalculate) < epsilon) { // parallel/colinear branch
+	if (fabs(precalculate) < epsilon)
+	{ // parallel/colinear branch
 
 		if (fabs(cross2(ab, ac)) > epsilon)
 			return false; // parallel but not colinear
@@ -92,11 +93,92 @@ bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2&
 	float t = cross2(ac, cd) / precalculate; // (ac×cd)/(ab×cd)
 	float u = cross2(ac, ab) / precalculate; // (ac×ab)/(ab×cd)
 
-	if (t >= 0 && t <= 1 && u >= 0 && u <= 1) { // Return false for intersection in d
+	if (t >= 0 && t <= 1 && u >= 0 && u < 1)
+	{ // Return false for intersection in d
 		p.x = a.x + t * ab.x;
 		p.y = a.y + t * ab.y;
 		return true;
 	}
 
 	return false;
+}
+
+struct HitData 
+{
+	unsigned int polygon;
+	unsigned int edge;
+	p2 hit;
+
+	HitData (unsigned int polygon_, unsigned int edge_, p2 hit_):polygon(polygon_),edge(edge_),hit(hit_)
+	{}
+	HitData(){}
+};
+
+void routing(vector<p2>& path, vector<vector<p2>> polygons, p2 start, const p2 goal)
+{
+	path.push_back(start);
+
+	while (path.back() != goal)
+	{
+		//we set that closest point as the goal, we will search for a hit with the polygons, if hits happen we will search for the closest one  
+		p2 closestPoint = goal;
+		vector<HitData> hits;
+		HitData currentHit;
+		unsigned int currentPolygon = std::numeric_limits<float>::max();
+
+		for (unsigned int i = 0; i < polygons.size(); i++)
+		{
+			p2 currentHitPoint = { 0,0 };
+
+			for (unsigned int j = 0; j < polygons[i].size(); j++)
+			{
+				if (isThereAnIntersectionPoint(path.back(), goal, polygons[i][j], polygons[i][j + 1], currentHit))
+				{
+					hits.push_back({ i,j,currentHitPoint });
+				}
+			}
+		}
+		if (hits.size())
+		{
+			float lowestDistance = std::numeric_limits<float>::max();
+
+			for (size_t i = 0; i < hits.size(); i++)
+			{
+				float distance = calculateDistance(start, hits[i].hit);
+
+				if (distance < lowestDistance)
+				{
+					lowestDistance = distance;
+					closestPoint = hits[i].hit;
+					currentHit = hits[i]; //Mierda de nombre
+				}
+			}
+
+
+		}
+		if (closestPoint == goal)
+		{
+			path.push_back(goal); //ending the while loop
+		}
+		else if (currentPolygon != std::numeric_limits<float>::max()) //we are in a polygon and we will be exiting it from the point that is closest to our goal
+		{
+			unsigned int closestIndex = std::numeric_limits<float>::max();
+			float closestDistance = std::numeric_limits<float>::max();
+
+			for (size_t i = 0; i < polygons[currentPolygon].size() - 1; i++) //the last point is repeated
+			{
+				float currentDistance = calculateDistance(polygons[currentPolygon][i], goal);
+
+				if (currentDistance < closestDistance)
+				{
+					closestDistance = currentDistance;
+					closestIndex = i;
+				}
+			}
+			//Going from currentHit to closestIndex
+		}
+
+	}
+
+
 }
