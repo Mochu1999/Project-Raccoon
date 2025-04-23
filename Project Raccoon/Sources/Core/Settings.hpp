@@ -14,15 +14,17 @@ struct Settings
 	p3& cameraPos;
 	p3& forward;
 	GlobalVariables& gv;
+	MainMap& map;
 
 	enum Variables
 	{
 		CameraPos,
 		Forward,
-		Program
+		Program,
+		TotalPixels
 	};
 
-	Settings(Camera& camera, GlobalVariables& gv_) : cameraPos(camera.cameraPos), forward(camera.forward), gv(gv_)
+	Settings(Camera& camera, GlobalVariables& gv_, MainMap& map_) : cameraPos(camera.cameraPos), forward(camera.forward), gv(gv_), map(map_)
 	{
 		read();
 	}
@@ -46,6 +48,10 @@ struct Settings
 			var = Program;
 			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
 			outFile.write(reinterpret_cast<const char*>(&gv.program), sizeof(gv.program));
+
+			var = TotalPixels;
+			outFile.write(reinterpret_cast<const char*>(&var), sizeof(var));
+			outFile.write(reinterpret_cast<const char*>(&map.totalPixels), sizeof(map.totalPixels));
 		}
 		outFile.close();
 	}
@@ -73,6 +79,11 @@ struct Settings
 				case Program:
 					inFile.read(reinterpret_cast<char*>(&gv.program), sizeof(gv.program));
 					break;
+				case TotalPixels:
+					inFile.read(reinterpret_cast<char*>(&map.totalPixels), sizeof(map.totalPixels));
+					map.update();
+					break;
+
 
 				default:
 					std::cerr << "Unknown variable in settings file." << std::endl;

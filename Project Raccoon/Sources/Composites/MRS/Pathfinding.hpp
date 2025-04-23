@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 
 void calculateBoundingBox(vector<std::pair<p2, p2>>& boundingBoxes, const vector<vector<p2>>& lonLatPositions)
@@ -27,7 +27,7 @@ void calculateBoundingBox(vector<std::pair<p2, p2>>& boundingBoxes, const vector
 
 //FUNCTION NEEDS TO BE HEAVILY TESTED. LOGIC OF COLLINEAR HAS NOT BEEN REVISED
 
-//HOSTIAS, NECESITO QUE NO TOQUE EL PUNTO D O ME CREAR¡ 2 PUNTOS SI EN D CHOCAN DOS LINEAS
+//HOSTIAS, NECESITO QUE NO TOQUE EL PUNTO D O ME CREAR√Å 2 PUNTOS SI EN D CHOCAN DOS LINEAS
 
 //Lines formed up by ab and cd 
 //wettedSurface.hpp has a calculateIntersectionPoint that works similarly but between p3s, a triangle and a lines, these are 2 2d lines
@@ -72,7 +72,7 @@ bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2&
 		float t1 = dot2(d - a, ab);
 		float denom = dot2(ab, ab);
 
-		if (denom < epsilon) return false; // ab is too small ñ treat as no segment
+		if (denom < epsilon) return false; // ab is too small ‚Äì treat as no segment
 
 		t0 /= denom;
 		t1 /= denom;
@@ -90,8 +90,8 @@ bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2&
 		return true;
 	}
 
-	float t = cross2(ac, cd) / precalculate; // (ac◊cd)/(ab◊cd)
-	float u = cross2(ac, ab) / precalculate; // (ac◊ab)/(ab◊cd)
+	float t = cross2(ac, cd) / precalculate; // (ac√ócd)/(ab√ócd)
+	float u = cross2(ac, ab) / precalculate; // (ac√óab)/(ab√ócd)
 
 	if (t >= 0 && t <= 1 && u >= 0 && u < 1)
 	{ // Return false for intersection in d
@@ -103,79 +103,120 @@ bool isThereAnIntersectionPoint(const p2& a, const p2& b, const p2& c, const p2&
 	return false;
 }
 
-struct HitData 
+//When routing finds a collision this struct stores the usefull data of the hit. In which polygon has it occurred, in what edge and the position
+struct HitData
 {
-	unsigned int polygon;
+	unsigned int polygonIndex;
 	unsigned int edge;
-	p2 hit;
+	p2 position;
 
-	HitData (unsigned int polygon_, unsigned int edge_, p2 hit_):polygon(polygon_),edge(edge_),hit(hit_)
+	HitData(unsigned int polygonIndex_, unsigned int edge_, p2 position_) :polygonIndex(polygonIndex_), edge(edge_), position(position_)
 	{}
-	HitData(){}
+	HitData() {}
 };
 
-void routing(vector<p2>& path, vector<vector<p2>> polygons, p2 start, const p2 goal)
+//path will return the waypoints
+//The algorithm finds a way from start to goal. it ends when path includes the goal
+// It searches for a hit with a polygon in the path. If there are the path will go to the closest polygon and from there it will go to the vertex
+// that is closest to the goal. The process is repeated from there
+void routing(vector<p2>& path, const vector<vector<p2>> vecOfPolygons, p2 start, const p2 goal)
 {
 	path.push_back(start);
 
 	while (path.back() != goal)
 	{
-		//we set that closest point as the goal, we will search for a hit with the polygons, if hits happen we will search for the closest one  
 		p2 closestPoint = goal;
 		vector<HitData> hits;
-		HitData currentHit;
-		unsigned int currentPolygon = std::numeric_limits<float>::max();
+		unsigned int hitIndex = std::numeric_limits<unsigned int>::max();
 
-		for (unsigned int i = 0; i < polygons.size(); i++)
+		//search for a hit with every polygon
+		for (unsigned int i = 0; i < vecOfPolygons.size(); i++)
 		{
-			p2 currentHitPoint = { 0,0 };
+			p2 currentHitPosition; //to be filled in isThereAnIntersectionPoint()
 
-			for (unsigned int j = 0; j < polygons[i].size(); j++)
+			for (unsigned int j = 0; j < vecOfPolygons[i].size(); j++)
 			{
-				if (isThereAnIntersectionPoint(path.back(), goal, polygons[i][j], polygons[i][j + 1], currentHit))
+				if (isThereAnIntersectionPoint(path.back(), goal, vecOfPolygons[i][j], vecOfPolygons[i][j + 1], currentHitPosition))
 				{
-					hits.push_back({ i,j,currentHitPoint });
+					if (path.back() != currentHitPosition) //Avoiding intersection with the point where you are
+						hits.push_back({ i,j,currentHitPosition });
 				}
 			}
 		}
+		//searchs for the closest hit
 		if (hits.size())
 		{
 			float lowestDistance = std::numeric_limits<float>::max();
 
-			for (size_t i = 0; i < hits.size(); i++)
+			for (unsigned int i = 0; i < hits.size(); i++)
 			{
-				float distance = calculateDistance(start, hits[i].hit);
+				float distance = calculateDistance(start, hits[i].position);
 
 				if (distance < lowestDistance)
 				{
 					lowestDistance = distance;
-					closestPoint = hits[i].hit;
-					currentHit = hits[i]; //Mierda de nombre
+					closestPoint = hits[i].position;
+					hitIndex = i;
 				}
 			}
 
 
 		}
+		//ends the while loop if you are in goal
 		if (closestPoint == goal)
 		{
-			path.push_back(goal); //ending the while loop
+			path.push_back(goal);
 		}
-		else if (currentPolygon != std::numeric_limits<float>::max()) //we are in a polygon and we will be exiting it from the point that is closest to our goal
+		//we are in a polygon and we will be exiting it from the point that is closest to our goal
+		else
 		{
-			unsigned int closestIndex = std::numeric_limits<float>::max();
+
+			const unsigned int polygonIndex = hits[hitIndex].polygonIndex;
+			const unsigned int startEdgeIndex = hits[hitIndex].edge;
+			const p2 position = hits[hitIndex].position;
+
+			unsigned int endEdgeIndex = 0;
 			float closestDistance = std::numeric_limits<float>::max();
 
-			for (size_t i = 0; i < polygons[currentPolygon].size() - 1; i++) //the last point is repeated
+			//we loop through the vertices looking for in which one will we be exiting
+			for (size_t i = 0; i < vecOfPolygons[polygonIndex].size() - 1; i++) //the last point is repeated
 			{
-				float currentDistance = calculateDistance(polygons[currentPolygon][i], goal);
+				float currentDistance = calculateDistance(vecOfPolygons[polygonIndex][i], goal);
 
 				if (currentDistance < closestDistance)
 				{
 					closestDistance = currentDistance;
-					closestIndex = i;
+					endEdgeIndex = i;
 				}
 			}
-			//Going from currentHit to closestIndex
+			//Going from currentHit to closestIndex both ascending and descending to check where is
+			const size_t length = vecOfPolygons[polygonIndex].size();
+
+			vector<p2> ascendingPositions = { hits[hitIndex].position }, descendingPositions = { hits[hitIndex].position };
+			float ascendingDistance = 0, descendingDistance = 0;
+
+			for (size_t i = startEdgeIndex; i != endEdgeIndex; i = (i + 1) % length) //if i+i is over length is turns to 0
+			{
+				ascendingDistance += calculateDistance(ascendingPositions.back(), vecOfPolygons[polygonIndex][i]);
+				ascendingPositions.push_back(vecOfPolygons[polygonIndex][i]);
+			}
+
+
+			//size_t is unsigned. If you are decreasing but not currently in 0 the +length will just, but if 0 it wraps to length-1
+			for (size_t i = startEdgeIndex; i != endEdgeIndex; i = (i + length - 1) % length)
+			{
+				descendingDistance += calculateDistance(descendingPositions.back(), vecOfPolygons[polygonIndex][i]);
+				descendingPositions.push_back(vecOfPolygons[polygonIndex][i]);
+			}
+
+			if (ascendingDistance < descendingDistance)
+			{
+				path.insert(path.end(), ascendingPositions.begin(), ascendingPositions.end());
+			}
+			else
+			{
+				path.insert(path.end(), descendingPositions.begin(), descendingPositions.end());
+			}
 		}
 
 	}

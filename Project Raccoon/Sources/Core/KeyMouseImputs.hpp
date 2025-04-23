@@ -55,18 +55,27 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 			//cameraModes
 		case GLFW_KEY_X:
-			gv->cameraMode = drag;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			if (gv->program == telemetry || gv->program == solar)
+			{
+				gv->cameraMode = drag;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
 			break;
 		case GLFW_KEY_C:
-			gv->cameraMode = FPS;
-			gv->variationMPos = gv->mPos;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			if (gv->program == telemetry || gv->program == solar)
+			{
+				gv->cameraMode = FPS;
+				gv->variationMPos = gv->mPos;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			}
 			break;
 		case GLFW_KEY_V:
-			gv->cameraMode = centered;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			if (gv->program == telemetry || gv->program == solar)
+			{
+				gv->cameraMode = centered;
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
+			}
 			break;
 		}
 
@@ -89,7 +98,18 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				gv->program = solar;
 
 				break;
+			case GLFW_KEY_O:
+				if (gv->program == MRS)
+				{
 
+				}
+				break;
+			case GLFW_KEY_S:
+				if (gv->program == MRS)
+				{
+
+				}
+				break;
 			}
 
 		}
@@ -141,7 +161,7 @@ void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& came
 				camera.cameraPos.y -= camera.translationSpeed;
 		}
 
-		
+
 	}
 	else if (gv.program == MRS)
 	{
@@ -202,7 +222,7 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 		}
 		else if (gv->program == telemetry || gv->program == solar)
 		{
-			camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed*10;
+			camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed * 10;
 		}
 	}
 	else if (yoffset < 0)
@@ -214,7 +234,7 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 		}
 		else if (gv->program == telemetry || gv->program == solar)
 		{
-			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed*10;
+			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed * 10;
 		}
 	}
 

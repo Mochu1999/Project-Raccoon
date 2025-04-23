@@ -80,7 +80,7 @@ struct MainMap
 
 	p2 point0;
 	float totalX, totalY, naturalRatio, scalingFactor;
-	float totalPixels = 1000 * 6; //This makes totalX 6000 pixels long
+	float totalPixels = 1000 * 6; //This makes totalX 6000 pixels long //Stored in settings
 
 	p2 mapCorner, translationTotal;
 	vector<float> frameLimits; //[0] x left, [1] x right, [2] y bottom, [3] y up
@@ -245,14 +245,9 @@ struct MainMap
 			shaderText.bind();
 			text2.addDynamicText({ {gv.mPos, lonLatToString(cursorVal)} });
 			text2.draw();
-		}
-		//shader2D.setUniform("u_Model", camera.identityMatrix);
 
-		
 
-		
 
-		{
 			shader2D.bind();
 			shader2D.setUniform("u_Model", camera.identityMatrix);
 			shader2D.setUniform("u_Color", 40 / 255.0f, 40 / 255.0f, 40 / 255.0f, 1.0f);
@@ -273,6 +268,11 @@ struct MainMap
 
 			text1.draw();
 		}
+		//shader2D.setUniform("u_Model", camera.identityMatrix);
+
+		
+
+
 		
 	}
 };

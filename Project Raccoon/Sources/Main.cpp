@@ -19,9 +19,9 @@ int main(void)
 
 	//main reason to add all the shaders there is to initialize the associated matrices in an encapsulated way
 		// IT ISN'T REASONABLE TO HAVE THE SHADER INITIALIZATION IN CAMERA, ENCAPSULATE THEM ELSEWHERE
-	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText,gv);
+	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText, gv);
 
-	Settings settings(camera, gv);
+	
 
 
 
@@ -54,7 +54,7 @@ int main(void)
 	MainMap map(shader2D, shaderText, camera, gv);
 
 
-
+	Settings settings(camera, gv, map);
 
 
 	AllPointers allPointers(&camera, &gv, &map, &ship);
@@ -75,8 +75,8 @@ int main(void)
 			tm.update();
 
 			clearScreen(gv);
-			
-			
+
+
 
 
 			switch (gv.program)
@@ -113,7 +113,7 @@ int main(void)
 			text.substituteText(0, { { 10,950 }, round2d(tm.fps), " fps" });
 			text.substituteText(1, round1d(tm.currentTime), " s");
 			p2 algo = { 0,0 };
-			if(gv.isLmbPressed==1) algo = gv.variationMPos - gv.mPos;
+			if (gv.isLmbPressed == 1) algo = gv.variationMPos - gv.mPos;
 			textAux.addDynamicText({
 				{{ 100,900 }, "isLmbPressed: ",gv.isLmbPressed},
 				{{ 100,850 }, "distance: ",algo.x,", ",algo.y},
@@ -133,7 +133,7 @@ int main(void)
 			keyboardRealTimePolls(window, gv, camera, map);
 			camera.updateCamera();
 
-			
+
 
 			//break;
 
