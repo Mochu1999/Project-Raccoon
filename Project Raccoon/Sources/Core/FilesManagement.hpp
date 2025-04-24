@@ -342,7 +342,9 @@ void writeVectorOfVectorsAscii(const std::vector<std::vector<p2>>& model)
 //Now only reads the map
 void readVectorOfVectorsAscii(std::vector<std::vector<p2>>& model)
 {
-	std::string path = "Resources/MRS/map.txt";
+	std::string basePath = "Resources/";
+	std::string addedPath = "MRS/map.txt";
+	std::string path = basePath + addedPath;
 
 	std::ifstream inFile(path);
 	if (!inFile)

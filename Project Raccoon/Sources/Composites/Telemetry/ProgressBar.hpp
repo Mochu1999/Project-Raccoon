@@ -11,7 +11,7 @@ struct ProgressBar {
 	TimeStruct& tm;
 
 	Camera& camera;
-	Ship& ship;
+	Light& ship;
 
 	unsigned int counterUpdatePlot = 0;
 
@@ -26,7 +26,7 @@ struct ProgressBar {
 
 	float percentage = 1, variation = 0.0005;
 
-	ProgressBar(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, Ship& ship_, TimeStruct& tm_
+	ProgressBar(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, Light& ship_, TimeStruct& tm_
 		, p2 outerCorner_)
 		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
 		, camera(camera_), ship(ship_), text("resources/Glyphs/Helvetica/Helvetica.otf", 20), outerCorner(outerCorner_)

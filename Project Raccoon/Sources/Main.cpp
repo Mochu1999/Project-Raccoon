@@ -43,7 +43,7 @@ int main(void)
 
 
 	Axis axis(shader3D, camera);
-	Ship ship(shader3D, camera, gv);
+	Light ship(shader3D, camera, gv);
 	SS ss(shader3D, camera, gv);
 
 	Overlay2D overlay(shader2D, camera);

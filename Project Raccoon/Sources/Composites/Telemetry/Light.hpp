@@ -10,7 +10,7 @@ float cosPlot(float& c)
 	return (1 * c * c / 10000) * cos(radians(c));
 }
 
-struct Ship 
+struct Light 
 {
 
 	Shader& shader3D;
@@ -37,7 +37,7 @@ struct Ship
 
 	p3 lightPos = { 30,25,40 };
 
-	Ship(Shader& shader3D_, Camera& camera_, GlobalVariables gv) :shader3D(shader3D_), camera(camera_), light(3) 
+	Light(Shader& shader3D_, Camera& camera_, GlobalVariables gv) :shader3D(shader3D_), camera(camera_), light(3)
 	{
 
 		casco1.addPolyhedra("casco1.bin");

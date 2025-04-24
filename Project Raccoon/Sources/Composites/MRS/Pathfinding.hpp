@@ -27,7 +27,7 @@ void calculateBoundingBox(vector<std::pair<p2, p2>>& boundingBoxes, const vector
 
 //FUNCTION NEEDS TO BE HEAVILY TESTED. LOGIC OF COLLINEAR HAS NOT BEEN REVISED
 
-//HOSTIAS, NECESITO QUE NO TOQUE EL PUNTO D O ME CREARÁ 2 PUNTOS SI EN D CHOCAN DOS LINEAS
+//HOSTIAS, NECESITO QUE NO TOQUE EL PUNTO D NO CREARÁ 2 PUNTOS SI EN D CHOCAN DOS LINEAS
 
 //Lines formed up by ab and cd 
 //wettedSurface.hpp has a calculateIntersectionPoint that works similarly but between p3s, a triangle and a lines, these are 2 2d lines

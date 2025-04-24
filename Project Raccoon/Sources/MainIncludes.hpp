@@ -35,7 +35,7 @@
 #include "Graphics.hpp"
 #include "mainMRS.hpp"
 #include "Axis.hpp"
-#include "Ship.hpp"
+#include "Light.hpp"
 #include "Overlay2D.hpp"
 #include "ProgressBar.hpp"
 

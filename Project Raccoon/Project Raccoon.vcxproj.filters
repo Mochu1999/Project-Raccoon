@@ -122,7 +122,7 @@
     <ClInclude Include="Sources\Composites\Telemetry\ProgressBar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\Telemetry\Ship.hpp">
+    <ClInclude Include="Sources\Composites\Telemetry\Light.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\BinariesManager.hpp">
@@ -156,6 +156,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Composites\MRS\Pathfinding.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\MRS\ShipMRS.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

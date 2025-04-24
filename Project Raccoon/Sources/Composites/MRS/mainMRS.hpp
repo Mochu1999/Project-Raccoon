@@ -2,19 +2,53 @@
 
 //pocketGrib
 
-//Pero tío, por que no hay que incluir nada?
-
 #include "FilesManagement.hpp"
 #include "Circles.hpp"
 #include "Text.hpp"
 #include "Icons.hpp"
 #include "Pathfinding.hpp"
+#include "ShipMRS.hpp"
 
-//Mirar el tema de los rumbos circulares
+
 
 //CAMERA ESTÁ SOLO PARA LAS MODEL MATRICES, PLANTEATE SI TE INTERESA TENER una referencia de camera, porque bien podría solo tener
 // una matriz aquí local y hacer la función que la crea global
 	//Crear matrices locales permitirá no recrear la matriz cada vez a coste de mayor memoria y no necesitar camara en muchas structs
+
+
+struct ShipMRS
+{
+	//////////inputs
+	p2 lonLatPosition;
+	float globalCourse;
+	float driftAngle;
+	//Custom realTimeRepeatedMeteorology
+
+	float windSpeed;
+	p2 windDirection;
+
+	struct AIS
+	{
+		p2 position;
+		float speed;
+		float course;
+
+	};
+	vector<AIS> aisShips;
+	float batteryLevel;
+
+
+	//////////outputs
+	string telemEtryMRS;
+	unsigned int pulsesRudder;
+	unsigned int pulsesFlap1;
+	unsigned int pulsesFlap2;
+	unsigned int pulsesFlap3; //direction
+
+};
+
+
+
 
 string formatFloat(float value) 
 {
@@ -22,9 +56,6 @@ string formatFloat(float value)
 	oss << std::fixed << std::setprecision(2) << value;
 	return oss.str();
 }
-
-
-
 
 
 string lonLatToString(p2 lonLat)
@@ -45,6 +76,8 @@ string lonLatToString(p2 lonLat)
 	return "{" + lonStr + ", " + latStr + "}";
 }
 
+
+
 //Ver que está en uso, que no, reserves y comentarios
 struct MainMap 
 {
@@ -52,6 +85,7 @@ struct MainMap
 	Camera& camera;
 	GlobalVariables& gv;
 
+	ShipMRS ship;
 	Lines2D mercator;
 	Polygons2D background;
 	
@@ -147,7 +181,8 @@ struct MainMap
 
 	}
 
-	void update() {
+	void update() 
+	{
 
 
 		//Multiplying the map positions by scalingFactor in the model matrix will make all coordinates fall between 0 and totalPixels (6000 pixels)
@@ -173,7 +208,8 @@ struct MainMap
 		
 	}
 
-	void draw() {
+	void draw() 
+	{
 		p2 a = (lonLatToMercator(shipCoordinates) - point0) * scalingFactor + mapCorner;
 		p2 cursorVal = mercatorToLonLat((gv.mPos - translationTotal) / scalingFactor);
 		totalDistance = calculateDistance(shipCoordinates, finishPoint);

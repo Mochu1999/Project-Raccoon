@@ -144,11 +144,12 @@
     <ClInclude Include="Sources\Composites\Axis.hpp" />
     <ClInclude Include="Sources\Composites\MRS\Icons.hpp" />
     <ClInclude Include="Sources\Composites\MRS\Pathfinding.hpp" />
+    <ClInclude Include="Sources\Composites\MRS\ShipMRS.hpp" />
     <ClInclude Include="Sources\Composites\Solar\SS.hpp" />
     <ClInclude Include="Sources\Composites\Telemetry\Graphics.hpp" />
     <ClInclude Include="Sources\Composites\MRS\mainMRS.hpp" />
     <ClInclude Include="Sources\Composites\Telemetry\ProgressBar.hpp" />
-    <ClInclude Include="Sources\Composites\Telemetry\Ship.hpp" />
+    <ClInclude Include="Sources\Composites\Telemetry\Light.hpp" />
     <ClInclude Include="Sources\Core\BinariesManager.hpp" />
     <ClInclude Include="Sources\Core\KeyMouseImputs.hpp" />
     <ClInclude Include="Sources\Core\Shader.hpp" />

@@ -2,7 +2,7 @@
 #include "Common.hpp"
 #include "Circles.hpp"
 #include "Lines2D_Instanced.hpp"
-#include "Ship.hpp"
+#include "Light.hpp"
 #include "Text.hpp"
 
 
@@ -16,7 +16,7 @@ struct Graphic {
 	TimeStruct& tm;
 
 	Camera& camera;
-	Ship& ship;
+	Light& ship;
 
 	Lines2D_Instanced gridStatic;
 	Lines2D_Instanced gridDynamic, currentXgrid;
@@ -44,7 +44,7 @@ struct Graphic {
 	float currentX = 0;
 	float& currentY;
 
-	Graphic(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, Ship& ship_, TimeStruct& tm_
+	Graphic(Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, Camera& camera_, Light& ship_, TimeStruct& tm_
 		, string name_, p2 gridCorner_,float& currentY_)
 		: shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), tm(tm_)
 		, camera(camera_), ship(ship_), text("resources/Glyphs/Helvetica/Helvetica.otf", 16),

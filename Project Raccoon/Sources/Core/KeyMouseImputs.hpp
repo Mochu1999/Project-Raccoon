@@ -2,7 +2,7 @@
 
 #include "Globe.hpp"
 #include "mainMRS.hpp"
-#include "Ship.hpp"
+#include "Light.hpp"
 #include "SS.hpp"
 
 
@@ -13,10 +13,10 @@ struct AllPointers {
 	Camera* camera;
 	GlobalVariables* gv;
 	MainMap* map;
-	Ship* ship;
+	Light* ship;
 	SS* ss;
 
-	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Ship* ship_) :camera(camera_), map(map_), gv(gv_), ship(ship_) {}
+	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Light* ship_) :camera(camera_), map(map_), gv(gv_), ship(ship_) {}
 };
 
 //The standard is to use callbacks for one-time event (typing, increase something once per press) and another function
@@ -27,7 +27,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	Camera* camera = allPointers->camera;
 	MainMap* map = allPointers->map;
-	Ship* ship = allPointers->ship;
+	Light* ship = allPointers->ship;
 	GlobalVariables* gv = allPointers->gv;
 
 
