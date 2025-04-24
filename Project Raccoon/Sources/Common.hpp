@@ -294,9 +294,12 @@ extern float windowHeight;
 extern float windowWidth;
 
 enum Programs { telemetry, MRS, solar };
-enum CameraModes { drag, FPS, centered};
+enum CameraModes { drag, FPS, centered };
+
+enum MrsMode { mapMRS, mapCustom }; //1 MRS map, 2 custom map
+
 /////////////////////////////////////////////
-struct GlobalVariables 
+struct GlobalVariables
 {
 
 
@@ -308,6 +311,7 @@ struct GlobalVariables
 	p2 variationMPos = { 0,0 };
 	bool isLmbPressed = 0;
 	p2 centerWindow;
+	MrsMode mrsMode = mapMRS;
 
 	GlobalVariables()
 	{

@@ -22,6 +22,7 @@ struct AllPointers {
 //The standard is to use callbacks for one-time event (typing, increase something once per press) and another function
 //  for per-frame polling that updates each frame or based on deltaTime for smooth changes in a variable over frames
 
+
 void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
