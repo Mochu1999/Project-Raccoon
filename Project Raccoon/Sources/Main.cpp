@@ -1,6 +1,7 @@
 
 #include "MainIncludes.hpp"
-
+#include <gp_Pnt.hxx>
+#include <gp_Vec.hxx>
 
 int main(void)
 {
@@ -23,8 +24,10 @@ int main(void)
 
 	
 
-
-
+	gp_Pnt v1(0, 0, 0);
+	gp_Pnt v2(10, 0, 0);
+	gp_Vec vec(v1, v2);
+	std::cout << "Vector length: " << vec.Magnitude() << std::endl;
 
 
 

@@ -105,13 +105,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Sources\Stability;Sources\Deprecated;Sources\Composites\Solar;Sources\Composites\MRS;Sources\Composites\Telemetry;Sources\Composites;Sources\BasicsRendering;Sources\Core;Resources\External\Includes;Sources;C:\dev\C++ libs\Freetype\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Sources\Stability;Sources\Deprecated;Sources\Composites\Solar;Sources\Composites\MRS;Sources\Composites\Telemetry;Sources\Composites;Sources\BasicsRendering;Sources\Core;Resources\External\Includes;Resources\External\Includes\OpenCascade;Sources;C:\dev\C++ libs\Freetype\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\C++ libs\Freetype\lib;Resources\External\Libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\C++ libs\Freetype\lib;Resources\External\Libs;Resources\External\Libs\OpenCascade</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;TKernel.lib;TKMath.lib;TKGeomBase.lib;TKG3d.lib;TKBRep.lib;TKTopAlgo.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
