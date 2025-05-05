@@ -56,7 +56,7 @@
     <ClInclude Include="Sources\Stability\Fourier.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\BasicsRendering\Lines3d.hpp">
+    <ClInclude Include="Sources\BasicsRendering\Lines3D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\FilesManagement.hpp">
@@ -116,7 +116,7 @@
     <ClInclude Include="Sources\Composites\Telemetry\Graphics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\MRS\mainMRS.hpp">
+    <ClInclude Include="Sources\Composites\MRS\MainMRS.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Composites\Telemetry\ProgressBar.hpp">
@@ -159,6 +159,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Composites\MRS\ShipMRS.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\OpenCascade\MainOC.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\OpenCascade\RenderedOC.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\OpenCascade\IncludesOC.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Composites\OpenCascade\AuxFunctionsOC.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

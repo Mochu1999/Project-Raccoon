@@ -293,7 +293,7 @@ float magnitude3(const vec3<T>& v) { //modulus
 extern float windowHeight;
 extern float windowWidth;
 
-enum Programs { telemetry, MRS, solar };
+enum Programs { telemetry, MRS, solar, openCascade };
 enum CameraModes { drag, FPS, centered };
 
 enum MrsMode { mapMRS, mapCustom }; //1 MRS map, 2 custom map

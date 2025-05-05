@@ -1,7 +1,6 @@
 
 #include "MainIncludes.hpp"
-#include <gp_Pnt.hxx>
-#include <gp_Vec.hxx>
+
 
 int main(void)
 {
@@ -24,10 +23,7 @@ int main(void)
 
 	
 
-	gp_Pnt v1(0, 0, 0);
-	gp_Pnt v2(10, 0, 0);
-	gp_Vec vec(v1, v2);
-	std::cout << "Vector length: " << vec.Magnitude() << std::endl;
+	
 
 
 
@@ -55,7 +51,7 @@ int main(void)
 	ProgressBar pb(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, { 1400 - 50,700 });
 
 	MainMap map(shader2D, shaderText, camera, gv);
-
+	MainOC mainOC(shader3D, camera, gv);
 
 	Settings settings(camera, gv, map);
 
@@ -97,6 +93,7 @@ int main(void)
 				pb.draw();
 
 				break;
+
 			case MRS:
 				map.draw();
 				break;
@@ -104,6 +101,14 @@ int main(void)
 			case solar:
 				axis.draw();
 				ss.draw();
+				
+				break;
+
+			case openCascade:
+				axis.draw();
+				mainOC.draw();
+
+				break;
 			}
 
 

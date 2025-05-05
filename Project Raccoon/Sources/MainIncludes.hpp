@@ -33,10 +33,11 @@
 #include "WettedSurface.hpp"
 
 #include "Graphics.hpp"
-#include "mainMRS.hpp"
+#include "MainMRS.hpp"
 #include "Axis.hpp"
 #include "Light.hpp"
 #include "Overlay2D.hpp"
 #include "ProgressBar.hpp"
 
 #include "SS.hpp"
+#include "MainOC.hpp"

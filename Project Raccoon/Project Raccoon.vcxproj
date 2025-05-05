@@ -105,13 +105,13 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>Sources\Stability;Sources\Deprecated;Sources\Composites\Solar;Sources\Composites\MRS;Sources\Composites\Telemetry;Sources\Composites;Sources\BasicsRendering;Sources\Core;Resources\External\Includes;Resources\External\Includes\OpenCascade;Sources;C:\dev\C++ libs\Freetype\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Sources\Stability;Sources\Deprecated;Sources\Composites\Solar;Sources\Composites\MRS;Sources\Composites\OpenCascade;Sources\Composites\Telemetry;Sources\Composites;Sources\BasicsRendering;Sources\Core;Resources\External\Includes;Resources\External\Includes\OpenCascade;Sources;C:\dev\C++ libs\Freetype\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\dev\C++ libs\Freetype\lib;Resources\External\Libs;Resources\External\Libs\OpenCascade</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;TKernel.lib;TKMath.lib;TKGeomBase.lib;TKG3d.lib;TKBRep.lib;TKTopAlgo.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;TKBin.lib;TKBinL.lib;TKBinTObj.lib;TKBinXCAF.lib;TKBO.lib;TKBool.lib;TKBRep.lib;TKCAF.lib;TKCDF.lib;TKD3DHost.lib;TKD3DHostTest.lib;TKDCAF.lib;TKDE.lib;TKDECascade.lib;TKDEGLTF.lib;TKDEIGES.lib;TKDEOBJ.lib;TKDEPLY.lib;TKDESTEP.lib;TKDESTL.lib;TKDEVRML.lib;TKDFBrowser.lib;TKDraw.lib;TKernel.lib;TKExpress.lib;TKFeat.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKHLR.lib;TKIVtk.lib;TKIVtkDraw.lib;TKLCAF.lib;TKMath.lib;TKMesh.lib;TKMeshVS.lib;TKMessageModel.lib;TKMessageView.lib;TKOffset.lib;TKOpenGl.lib;TKOpenGles.lib;TKOpenGlesTest.lib;TKOpenGlTest.lib;TKPrim.lib;TKQADraw.lib;TKRWMesh.lib;TKService.lib;TKShapeView.lib;TKShHealing.lib;TKStd.lib;TKStdL.lib;TKTInspector.lib;TKTInspectorAPI.lib;TKTObj.lib;TKTObjDRAW.lib;TKToolsDraw.lib;TKTopAlgo.lib;TKTopTest.lib;TKTreeModel.lib;TKV3d.lib;TKVCAF.lib;TKView.lib;TKViewerTest.lib;TKVInspector.lib;TKXCAF.lib;TKXDEDRAW.lib;TKXMesh.lib;TKXml.lib;TKXmlL.lib;TKXmlTObj.lib;TKXmlXCAF.lib;TKXSBase.lib;TKXSDRAW.lib;TKXSDRAWDE.lib;TKXSDRAWGLTF.lib;TKXSDRAWIGES.lib;TKXSDRAWOBJ.lib;TKXSDRAWPLY.lib;TKXSDRAWSTEP.lib;TKXSDRAWSTL.lib;TKXSDRAWVRML.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -120,15 +120,18 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>Sources\Stability;Sources\Deprecated;Sources\Composites\Solar;Sources\Composites\MRS;Sources\Composites\OpenCascade;Sources\Composites\Telemetry;Sources\Composites;Sources\BasicsRendering;Sources\Core;Resources\External\Includes;Resources\External\Includes\OpenCascade;Sources;C:\dev\C++ libs\Freetype\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\dev\C++ libs\Freetype\lib;Resources\External\Libs;Resources\External\Libs\OpenCascade</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32s.lib;glfw3.lib;opengl32.lib;freetype.lib;TKBin.lib;TKBinL.lib;TKBinTObj.lib;TKBinXCAF.lib;TKBO.lib;TKBool.lib;TKBRep.lib;TKCAF.lib;TKCDF.lib;TKD3DHost.lib;TKD3DHostTest.lib;TKDCAF.lib;TKDE.lib;TKDECascade.lib;TKDEGLTF.lib;TKDEIGES.lib;TKDEOBJ.lib;TKDEPLY.lib;TKDESTEP.lib;TKDESTL.lib;TKDEVRML.lib;TKDFBrowser.lib;TKDraw.lib;TKernel.lib;TKExpress.lib;TKFeat.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKHLR.lib;TKIVtk.lib;TKIVtkDraw.lib;TKLCAF.lib;TKMath.lib;TKMesh.lib;TKMeshVS.lib;TKMessageModel.lib;TKMessageView.lib;TKOffset.lib;TKOpenGl.lib;TKOpenGles.lib;TKOpenGlesTest.lib;TKOpenGlTest.lib;TKPrim.lib;TKQADraw.lib;TKRWMesh.lib;TKService.lib;TKShapeView.lib;TKShHealing.lib;TKStd.lib;TKStdL.lib;TKTInspector.lib;TKTInspectorAPI.lib;TKTObj.lib;TKTObjDRAW.lib;TKToolsDraw.lib;TKTopAlgo.lib;TKTopTest.lib;TKTreeModel.lib;TKV3d.lib;TKVCAF.lib;TKView.lib;TKViewerTest.lib;TKVInspector.lib;TKXCAF.lib;TKXDEDRAW.lib;TKXMesh.lib;TKXml.lib;TKXmlL.lib;TKXmlTObj.lib;TKXmlXCAF.lib;TKXSBase.lib;TKXSDRAW.lib;TKXSDRAWDE.lib;TKXSDRAWGLTF.lib;TKXSDRAWIGES.lib;TKXSDRAWOBJ.lib;TKXSDRAWPLY.lib;TKXSDRAWSTEP.lib;TKXSDRAWSTL.lib;TKXSDRAWVRML.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -145,9 +148,13 @@
     <ClInclude Include="Sources\Composites\MRS\Icons.hpp" />
     <ClInclude Include="Sources\Composites\MRS\Pathfinding.hpp" />
     <ClInclude Include="Sources\Composites\MRS\ShipMRS.hpp" />
+    <ClInclude Include="Sources\Composites\OpenCascade\AuxFunctionsOC.hpp" />
+    <ClInclude Include="Sources\Composites\OpenCascade\IncludesOC.hpp" />
+    <ClInclude Include="Sources\Composites\OpenCascade\MainOC.hpp" />
+    <ClInclude Include="Sources\Composites\OpenCascade\RenderedOC.hpp" />
     <ClInclude Include="Sources\Composites\Solar\SS.hpp" />
     <ClInclude Include="Sources\Composites\Telemetry\Graphics.hpp" />
-    <ClInclude Include="Sources\Composites\MRS\mainMRS.hpp" />
+    <ClInclude Include="Sources\Composites\MRS\MainMRS.hpp" />
     <ClInclude Include="Sources\Composites\Telemetry\ProgressBar.hpp" />
     <ClInclude Include="Sources\Composites\Telemetry\Light.hpp" />
     <ClInclude Include="Sources\Core\BinariesManager.hpp" />
@@ -169,7 +176,7 @@
     <ClInclude Include="Sources\Delaunay_2D.hpp" />
     <ClInclude Include="Sources\Stability\Fourier.hpp" />
     <ClInclude Include="Sources\BasicsRendering\Lines2D.hpp" />
-    <ClInclude Include="Sources\BasicsRendering\Lines3d.hpp" />
+    <ClInclude Include="Sources\BasicsRendering\Lines3D.hpp" />
     <ClInclude Include="Sources\Core\FilesManagement.hpp" />
     <ClInclude Include="Sources\Composites\Overlay2D.hpp" />
     <ClInclude Include="Sources\BasicsRendering\Polygons.hpp" />

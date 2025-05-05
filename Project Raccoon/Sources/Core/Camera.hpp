@@ -14,7 +14,7 @@
 
 struct Camera {
 
-	float translationSpeed = 0.03f, rotationSpeed = 0.05f;
+	float translationSpeed = 0.16f, rotationSpeed = 0.05f;
 
 	GLFWwindow* window;
 	Shader& shader3D, shader2D, shader2D_Instanced, shaderText;

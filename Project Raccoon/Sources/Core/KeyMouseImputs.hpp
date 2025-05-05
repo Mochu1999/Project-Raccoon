@@ -54,16 +54,16 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			}
 			break;
 
-			//cameraModes
+			//cameraModes //updateCamera in camera.cpp also need to be updated if ths is to change
 		case GLFW_KEY_X:
-			if (gv->program == telemetry || gv->program == solar)
+			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 			{
 				gv->cameraMode = drag;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			}
 			break;
 		case GLFW_KEY_C:
-			if (gv->program == telemetry || gv->program == solar)
+			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 			{
 				gv->cameraMode = FPS;
 				gv->variationMPos = gv->mPos;
@@ -71,7 +71,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			}
 			break;
 		case GLFW_KEY_V:
-			if (gv->program == telemetry || gv->program == solar)
+			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 			{
 				gv->cameraMode = centered;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -99,7 +99,11 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				gv->program = solar;
 
 				break;
-			case GLFW_KEY_O:
+			case GLFW_KEY_4:
+				gv->program = openCascade;
+
+				break;
+			case GLFW_KEY_O: //changing maps
 				if (gv->program == MRS)
 				{
 
@@ -125,7 +129,7 @@ void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& came
 	//TIENES ESTO PARTIDO ENTRE AQUÍ Y UPDATECAMERA
 
 	// Rotation
-	if (gv.program == telemetry || gv.program == solar)
+	if (gv.program == telemetry || gv.program == solar || gv.program == openCascade)
 	{
 		if (gv.cameraMode == drag || gv.cameraMode == FPS)
 		{
@@ -206,6 +210,7 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 
+float scrollTranslationSpeedFactor = 20;
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
@@ -221,9 +226,9 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 			map->totalPixels *= 1.15;
 			map->update();
 		}
-		else if (gv->program == telemetry || gv->program == solar)
+		else if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 		{
-			camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed * 10;
+			camera->cameraPos = camera->cameraPos + camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
 		}
 	}
 	else if (yoffset < 0)
@@ -233,13 +238,13 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 			map->totalPixels /= 1.15;
 			map->update();
 		}
-		else if (gv->program == telemetry || gv->program == solar)
+		else if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 		{
-			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed * 10;
+			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
 		}
 	}
 
-	else if (gv->program == telemetry || gv->program == solar)
+	else if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 	{
 
 	}

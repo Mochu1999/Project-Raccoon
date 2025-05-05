@@ -107,7 +107,7 @@ void Camera::updateCamera() {
 	p2 currentMPosVariation = gv.variationMPos - gv.mPos;
 
 
-	if (gv.program == telemetry || gv.program == solar)
+	if (gv.program == telemetry || gv.program == solar || gv.program == openCascade)
 	{
 		if (gv.cameraMode == drag && gv.isLmbPressed == 1)
 		{

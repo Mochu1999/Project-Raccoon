@@ -68,6 +68,15 @@ struct Polyhedra {
 		inFile.close();
 	}
 
+	void addPolyhedra(const vector<p3>& positions_, const vector<unsigned int>& indices_, const vector<p3>& normals_)
+	{
+		clear();
+
+		positions = positions_;
+		indices = indices_;
+		normals = normals_;
+	}
+
 	void simpleIndices() {
 		indices.clear();
 		for (int i = 0; i < positions.size(); i++)
@@ -78,8 +87,9 @@ struct Polyhedra {
 
 	//polyhedras that were stl before, with the same .size() for positions, indices and normals
 	//  ,but the size of indices in floats while the others in p3
-	//indices in order in triangles {1,2,3,4,5,6,7,8,9}
-	void stlDraw() {
+	//indices are in order in triangles {1,2,3,4,5,6,7,8,9}
+	void stlDraw() 
+	{
 
 		glBindVertexArray(vertexArray);
 
@@ -104,6 +114,67 @@ struct Polyhedra {
 
 	}
 
+	//No optimizations. Optimize as in polygons::draw()
+	void draw() 
+	{
+		glBindVertexArray(vertexArray);
+
+		//the buffer is not expected to be updated at all. Can use data instead of subdata
+		if (isBufferUpdated)
+		{
+			//float stlSize = positions.size() * sizeof(p3);
+
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3), positions.data(), GL_DYNAMIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
+
+			glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+			glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3), normals.data(), GL_DYNAMIC_DRAW);
+
+			isBufferUpdated = false;
+		}
+
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+	}
+
+	//void Polygons::draw() {
+	//	GLenum usageHint = GL_DYNAMIC_DRAW;
+
+	//	glBindVertexArray(vertexArray);
+
+	//	////flag activates only when an addSet is Called, otherwise the buffer remains the same
+	//	if (isBufferUpdated)
+	//	{
+	//		currentPositionsDataSize = positions.size() * sizeof(p3);
+	//		currentIndicesDataSize = indices.size() * sizeof(unsigned int);
+
+	//		//Estoy haciendo pruebas y he tenido que poner la nueva condición. No creo que sea necesaria en el futuro
+	//		if (currentPositionsDataSize > currentPositionsBufferSize || currentIndicesDataSize > currentIndicesBufferSize)
+	//		{
+
+	//			currentPositionsBufferSize = currentPositionsDataSize * 2;
+	//			currentIndicesBufferSize = currentIndicesDataSize * 2;
+
+	//			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	//			glBufferData(GL_ARRAY_BUFFER, currentPositionsBufferSize, nullptr, usageHint);
+
+	//			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	//			glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndicesBufferSize, nullptr, usageHint);
+	//		}
+
+	//		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	//		glBufferSubData(GL_ARRAY_BUFFER, 0, currentPositionsDataSize, positions.data());
+
+
+	//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	//		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, currentIndicesDataSize, indices.data());
+
+	//		isBufferUpdated = false;
+	//	}
+	//	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+	//}
 
 
 	void genBuffers() {

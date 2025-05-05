@@ -6,7 +6,7 @@
 #include "Lines3D.hpp"
 
 
-
+/////////////ESTO ESTÁ TURBO DESACTUALIZADO
 struct Polygons {
 	GLenum usageHint = GL_DYNAMIC_DRAW;
 
@@ -24,6 +24,7 @@ struct Polygons {
 	unsigned int vertexArray;
 	unsigned int indexBuffer;
 
+	///VECTOR??
 	p3 normal;
 
 	//Setting initial buffers size
@@ -52,6 +53,7 @@ struct Polygons {
 	void draw();
 
 	void clear();
+
 	void addSet(vector<p3> items);
 
 

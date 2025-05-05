@@ -20,7 +20,7 @@ void Polygons::genBuffers() {
 }
 
 void Polygons::draw() {
-	GLenum usageHint = GL_DYNAMIC_DRAW; //Que hace esto aquí? Se puede quitar?
+	GLenum usageHint = GL_DYNAMIC_DRAW;
 
 	glBindVertexArray(vertexArray);
 
