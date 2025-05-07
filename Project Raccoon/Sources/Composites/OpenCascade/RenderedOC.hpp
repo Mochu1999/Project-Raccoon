@@ -9,69 +9,70 @@ struct ShapeRenderer
 {
 	TopoDS_Shape shape;
 
+	GlobalVariables& gv;
+	Shader& shader3D;
 
+	unsigned int trVAO, VBO, trIBO, trNBO; //shared vertex buffer between tr and wire
+	unsigned int wireVAO, wireIBO;
 
+	std::vector<p3> positions, trNormals;
+	std::vector<unsigned int> trIndices, wireIndices;
 
-
-	ShapeRenderer(/*TopoDS_Shape shape_*/) /*: shape(shape_)*/
+	ShapeRenderer(GlobalVariables& gv_, Shader& shader3D_) :gv(gv_), shader3D(shader3D_)
 	{
 		genBuffers();
 
-		p3 corner = { 0, 0, 0 };
-		p3 size = { 5, 3, 2 };
+	}
 
-		//Hardcoding the shape for now
+	void addBoxShape(p3 corner, p3 size)
+	{
+		clear();
+
 		gp_Pnt gpCorner(corner.x, corner.y, corner.z);
-
-		TopoDS_Shape box = BRepPrimAPI_MakeBox
-		(
+		shape = BRepPrimAPI_MakeBox(
 			gpCorner,
 			static_cast<Standard_Real>(size.x),
 			static_cast<Standard_Real>(size.y),
 			static_cast<Standard_Real>(size.z)
 		);
 
-		//These intermidiate variables are inefficient but I am interested in not changing extractFaceData() for now
+		extractShapeData();
+		updateBuffers();
+	}
 
-		unsigned int trIndexOffset = 0;
-		unsigned int wireIndexOffset = 0;
-		for (TopExp_Explorer exp(box, TopAbs_FACE); exp.More(); exp.Next())
+	void addSphereShape(p3 center, float radius)
+	{
+		clear();
+
+		gp_Pnt gpCenter(center.x, center.y, center.z);
+		shape = BRepPrimAPI_MakeSphere(gpCenter, static_cast<Standard_Real>(radius));
+
+		extractShapeData();
+
+		trNormals.clear();
+
+		for (auto& pos : positions)
 		{
-			const TopoDS_Face& face = TopoDS::Face(exp.Current());
-
-			std::vector<p3> interm_trPositions, interm_trNormals, interm_wirePositions;
-			std::vector<unsigned int> interm_trIndices, interm_wireIndices;
-
-			trIndexOffset = trPositions.size(); //Works bc a face won't have a repeated vertex
-			wireIndexOffset = 0;
-			extractFaceData(face, interm_trPositions, interm_trIndices, interm_trNormals, interm_wirePositions, interm_wireIndices
-				, trIndexOffset, wireIndexOffset);
-
-			trPositions.insert(trPositions.end(), interm_trPositions.begin(), interm_trPositions.end());
-			trIndices.insert(trIndices.end(), interm_trIndices.begin(), interm_trIndices.end());
-			trNormals.insert(trNormals.end(), interm_trNormals.begin(), interm_trNormals.end());
-
-			wirePositions.insert(wirePositions.end(), interm_wirePositions.begin(), interm_wirePositions.end());
-			wireIndices.insert(wireIndices.end(), interm_wireIndices.begin(), interm_wireIndices.end());
+			trNormals.push_back(normalize3(pos - center));
 		}
 
 		updateBuffers();
+		print(positions.size());
 	}
-	unsigned int trVAO, trVBO, trIBO, trNBO;
-	unsigned int wireVAO, wireVBO, wireIBO;
 
-	std::vector<p3> trPositions, trNormals, wirePositions;
-	std::vector<unsigned int> trIndices, wireIndices;
 	void genBuffers()
 	{
 		glGenVertexArrays(1, &trVAO);
-		glBindVertexArray(trVAO);
+		glGenVertexArrays(1, &wireVAO);
 
-		glGenBuffers(1, &trVBO);
+		glGenBuffers(1, &VBO);
 		glGenBuffers(1, &trIBO);
+		glGenBuffers(1, &wireIBO);
 		glGenBuffers(1, &trNBO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, trVBO);
+		glBindVertexArray(trVAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -82,40 +83,43 @@ struct ShapeRenderer
 		glBindVertexArray(0);
 
 
-
-		glGenVertexArrays(1, &wireVAO);
 		glBindVertexArray(wireVAO);
 
-		glGenBuffers(1, &wireVBO);
-		glGenBuffers(1, &wireIBO);
-
-		glBindBuffer(GL_ARRAY_BUFFER, wireVBO);
-
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //wireVAO must also be aware of the layout
 
 		glBindVertexArray(0);
 	}
 
+	//Extracts the rendering data of the shape
+	void extractShapeData()
+	{
+		//Iterating through each face to get the rendering data
+		for (TopExp_Explorer exp(shape, TopAbs_FACE); exp.More(); exp.Next())
+		{
+			const TopoDS_Face& face = TopoDS::Face(exp.Current());
+
+			extractFaceData(face, positions, trIndices, wireIndices, trNormals);
+		}
+	}
+
 	void clear()
 	{
-		trPositions.clear();
+		positions.clear();
 		trIndices.clear();
-		trNormals.clear();
-
-		wirePositions.clear();
 		wireIndices.clear();
+		trNormals.clear();
 	}
 
 	~ShapeRenderer()
 	{
 		glDeleteVertexArrays(1, &trVAO);
-		glDeleteBuffers(1, &trVBO);
+		glDeleteBuffers(1, &VBO);
 		glDeleteBuffers(1, &trIBO);
 		glDeleteBuffers(1, &trNBO);
 
 		glDeleteVertexArrays(1, &wireVAO);
-		glDeleteBuffers(1, &wireVBO);
 		glDeleteBuffers(1, &wireIBO);
 	}
 
@@ -126,24 +130,47 @@ struct ShapeRenderer
 	{
 		glBindVertexArray(trVAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, trVBO);
-		glBufferData(GL_ARRAY_BUFFER, trPositions.size() * sizeof(p3), trPositions.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3), positions.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, trIBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, trIndices.size() * sizeof(unsigned int), trIndices.data(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, trNBO);
 		glBufferData(GL_ARRAY_BUFFER, trNormals.size() * sizeof(p3), trNormals.data(), GL_STATIC_DRAW);
-	}
 
+		glBindVertexArray(wireVAO);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wireIBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, wireIndices.size() * sizeof(unsigned int), wireIndices.data(), GL_STATIC_DRAW);
+	}
 
 
 	void draw() const
 	{
-		glBindVertexArray(trVAO);
-		glDrawElements(GL_TRIANGLES, trIndices.size(), GL_UNSIGNED_INT, nullptr);
+		shader3D.bind();
+		shader3D.setUniform("u_Model", gv.identityMatrix);
+		shader3D.setUniform("u_Color", 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1);
 
+		if (gv.visualizationMode == triangulated)
+		{
+			shader3D.setUniform("u_fragmentMode", 0);
 
+			glBindVertexArray(trVAO);
+			glDrawElements(GL_TRIANGLES, trIndices.size(), GL_UNSIGNED_INT, nullptr);
+
+			glBindVertexArray(wireVAO);
+			glDrawElements(GL_LINES, wireIndices.size(), GL_UNSIGNED_INT, nullptr);
+		}
+		else //(gv.visualizationMode == wire)
+		{
+			shader3D.setUniform("u_fragmentMode", 1);
+
+			glBindVertexArray(wireVAO);
+			glLineWidth(1);
+			glDrawElements(GL_LINES, wireIndices.size(), GL_UNSIGNED_INT, nullptr);
+			glLineWidth(1);
+		}
 	}
 };
 

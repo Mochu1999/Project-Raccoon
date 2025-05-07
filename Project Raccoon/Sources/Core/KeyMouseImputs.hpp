@@ -78,6 +78,21 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 			}
 			break;
+		case GLFW_KEY_O:
+			if (gv->program == openCascade)
+			{
+				gv->visualizationMode = triangulated;
+
+			}
+			break;
+		case GLFW_KEY_I:
+			if (gv->program == openCascade)
+			{
+				gv->visualizationMode = wire;
+
+
+			}
+			break;
 		}
 
 

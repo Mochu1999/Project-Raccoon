@@ -295,7 +295,7 @@ extern float windowWidth;
 
 enum Programs { telemetry, MRS, solar, openCascade };
 enum CameraModes { drag, FPS, centered };
-
+enum VisualizationMode { wire, triangulated }; //OCC
 enum MrsMode { mapMRS, mapCustom }; //1 MRS map, 2 custom map
 
 /////////////////////////////////////////////
@@ -312,6 +312,9 @@ struct GlobalVariables
 	bool isLmbPressed = 0;
 	p2 centerWindow;
 	MrsMode mrsMode = mapMRS;
+	std::array<float, 16> identityMatrix = { 1, 0, 0, 0, 0, 1, 0, 0,0, 0, 1, 0,0, 0, 0, 1 };
+	
+	VisualizationMode visualizationMode = triangulated;
 
 	GlobalVariables()
 	{
@@ -484,5 +487,3 @@ float radians(float input);
 
 
 float degrees(float input);
-
-std::array<float, 16> createIdentityMatrix();

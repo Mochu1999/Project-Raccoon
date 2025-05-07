@@ -9,8 +9,7 @@
 3  7  11 15
 */
 
-/// IDENTITY MATRIX NO DEBERÍA SER UNA VARIABLE AQUÍ SI NO UNA VARIABLE GLOBAL PARA EVITAR QUE CLASES COMO AXIS COJAN CAMERA AT ALL,
-// PERO NO SÉ DE QUE TIPO DEBERÍA DE SER ESA VARIABLE
+
 
 struct Camera {
 
@@ -30,6 +29,7 @@ struct Camera {
 
 
 	std::array<float, 16> perspectiveMatrix, viewMatrix, vpMatrix, orthoMatrix, identityMatrix;
+	
 
 	p3 cameraPos;
 
@@ -45,7 +45,7 @@ struct Camera {
 	Camera(GLFWwindow* window_, Shader& shader3D_, Shader& shader2D_, Shader& shader2D_Instanced_, Shader& shaderText_, GlobalVariables& gv_)
 		:window(window_), shader3D(shader3D_), shader2D(shader2D_), shader2D_Instanced(shader2D_Instanced_), shaderText(shaderText_), gv(gv_) 
 	{
-
+		identityMatrix = gv.identityMatrix;
 		orthoMatrix = createOrthoMatrix();
 		perspectiveMatrix = createPerspectiveMatrix();
 
@@ -54,8 +54,8 @@ struct Camera {
 		p3 rotAxis = { 0.0f, 1.0f, 0.0f }; // Y axis
 
 		//modelMatrix = create3DModelMatrix(objPos, angle, rotAxis);
-		identityMatrix = createIdentityMatrix();
 
+		
 
 		updateCamera();
 

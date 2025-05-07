@@ -26,3 +26,7 @@
 #include <Geom_Surface.hxx>
 #include <Geom_Plane.hxx>
 #include <TopoDS.hxx>
+
+#include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepTools.hxx>
+
