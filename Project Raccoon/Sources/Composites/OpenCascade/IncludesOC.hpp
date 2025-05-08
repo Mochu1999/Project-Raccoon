@@ -30,3 +30,4 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
 
+#include <IGESControl_Reader.hxx>

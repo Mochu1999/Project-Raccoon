@@ -41,7 +41,7 @@ int main(void)
 
 
 
-	Axis axis(shader3D, camera);
+	//Axis axis(shader3D, gv);
 	Light ship(shader3D, camera, gv);
 	SS ss(shader3D, camera, gv);
 
@@ -56,7 +56,7 @@ int main(void)
 	Settings settings(camera, gv, map);
 
 
-	AllPointers allPointers(&camera, &gv, &map, &ship);
+	AllPointers allPointers(&camera, &gv, &map, &ship, &mainOC);
 	glfwSetWindowUserPointer(window, &allPointers);
 	glfwSetKeyCallback(window, keyboardEventCallback);
 	glfwSetMouseButtonCallback(window, mouseEventCallback);
@@ -81,7 +81,7 @@ int main(void)
 			switch (gv.program)
 			{
 			case telemetry:
-				axis.draw();
+				//axis.draw();
 				ship.draw();
 
 
@@ -99,13 +99,13 @@ int main(void)
 				break;
 
 			case solar:
-				axis.draw();
+				//axis.draw();
 				ss.draw();
 				
 				break;
 
 			case openCascade:
-				axis.draw();
+				//axis.draw();
 				mainOC.draw();
 
 				break;

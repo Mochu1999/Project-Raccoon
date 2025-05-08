@@ -4,7 +4,7 @@
 #include "mainMRS.hpp"
 #include "Light.hpp"
 #include "SS.hpp"
-
+#include "MainOC.hpp"
 
 int keyCounter = 5;
 
@@ -15,8 +15,10 @@ struct AllPointers {
 	MainMap* map;
 	Light* ship;
 	SS* ss;
+	MainOC* mainOC;
 
-	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Light* ship_) :camera(camera_), map(map_), gv(gv_), ship(ship_) {}
+	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Light* ship_, MainOC* mainOC_) 
+		:camera(camera_), map(map_), gv(gv_), ship(ship_), mainOC(mainOC_) {}
 };
 
 //The standard is to use callbacks for one-time event (typing, increase something once per press) and another function
@@ -212,6 +214,7 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	AllPointers* allPointers = static_cast<AllPointers*>(glfwGetWindowUserPointer(window));
 	GlobalVariables* gv = allPointers->gv;
 	MainMap* map = allPointers->map;
+	MainOC* mainOC = allPointers->mainOC;
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
@@ -221,6 +224,10 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
 		gv->isLmbPressed = 0;
+	}
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+	{
+
 	}
 }
 

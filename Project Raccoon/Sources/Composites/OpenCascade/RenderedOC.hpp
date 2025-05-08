@@ -24,6 +24,17 @@ struct ShapeRenderer
 
 	}
 
+	void addIGES(const string iges)
+	{
+		clear();
+
+		importIGES(iges, shape);
+		
+		extractShapeData();
+		
+		updateBuffers();
+	}
+
 	void addBoxShape(p3 corner, p3 size)
 	{
 		clear();
@@ -36,8 +47,7 @@ struct ShapeRenderer
 			static_cast<Standard_Real>(size.z)
 		);
 
-		extractShapeData();
-		updateBuffers();
+		
 	}
 
 	void addSphereShape(p3 center, float radius)
@@ -57,7 +67,6 @@ struct ShapeRenderer
 		}
 
 		updateBuffers();
-		print(positions.size());
 	}
 
 	void genBuffers()
@@ -95,12 +104,15 @@ struct ShapeRenderer
 	//Extracts the rendering data of the shape
 	void extractShapeData()
 	{
+		int counter = 0;
 		//Iterating through each face to get the rendering data
 		for (TopExp_Explorer exp(shape, TopAbs_FACE); exp.More(); exp.Next())
 		{
 			const TopoDS_Face& face = TopoDS::Face(exp.Current());
 
 			extractFaceData(face, positions, trIndices, wireIndices, trNormals);
+			counter++;
+			print(counter);
 		}
 	}
 

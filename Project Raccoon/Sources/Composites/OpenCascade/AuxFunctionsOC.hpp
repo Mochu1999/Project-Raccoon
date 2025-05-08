@@ -101,3 +101,18 @@ void makeRectangle(p3 corner1, p3 corner2, p3 planeNormal, TopoDS_Wire& squareWi
 	squareWire = BRepBuilderAPI_MakeWire(edge1, edge2, edge3, edge4);
 	squareFace = BRepBuilderAPI_MakeFace(squareWire);
 }
+
+
+
+void importIGES(const std::string& filepath, TopoDS_Shape& shape)
+{
+	std::string basePath = "Resources/OpenCascade/";
+	string finalPath = basePath + filepath;
+	IGESControl_Reader reader;
+	IFSelect_ReturnStatus status = reader.ReadFile(finalPath.c_str());
+	if (status != IFSelect_RetDone)
+		return;
+
+	reader.TransferRoots();
+	shape = reader.OneShape();
+}

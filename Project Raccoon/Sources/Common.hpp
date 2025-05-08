@@ -118,6 +118,7 @@ struct vec2 {
 
 using p2 = vec2<float>;
 using ui2 = vec2<unsigned int>;
+using matrix4x4 = std::array<float, 16>;
 
 //needed for the unordered_maps that take p as keys, it could be inside vec2, but this is more idiomatic
 //umaps have average looking times of O(1), compared with O(logn) of map
