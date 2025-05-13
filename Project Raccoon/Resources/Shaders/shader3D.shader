@@ -48,7 +48,7 @@ void main()
 {
 	if (u_fragmentMode == 0) 
 	{
-		float ambient = 0.25f;
+		float ambient = 0.45f;
 		float specularLight = 0.7f;
 
 		// diffuse lighting

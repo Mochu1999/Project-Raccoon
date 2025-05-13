@@ -83,7 +83,9 @@ struct Camera {
 		}
 	}
 
-	void centeredRotation();
+	p3 cursorToXZPlane();
+	void setCursorToXZPoint(const p3& pointInXZ);
+
 
 	std::array<float, 16> createScalingMatrix(float scaleX, float scaleY, float scaleZ);
 

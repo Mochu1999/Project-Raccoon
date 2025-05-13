@@ -17,7 +17,7 @@ struct AllPointers {
 	SS* ss;
 	MainOC* mainOC;
 
-	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Light* ship_, MainOC* mainOC_) 
+	AllPointers(Camera* camera_, GlobalVariables* gv_, MainMap* map_, Light* ship_, MainOC* mainOC_)
 		:camera(camera_), map(map_), gv(gv_), ship(ship_), mainOC(mainOC_) {}
 };
 
@@ -32,6 +32,8 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 	MainMap* map = allPointers->map;
 	Light* ship = allPointers->ship;
 	GlobalVariables* gv = allPointers->gv;
+	MainOC* mainOC = allPointers->mainOC;
+
 
 
 	if (action == GLFW_PRESS)
@@ -68,7 +70,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
 			{
 				gv->cameraMode = FPS;
-				gv->variationMPos = gv->mPos;
+				gv->LastLMPos = gv->mPos;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			}
 			break;
@@ -84,7 +86,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 			if (gv->program == openCascade)
 			{
 				gv->visualizationMode = triangulated;
-
 			}
 			break;
 		case GLFW_KEY_I:
@@ -93,6 +94,74 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				gv->visualizationMode = wire;
 
 
+			}
+			break;
+		case GLFW_KEY_T:
+			if (gv->program == openCascade)
+			{
+				if (gv->cadMode == polyline)
+				{
+					gv->cadMode = none;
+				}
+				else if (gv->cadMode != polyline)
+				{
+					gv->cadMode = polyline;
+				}
+			}
+			break;
+		case GLFW_KEY_Y:
+			if (gv->program == openCascade)
+			{
+				if (gv->cadMode == rectangle)
+				{
+					gv->cadMode = none;
+				}
+				else if (gv->cadMode != rectangle)
+				{
+					gv->cadMode = rectangle;
+				}
+			}
+			break;
+		case GLFW_KEY_G:
+			if (gv->program == openCascade)
+			{
+				if (gv->cadMode == circle)
+				{
+					gv->cadMode = none;
+				}
+				else if (gv->cadMode != circle)
+				{
+					gv->cadMode = circle;
+				}
+			}
+			break;
+		case GLFW_KEY_H:
+			if (gv->program == openCascade)
+			{
+				if (gv->cadMode == sphere)
+				{
+					gv->cadMode = none;
+				}
+				else if (gv->cadMode != sphere)
+				{
+					gv->cadMode = sphere;
+				}
+			}
+			break;
+		case GLFW_KEY_U:
+			if (gv->program == openCascade)
+			{
+				if (gv->cadMode == extrusion)
+				{
+					gv->cadMode = none;
+				}
+				else if (gv->cadMode != extrusion)
+				{
+					gv->cadMode = extrusion;
+
+					camera->setCursorToXZPoint(mainOC->cadCreator.lastShape.positions[0]);
+					
+				}
 			}
 			break;
 		}
@@ -125,11 +194,18 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				{
 
 				}
+				if (gv->program == openCascade)
+				{
+					mainOC->a.openShape();
+				}
 				break;
 			case GLFW_KEY_S:
 				if (gv->program == MRS)
 				{
-
+				}
+				if (gv->program == openCascade)
+				{
+					mainOC->a.saveShape();
 				}
 				break;
 			}
@@ -215,19 +291,110 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	GlobalVariables* gv = allPointers->gv;
 	MainMap* map = allPointers->map;
 	MainOC* mainOC = allPointers->mainOC;
+	Camera* camera = allPointers->camera;
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		gv->isLmbPressed = 1;
-		gv->variationMPos = gv->mPos;
+		gv->LastLMPos = gv->mPos;
+
+		if (gv->cadMode == polyline)
+		{
+			gv->cadPositions.back() = camera->cursorToXZPlane();
+			gv->cadPositions.push_back(camera->cursorToXZPlane());
+
+
+			if (gv->cadPositions.size() >= 2)
+			{
+				mainOC->cadCreator.lines.clear();
+				mainOC->cadCreator.lines.addSet(gv->cadPositions);
+
+			}
+		}
+		if (gv->cadMode == rectangle)
+		{
+			if (mainOC->cadCreator.isPoint1 == 0)
+			{
+				mainOC->cadCreator.point1 = camera->cursorToXZPlane();
+				mainOC->cadCreator.isPoint1 = 1;
+			}
+			else
+			{
+				mainOC->a.addRectangle(mainOC->cadCreator.point1, camera->cursorToXZPlane());
+				mainOC->cadCreator.isPoint1 = 0;
+				gv->cadMode = none;
+			}
+		}
+		if (gv->cadMode == circle)
+		{
+			if (mainOC->cadCreator.isPoint1 == 0)
+			{
+				mainOC->cadCreator.isPoint1 = 1;
+				mainOC->cadCreator.point1 = camera->cursorToXZPlane();
+			}
+			else
+			{
+				mainOC->a.addCircle(mainOC->cadCreator.point1,magnitude3(camera->cursorToXZPlane() - mainOC->cadCreator.point1));
+				mainOC->cadCreator.isPoint1 = 0;
+				gv->cadMode = none;
+			}
+		}
+		if (gv->cadMode == sphere)
+		{
+			if (mainOC->cadCreator.isPoint1 == 0)
+			{
+				mainOC->cadCreator.point1 = camera->cursorToXZPlane();
+				mainOC->cadCreator.isPoint1 = 1;
+			}
+			else
+			{
+				mainOC->a.addSphereShape(mainOC->cadCreator.point1, magnitude3(camera->cursorToXZPlane() - mainOC->cadCreator.point1));
+				mainOC->cadCreator.isPoint1 = 0;
+				gv->cadMode = none;
+			}
+		}
+		if (gv->cadMode == extrusion)
+		{
+			mainOC->a.extrudeFace((gv->mPos.y - mainOC->cadCreator.point1.y) * 0.12);
+			mainOC->cadCreator.isExtruded = 0;
+			gv->cadMode = none;
+
+
+		}
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
 		gv->isLmbPressed = 0;
 	}
-	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 	{
 
+		if (gv->cadMode == polyline)
+		{
+			gv->cadPositions.back() =gv->cadPositions[0];
+			mainOC->cadCreator.lines.clear();
+			mainOC->cadCreator.lines.addSet(gv->cadPositions);
+
+			mainOC->a.addPolyline(gv->cadPositions);
+			gv->cadPositions.clear();
+			gv->cadMode = none;
+			camera->setCursorToXZPoint(mainOC->a.positions[0]);
+
+
+		}
+	}
+
+
+
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+	{
+		gv->isMmbPressed = 1;
+		gv->LastMMPos = gv->mPos;
+	}
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
+	{
+		gv->isMmbPressed = 0;
 	}
 }
 
@@ -264,11 +431,6 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 		{
 			camera->cameraPos = camera->cameraPos - camera->forward * camera->translationSpeed * scrollTranslationSpeedFactor;
 		}
-	}
-
-	else if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
-	{
-
 	}
 
 }

@@ -164,7 +164,7 @@
     <ClInclude Include="Sources\Composites\OpenCascade\MainOC.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Composites\OpenCascade\RenderedOC.hpp">
+    <ClInclude Include="Sources\Composites\OpenCascade\ShapeRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Composites\OpenCascade\IncludesOC.hpp">
@@ -173,5 +173,11 @@
     <ClInclude Include="Sources\Composites\OpenCascade\AuxFunctionsOC.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Composites\OpenCascade\CadCreation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Sources\knownBugs.txt" />
   </ItemGroup>
 </Project>

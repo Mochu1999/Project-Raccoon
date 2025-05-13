@@ -110,7 +110,7 @@ float isBelowTriangle(const p3& a, const p3& b, const p3& c, const p3& p) {
 }
 
 
-void printm16_without_macro(const std::string& name, const std::array<float, 16>& matrix)
+void print_(const std::string& name, const std::array<float, 16>& matrix)
 {
 	std::stringstream ss;
 	ss << name << " = " << std::endl;
@@ -127,7 +127,8 @@ void printm16_without_macro(const std::string& name, const std::array<float, 16>
 }
 
 
-std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std::array<float, 16>& b) {
+std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std::array<float, 16>& b) 
+{
 	std::array<float, 16> output = {};
 
 	for (int i = 0; i < 4; ++i) { // row index
@@ -142,6 +143,78 @@ std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std
 
 	return output;
 }
+
+//Mat4x4 · vec4 = vec4
+std::array<float, 4> multiplyMatVec(const std::array<float, 16>& m, const std::array<float, 4>& v) {
+	std::array<float, 4> output = {};
+
+	for (int i = 0; i < 4; ++i) { // row index
+		output[i] =
+			m[0 * 4 + i] * v[0] +
+			m[1 * 4 + i] * v[1] +
+			m[2 * 4 + i] * v[2] +
+			m[3 * 4 + i] * v[3];
+	}
+
+	return output;
+}
+
+
+matrix4x4 invertMatrix(const matrix4x4& m)
+{
+	// Create augmented 4×8 matrix  [ M | I ]
+	float aug[4][8] = {};
+	for (int row = 0; row < 4; ++row)
+	{
+		for (int col = 0; col < 4; ++col)
+			aug[row][col] = m[col * 4 + row];          // column‑major access
+
+		aug[row][4 + row] = 1.0f;                      // Right‑hand identity
+	}
+
+	// Gauss‑Jordan elimination with partial pivoting
+	for (int col = 0; col < 4; ++col)
+	{
+		// Pivot: find the row with largest absolute value in this column
+		int pivot = col;
+		float maxAbs = std::fabs(aug[pivot][col]);
+		for (int r = col + 1; r < 4; ++r)
+		{
+			float absVal = std::fabs(aug[r][col]);
+			if (absVal > maxAbs) { maxAbs = absVal; pivot = r; }
+		}
+		if (maxAbs < 1e-8f)   // determinant is zero
+			throw std::runtime_error("invertMatrix: singular matrix");
+
+		// Swap current row with pivot row
+		if (pivot != col)
+			for (int c = 0; c < 8; ++c)
+				std::swap(aug[col][c], aug[pivot][c]);
+
+		// Scale pivot row to make pivot element = 1
+		float invPivot = 1.0f / aug[col][col];
+		for (int c = 0; c < 8; ++c)
+			aug[col][c] *= invPivot;
+
+		// Eliminate this column from the other rows
+		for (int r = 0; r < 4; ++r)
+		{
+			if (r == col) continue;
+			float factor = aug[r][col];
+			for (int c = 0; c < 8; ++c)
+				aug[r][c] -= factor * aug[col][c];
+		}
+	}
+
+	// Extract the right‑hand 4×4 block (the inverse)
+	matrix4x4 inv{};
+	for (int row = 0; row < 4; ++row)
+		for (int col = 0; col < 4; ++col)
+			inv[col * 4 + row] = aug[row][4 + col];    // back to column‑major
+
+	return inv;
+}
+
 
 // Normalizes the quaternion [w, x, y, z] in-place
 void normalizeQuaternion(std::array<float, 4>& q)

@@ -53,21 +53,21 @@ struct Lines3D {
 
 
 
-	
 
 
-	
+
+
 
 
 	//One set per lines
 	void addSet(const vector<p3>& items, int isConsecutiveIndices = 0) {
 		positions.reserve(positions.size() + items.size());
-		
+
 		positions.reserve(items.size());
 		positions.insert(positions.end(), items.begin(), items.end());
 
 		//consecutive
-		if (isConsecutiveIndices==0)
+		if (isConsecutiveIndices == 0)
 		{
 			createIndices0(items);
 		}
@@ -110,34 +110,43 @@ struct Lines3D {
 
 		glBindVertexArray(vertexArray);
 
+		
 		//flag activates only when an addSet is Called, otherwise the buffer remains the same
-		if (isBufferUpdated)
-		{
-			currentPositionsDataSize = positions.size() * sizeof(p3);
-			currentIndicesDataSize = indices.size() * sizeof(unsigned int);
+		//if (isBufferUpdated)
+		//{
+		//	currentPositionsDataSize = positions.size() * sizeof(p3);
+		//	currentIndicesDataSize = indices.size() * sizeof(unsigned int);
 
-			//buffers are not equal
-			if (currentPositionsDataSize > currentPositionsBufferSize)
-			{
-				currentPositionsBufferSize = currentPositionsDataSize * 2;
-				currentIndicesBufferSize = currentIndicesDataSize * 2;
+		//	//buffers are not equal
+		//	if (currentPositionsDataSize > currentPositionsBufferSize)
+		//	{
+		//		currentPositionsBufferSize = currentPositionsDataSize * 2;
+		//		currentIndicesBufferSize = currentIndicesDataSize * 2;
 
-				glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-				glBufferData(GL_ARRAY_BUFFER, currentPositionsBufferSize, nullptr, usageHint);
+		//		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		//		glBufferData(GL_ARRAY_BUFFER, currentPositionsBufferSize, nullptr, usageHint);
 
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndicesBufferSize, nullptr, usageHint);
-			}
+		//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		//		glBufferData(GL_ELEMENT_ARRAY_BUFFER, currentIndicesBufferSize, nullptr, usageHint);
+		//	}
 
-			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, currentPositionsDataSize, positions.data());
+		//	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		//	glBufferSubData(GL_ARRAY_BUFFER, 0, currentPositionsDataSize, positions.data());
 
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, currentIndicesDataSize, indices.data());
+		//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		//	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, currentIndicesDataSize, indices.data());
 
-			isBufferUpdated = false;
-		}
+		//	isBufferUpdated = false;
+		//}
+
+		//Me ha dado problemas en cad y le he quitado la optimización
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(p3), positions.data(), usageHint);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), usageHint);
+
 		glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
 	}
@@ -145,6 +154,7 @@ struct Lines3D {
 	void clear() {
 		positions.clear();
 		indices.clear();
+		indexOffset = 0;
 	}
 
 	~Lines3D() {

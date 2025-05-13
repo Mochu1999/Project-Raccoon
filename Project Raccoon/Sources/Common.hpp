@@ -298,6 +298,7 @@ enum Programs { telemetry, MRS, solar, openCascade };
 enum CameraModes { drag, FPS, centered };
 enum VisualizationMode { wire, triangulated }; //OCC
 enum MrsMode { mapMRS, mapCustom }; //1 MRS map, 2 custom map
+enum CadMode { none, polyline, rectangle, circle, sphere, extrusion};
 
 /////////////////////////////////////////////
 struct GlobalVariables
@@ -309,13 +310,22 @@ struct GlobalVariables
 	CameraModes cameraMode = drag;
 	bool isRunning = true;
 	p2 mPos = { 0,0 };
-	p2 variationMPos = { 0,0 };
+
 	bool isLmbPressed = 0;
+	bool isMmbPressed = 0;
+	p2 LastLMPos = { 0,0 };
+	p2 LastMMPos = { 0,0 };
+	p3 totalMiddleMPosVariation;
+	p3 accumulativePositionChange; //LastMMPos measures mpos change, this is traspased to 3d with forward and right operations made on it
+
 	p2 centerWindow;
 	MrsMode mrsMode = mapMRS;
-	std::array<float, 16> identityMatrix = { 1, 0, 0, 0, 0, 1, 0, 0,0, 0, 1, 0,0, 0, 0, 1 };
-	
+	matrix4x4 identityMatrix = { 1, 0, 0, 0, 0, 1, 0, 0,0, 0, 1, 0,0, 0, 0, 1 };
+	matrix4x4 modelMatrixOCC = identityMatrix;
+
 	VisualizationMode visualizationMode = triangulated;
+	CadMode cadMode = none;
+	vector <p3> cadPositions = { {0,0,0} };
 
 	GlobalVariables()
 	{
@@ -410,12 +420,11 @@ void print_(const string& name, const vector<T>& items) {
 	cout << ss.str() << endl << endl;
 }
 
+
+//matrix4x4
+void print_(const std::string& name, const std::array<float, 16>& matrix);
+
 #define print(var) print_(#var, var)
-
-
-#define printm16(var) printm16_without_macro(#var, var)
-
-void printm16_without_macro(const std::string& name, const std::array<float, 16>& matrix);
 
 
 
@@ -478,7 +487,9 @@ vec3<T> normal(const vec3<T>& p1, const vec3<T>& p2, const vec3<T>& p3) {
 
 
 std::array<float, 16> multiplyMatrices(const std::array<float, 16>& a, const std::array<float, 16>& b);
+matrix4x4 invertMatrix(const matrix4x4& m);
 
+std::array<float, 4> multiplyMatVec(const std::array<float, 16>& m, const std::array<float, 4>& v);
 
 // Normalizes the quaternion [w, x, y, z] in-place
 void normalizeQuaternion(std::array<float, 4>& q);

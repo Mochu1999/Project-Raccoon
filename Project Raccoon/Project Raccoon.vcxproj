@@ -149,9 +149,10 @@
     <ClInclude Include="Sources\Composites\MRS\Pathfinding.hpp" />
     <ClInclude Include="Sources\Composites\MRS\ShipMRS.hpp" />
     <ClInclude Include="Sources\Composites\OpenCascade\AuxFunctionsOC.hpp" />
+    <ClInclude Include="Sources\Composites\OpenCascade\CadCreation.hpp" />
     <ClInclude Include="Sources\Composites\OpenCascade\IncludesOC.hpp" />
     <ClInclude Include="Sources\Composites\OpenCascade\MainOC.hpp" />
-    <ClInclude Include="Sources\Composites\OpenCascade\RenderedOC.hpp" />
+    <ClInclude Include="Sources\Composites\OpenCascade\ShapeRenderer.hpp" />
     <ClInclude Include="Sources\Composites\Solar\SS.hpp" />
     <ClInclude Include="Sources\Composites\Telemetry\Graphics.hpp" />
     <ClInclude Include="Sources\Composites\MRS\MainMRS.hpp" />
@@ -189,6 +190,9 @@
     <ClInclude Include="Sources\BasicsRendering\Text.hpp" />
     <ClInclude Include="Sources\TrWettedSurface.hpp" />
     <ClInclude Include="Sources\Stability\WettedSurface.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Sources\knownBugs.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

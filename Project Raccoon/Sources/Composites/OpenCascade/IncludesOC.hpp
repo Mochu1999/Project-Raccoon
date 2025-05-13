@@ -28,6 +28,16 @@
 #include <TopoDS.hxx>
 
 #include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepAlgoAPI_Common.hxx>
+#include <BRepAlgoAPI_Cut.hxx>
+#include <gp_Circ.hxx>
+
+
 #include <BRepTools.hxx>
 
 #include <IGESControl_Reader.hxx>
+#include <StlAPI_Reader.hxx>
+
+#include <BinTools.hxx>

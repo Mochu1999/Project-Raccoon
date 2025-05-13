@@ -37,6 +37,7 @@ struct Polyhedra {
 		genBuffers();
 	}
 
+	//Si hay un writeSimplePolyhedra porque no está esto ahí o eso aquí?
 	void addPolyhedra(const std::string& modelPath) {
 
 		clear();
@@ -60,12 +61,14 @@ struct Polyhedra {
 			inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
 			indices.resize(size);
 			inFile.read(reinterpret_cast<char*>(indices.data()), size * sizeof(unsigned int));
+
+			inFile.close();
 		}
 		else
 		{
 			std::cerr << "Error opening file for reading." << std::endl;
 		}
-		inFile.close();
+		
 	}
 
 	void addPolyhedra(const vector<p3>& positions_, const vector<unsigned int>& indices_, const vector<p3>& normals_)

@@ -23,9 +23,31 @@ struct Axis {
 
 
 	}
-	void draw() {
+	void draw() 
+	{
 		shader3D.bind();
 		shader3D.setUniform("u_Model", gv.identityMatrix);
+
+		glLineWidth(2); //this is deprecated and platform dependent
+		shader3D.setUniform("u_fragmentMode", 1);
+
+
+		shader3D.setUniform("u_Color", 1.0, 0.0, 0.0, 1.0);
+		xLine.draw();
+		shader3D.setUniform("u_Color", 0.0, 1.0, 0.0, 1.0);
+		yLine.draw();
+		shader3D.setUniform("u_Color", 0.0, 0.0, 1.0, 1.0);
+		zLine.draw();
+
+		glLineWidth(1);
+
+		shader3D.setUniform("u_Color", 1, 1, 1, 1.0);
+
+	}
+	void draw(matrix4x4& modelMatrix)
+	{
+		shader3D.bind();
+		shader3D.setUniform("u_Model", modelMatrix);
 
 		glLineWidth(2); //this is deprecated and platform dependent
 		shader3D.setUniform("u_fragmentMode", 1);
@@ -66,11 +88,13 @@ struct AxisOCC {
 
 
 	}
-	void draw() {
+	//esto es una gv, no habría que meterla, pero lo dejo para que decidas si queremos matener modelMatrixOCC como gv
+	void draw(matrix4x4& modelMatrixOCC) 
+	{
 		shader3D.bind();
 		shader3D.setUniform("u_Model", gv.identityMatrix);
 
-		glLineWidth(1); //this is deprecated and platform dependent
+		glLineWidth(0.5);
 		shader3D.setUniform("u_fragmentMode", 1);
 
 
@@ -81,6 +105,6 @@ struct AxisOCC {
 
 		glLineWidth(1);
 
-
+		shader3D.setUniform("u_Model", modelMatrixOCC);
 	}
 };

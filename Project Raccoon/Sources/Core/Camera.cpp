@@ -88,7 +88,8 @@ std::array<float, 16> Camera::createViewMatrix(const p3& right, const p3& up, p3
 
 
 
-void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis) {
+void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& rotationAxis)
+{
 	p3 intermForward;
 
 	rotatePoint(forward, rotationSpeed, rotationAxis);
@@ -98,18 +99,16 @@ void Camera::calculateForward(p3& forward, const float rotationSpeed, const p3& 
 		forward = intermForward;
 }
 
-void Camera::centeredRotation() {
-
-}
 
 void Camera::updateCamera() {
 
-	p2 currentMPosVariation = gv.variationMPos - gv.mPos;
+	p2 currentMPosVariation = gv.LastLMPos - gv.mPos;
+	p2 currentMiddleMPosVariation = gv.LastMMPos - gv.mPos;
 
 
 	if (gv.program == telemetry || gv.program == solar || gv.program == openCascade)
 	{
-		if (gv.cameraMode == drag && gv.isLmbPressed == 1)
+		if (gv.cameraMode == drag && gv.isLmbPressed)
 		{
 			calculateForward(forward, currentMPosVariation.y * 0.001, right);
 
@@ -120,7 +119,7 @@ void Camera::updateCamera() {
 
 			calculateForward(forward, -currentMPosVariation.x * 0.001, up);
 
-			gv.variationMPos = gv.mPos;
+			gv.LastLMPos = gv.mPos;
 		}
 		else if (gv.cameraMode == FPS)
 		{
@@ -133,7 +132,7 @@ void Camera::updateCamera() {
 
 			calculateForward(forward, currentMPosVariation.x * 0.003, up);
 
-			gv.variationMPos = gv.mPos;
+			gv.LastLMPos = gv.mPos;
 		}
 		else if (gv.cameraMode == centered)
 		{
@@ -167,8 +166,24 @@ void Camera::updateCamera() {
 
 			forward = -normalize3(cameraPos);
 		}
+
+		
 	}
 
+	if (gv.program == openCascade)
+	{
+		if (gv.isMmbPressed)
+		{
+			gv.totalMiddleMPosVariation -= right * (currentMiddleMPosVariation.x * 0.05);
+			gv.totalMiddleMPosVariation -= forward * (currentMiddleMPosVariation.y * 0.05);
+			gv.totalMiddleMPosVariation.y = 0;
+
+			translate3DModelMatrix(gv.modelMatrixOCC, gv.totalMiddleMPosVariation);
+
+			gv.LastMMPos = gv.mPos;
+		}
+
+	}
 
 	//The quaternion method is intentionally incomplete. The true method would calculate the f and u for pitch and f and r for yaw
 	// But instead of calculating everything there we are only calculating f and here forcing right to be with respect of the referenceUp
@@ -184,6 +199,10 @@ void Camera::updateCamera() {
 	shader3D.bind();
 	shader3D.setUniform("u_CamPos", cameraPos);
 	shader3D.setUniform("u_View", viewMatrix);
+
+
+	//print(cursorToXZPlane());
+	
 }
 
 
@@ -457,4 +476,81 @@ std::array<float, 16> Camera::create2DModelMatrix(const p2 translation, float an
 	modelMatrix[13] = translation.y;
 
 	return modelMatrix;
+}
+
+
+p3 Camera::cursorToXZPlane()
+{
+	matrix4x4 invVP = invertMatrix(vpMatrix);
+
+	// Step 1: Cursor to NDC, Normalized‑Device Coordinates [–1 … +1]
+	float ndcX = 2.0f * gv.mPos.x / windowWidth - 1.0f;
+	float ndcY = 2.0f * gv.mPos.y / windowHeight - 1.0f;
+
+	/*print(ndcX);
+	print(ndcY);*/
+
+	//step 2: z = −1 is the near plane, z = +1 the far plane in OpenGL clip coordinates. These two points define the ray.
+	std::array<float, 4> clipNear = { ndcX, ndcY, -1.0f, 1.0f };
+	std::array<float, 4> clipFar = { ndcX, ndcY,  1.0f, 1.0f };
+
+
+	// Step 3: Unproject to world space
+	std::array<float, 4> worldNear = multiplyMatVec(invVP, clipNear);
+	std::array<float, 4> worldFar = multiplyMatVec(invVP, clipFar);
+
+	// Perspective divide
+	for (int i = 0; i < 3; ++i) {
+		worldNear[i] /= worldNear[3];
+		worldFar[i] /= worldFar[3];
+	}
+
+	p3 rayOrigin = { worldNear[0], worldNear[1], worldNear[2] };
+	p3 rayDir = normalize3(p3{
+		worldFar[0] - worldNear[0],
+		worldFar[1] - worldNear[1],
+		worldFar[2] - worldNear[2]
+		});
+
+	// Step 4: Ray-plane intersection (XZ plane at Y=0)
+	if (fabs(rayDir.y) < 1e-6f) {
+		// Ray is parallel to XZ plane → no intersection
+		return { 0.0f, 0.0f, 0.0f }; // Or some invalid marker
+	}
+
+	float t = -rayOrigin.y / rayDir.y;
+	p3 intersection = rayOrigin + rayDir * t;
+
+	// Force result to XZ plane (y = 0)
+	return { intersection.x, 0.0f, intersection.z };
+}
+
+
+void Camera::setCursorToXZPoint(const p3& pointInXZ)
+{
+	// Step 1: World point → Clip Space
+	std::array<float, 4> worldPos = { pointInXZ.x, 0.0f, pointInXZ.z, 1.0f };
+
+	// Multiply view matrix first
+	std::array<float, 4> viewPos = multiplyMatVec(viewMatrix, worldPos);
+
+	// Then project to clip space
+	std::array<float, 4> clipPos = multiplyMatVec(perspectiveMatrix, viewPos);
+
+	// Step 2: Perspective divide (to NDC)
+	if (fabs(clipPos[3]) < 1e-6f)
+		return; // Avoid division by zero
+
+	float ndcX = clipPos[0] / clipPos[3];
+	float ndcY = clipPos[1] / clipPos[3];
+
+	// Step 3: NDC → Screen-space (pixels, bottom-left origin)
+	float screenX = (ndcX + 1.0f) * 0.5f * windowWidth;
+	float screenY = (ndcY + 1.0f) * 0.5f * windowHeight;
+
+	// Step 4: Flip Y to match GLFW's top-left origin
+	float glfwY = windowHeight - screenY;
+
+	// Step 5: Move cursor
+	glfwSetCursorPos(window, screenX, glfwY);
 }

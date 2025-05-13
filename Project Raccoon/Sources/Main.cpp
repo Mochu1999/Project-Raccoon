@@ -21,16 +21,16 @@ int main(void)
 		// IT ISN'T REASONABLE TO HAVE THE SHADER INITIALIZATION IN CAMERA, ENCAPSULATE THEM ELSEWHERE
 	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText, gv);
 
-	
 
-	
+
+
 
 
 
 
 	Text text("resources/Glyphs/Helvetica/Helvetica.otf", 36);
 	text.addText({ {{ 10,950 }, tm.fps, " fps"},{{10,1000},tm.currentTime, " s"} });
-	Text textAux("resources/Glyphs/Helvetica/Helvetica.otf", 36);
+	Text textAux("resources/Glyphs/Helvetica/Helvetica.otf", 48);
 
 
 	Lines2D centerCross;
@@ -51,7 +51,7 @@ int main(void)
 	ProgressBar pb(shader2D, shader2D_Instanced, shaderText, camera, ship, tm, { 1400 - 50,700 });
 
 	MainMap map(shader2D, shaderText, camera, gv);
-	MainOC mainOC(shader3D, camera, gv);
+	MainOC mainOC(shader3D, shaderText, camera, gv);
 
 	Settings settings(camera, gv, map);
 
@@ -101,7 +101,7 @@ int main(void)
 			case solar:
 				//axis.draw();
 				ss.draw();
-				
+
 				break;
 
 			case openCascade:
@@ -121,13 +121,32 @@ int main(void)
 			text.substituteText(0, { { 10,950 }, round2d(tm.fps), " fps" });
 			text.substituteText(1, round1d(tm.currentTime), " s");
 			p2 algo = { 0,0 };
-			if (gv.isLmbPressed == 1) algo = gv.variationMPos - gv.mPos;
-			textAux.addDynamicText({
-				{{ 100,900 }, "isLmbPressed: ",gv.isLmbPressed},
-				{{ 100,850 }, "distance: ",algo.x,", ",algo.y},
-				});
+			if (gv.cadMode == polyline)
+			{
+				textAux.addDynamicText({ {{ 10,700 }, "CAD mode: Polyline"}, });
+				textAux.draw();
+			}
+			else if (gv.cadMode == rectangle)
+			{
+				textAux.addDynamicText({ {{ 10,700 }, "CAD mode: Rectangle"}, });
+				textAux.draw();
+			}
+			else if (gv.cadMode == circle)
+			{
+				textAux.addDynamicText({ {{ 10,700 }, "CAD mode: Circle"}, });
+				textAux.draw();
+			}
 
-			//textAux.draw();
+			else if (gv.cadMode == sphere)
+			{
+				textAux.addDynamicText({ {{ 10,700 }, "CAD mode: Sphere"}, });
+				textAux.draw();
+			}
+			else if (gv.cadMode == extrusion)
+			{
+				textAux.addDynamicText({ {{ 10,700 }, "CAD mode: Extrusion"}, });
+				textAux.draw();
+			}
 
 			transparent();
 			shader2D.bind();
