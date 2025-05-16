@@ -174,13 +174,14 @@ void Camera::updateCamera() {
 	{
 		if (gv.isMmbPressed)
 		{
-			gv.totalMiddleMPosVariation -= right * (currentMiddleMPosVariation.x * 0.05);
-			gv.totalMiddleMPosVariation -= forward * (currentMiddleMPosVariation.y * 0.05);
-			gv.totalMiddleMPosVariation.y = 0;
+			//cameraPos -= right * (currentMiddleMPosVariation.x * 0.05);
+			//cameraPos -= forward * (currentMiddleMPosVariation.y * 0.05);
+			//gv.totalMiddleMPosVariation.y = 10;
 
-			translate3DModelMatrix(gv.modelMatrixOCC, gv.totalMiddleMPosVariation);
+			////translate3DModelMatrix(gv.modelMatrixOCC, gv.totalMiddleMPosVariation);
+			////cameraPos += gv.totalMiddleMPosVariation;
 
-			gv.LastMMPos = gv.mPos;
+			//gv.LastMMPos = gv.mPos;
 		}
 
 	}

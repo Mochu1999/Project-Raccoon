@@ -38,135 +38,6 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 
 	if (action == GLFW_PRESS)
 	{
-		switch (key)
-		{
-		case GLFW_KEY_P:
-			gv->isRunning = !gv->isRunning;
-			print(gv->isRunning);
-			break;
-			/*case GLFW_KEY_C:
-				keyCounter++;
-
-				break;*/
-		case GLFW_KEY_Q:
-			if (gv->program == 1)
-			{
-				if (map->show)
-					map->show = 0;
-				else
-					map->show = 1;
-			}
-			break;
-
-			//cameraModes //updateCamera in camera.cpp also need to be updated if ths is to change
-		case GLFW_KEY_X:
-			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
-			{
-				gv->cameraMode = drag;
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			}
-			break;
-		case GLFW_KEY_C:
-			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
-			{
-				gv->cameraMode = FPS;
-				gv->LastLMPos = gv->mPos;
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			}
-			break;
-		case GLFW_KEY_V:
-			if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
-			{
-				gv->cameraMode = centered;
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-
-			}
-			break;
-		case GLFW_KEY_O:
-			if (gv->program == openCascade)
-			{
-				gv->visualizationMode = triangulated;
-			}
-			break;
-		case GLFW_KEY_I:
-			if (gv->program == openCascade)
-			{
-				gv->visualizationMode = wire;
-
-
-			}
-			break;
-		case GLFW_KEY_T:
-			if (gv->program == openCascade)
-			{
-				if (gv->cadMode == polyline)
-				{
-					gv->cadMode = none;
-				}
-				else if (gv->cadMode != polyline)
-				{
-					gv->cadMode = polyline;
-				}
-			}
-			break;
-		case GLFW_KEY_Y:
-			if (gv->program == openCascade)
-			{
-				if (gv->cadMode == rectangle)
-				{
-					gv->cadMode = none;
-				}
-				else if (gv->cadMode != rectangle)
-				{
-					gv->cadMode = rectangle;
-				}
-			}
-			break;
-		case GLFW_KEY_G:
-			if (gv->program == openCascade)
-			{
-				if (gv->cadMode == circle)
-				{
-					gv->cadMode = none;
-				}
-				else if (gv->cadMode != circle)
-				{
-					gv->cadMode = circle;
-				}
-			}
-			break;
-		case GLFW_KEY_H:
-			if (gv->program == openCascade)
-			{
-				if (gv->cadMode == sphere)
-				{
-					gv->cadMode = none;
-				}
-				else if (gv->cadMode != sphere)
-				{
-					gv->cadMode = sphere;
-				}
-			}
-			break;
-		case GLFW_KEY_U:
-			if (gv->program == openCascade)
-			{
-				if (gv->cadMode == extrusion)
-				{
-					gv->cadMode = none;
-				}
-				else if (gv->cadMode != extrusion)
-				{
-					gv->cadMode = extrusion;
-
-					camera->setCursorToXZPoint(mainOC->cadCreator.lastShape.positions[0]);
-					
-				}
-			}
-			break;
-		}
-
-
 		//CTRL
 		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		{
@@ -196,7 +67,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				}
 				if (gv->program == openCascade)
 				{
-					mainOC->a.openShape();
+					mainOC->renders[mainOC->currentRender]->openShape();
 				}
 				break;
 			case GLFW_KEY_S:
@@ -205,12 +76,173 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 				}
 				if (gv->program == openCascade)
 				{
-					mainOC->a.saveShape();
+					mainOC->renders[mainOC->currentRender]->saveShape();
 				}
 				break;
 			}
 
 		}
+		else
+		{
+			switch (key)
+			{
+			case GLFW_KEY_P:
+				gv->isRunning = !gv->isRunning;
+				print(gv->isRunning);
+				break;
+				/*case GLFW_KEY_C:
+					keyCounter++;
+
+					break;*/
+			case GLFW_KEY_Q:
+				if (gv->program == 1)
+				{
+					if (map->show)
+						map->show = 0;
+					else
+						map->show = 1;
+				}
+				break;
+
+				//cameraModes //updateCamera in camera.cpp also need to be updated if ths is to change
+			case GLFW_KEY_X:
+				if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
+				{
+					gv->cameraMode = drag;
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+				break;
+			case GLFW_KEY_C:
+				if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
+				{
+					gv->cameraMode = FPS;
+					gv->LastLMPos = gv->mPos;
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				}
+				break;
+			case GLFW_KEY_V:
+				if (gv->program == telemetry || gv->program == solar || gv->program == openCascade)
+				{
+					gv->cameraMode = centered;
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+				}
+				break;
+			case GLFW_KEY_O:
+				if (gv->program == openCascade)
+				{
+					gv->visualizationMode = triangulated;
+				}
+				break;
+			case GLFW_KEY_I:
+				if (gv->program == openCascade)
+				{
+					gv->visualizationMode = wire;
+
+
+				}
+				break;
+			case GLFW_KEY_T:
+				if (gv->program == openCascade)
+				{
+					if (gv->cadMode == polyline)
+					{
+						gv->cadMode = none;
+					}
+					else if (gv->cadMode != polyline)
+					{
+						gv->cadMode = polyline;
+						mainOC->currentRender++;
+					}
+				}
+				break;
+			case GLFW_KEY_Y:
+				if (gv->program == openCascade)
+				{
+					if (gv->cadMode == rectangle)
+					{
+						gv->cadMode = none;
+					}
+					else if (gv->cadMode != rectangle)
+					{
+						gv->cadMode = rectangle;
+						mainOC->currentRender++;
+					}
+				}
+				break;
+			case GLFW_KEY_G:
+				if (gv->program == openCascade)
+				{
+					if (gv->cadMode == circle)
+					{
+						gv->cadMode = none;
+					}
+					else if (gv->cadMode != circle)
+					{
+						gv->cadMode = circle;
+						mainOC->currentRender++;
+					}
+				}
+				break;
+			case GLFW_KEY_H:
+				if (gv->program == openCascade)
+				{
+					if (gv->cadMode == sphere)
+					{
+						gv->cadMode = none;
+					}
+					else if (gv->cadMode != sphere)
+					{
+						gv->cadMode = sphere;
+						mainOC->currentRender++;
+					}
+				}
+				break;
+			case GLFW_KEY_U:
+				if (gv->program == openCascade)
+				{
+					if (gv->cadMode == extrusion)
+					{
+						gv->cadMode = none;
+					}
+					else if (gv->cadMode != extrusion)
+					{
+
+						if (faceCounter(mainOC->renders[mainOC->currentRender]->shape) != 1) return;
+
+						gv->cadMode = extrusion;
+						camera->setCursorToXZPoint(mainOC->renders[mainOC->currentRender]->positions[0]);
+					}
+				}
+				break;
+			case GLFW_KEY_J:
+				if (gv->program == openCascade)
+				{
+					mainOC->booleanUnion();
+				}
+				break;
+			case GLFW_KEY_K:
+				if (gv->program == openCascade)
+				{
+					mainOC->booleanIntersection();
+				}
+				break;
+			case GLFW_KEY_L:
+				if (gv->program == openCascade)
+				{
+					mainOC->booleanCut();
+				}
+				break;
+			case GLFW_KEY_R:
+				if (gv->program == openCascade)
+				{
+					mainOC->removeRenderer();
+				}
+				break;
+			}
+
+		}
+
 	}
 }
 
@@ -219,7 +251,7 @@ void keyboardEventCallback(GLFWwindow* window, int key, int scancode, int action
 //keys functions gets triggered once per frame
 void keyboardRealTimePolls(GLFWwindow* window, GlobalVariables& gv, Camera& camera, MainMap& map) {
 
-	//TIENES ESTO PARTIDO ENTRE AQUÍ Y UPDATECAMERA
+	//The rest of the logic is in updateCamera
 
 	// Rotation
 	if (gv.program == telemetry || gv.program == solar || gv.program == openCascade)
@@ -293,6 +325,7 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 	MainOC* mainOC = allPointers->mainOC;
 	Camera* camera = allPointers->camera;
 
+	//LEFT
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		gv->isLmbPressed = 1;
@@ -320,7 +353,7 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 			}
 			else
 			{
-				mainOC->a.addRectangle(mainOC->cadCreator.point1, camera->cursorToXZPlane());
+				mainOC->renders[mainOC->currentRender]->addRectangle(mainOC->cadCreator.point1, camera->cursorToXZPlane());
 				mainOC->cadCreator.isPoint1 = 0;
 				gv->cadMode = none;
 			}
@@ -334,7 +367,9 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 			}
 			else
 			{
-				mainOC->a.addCircle(mainOC->cadCreator.point1,magnitude3(camera->cursorToXZPlane() - mainOC->cadCreator.point1));
+				mainOC->renders[mainOC->currentRender]->addCircle
+				(mainOC->cadCreator.point1, magnitude3(camera->cursorToXZPlane() - mainOC->cadCreator.point1));
+
 				mainOC->cadCreator.isPoint1 = 0;
 				gv->cadMode = none;
 			}
@@ -348,14 +383,14 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 			}
 			else
 			{
-				mainOC->a.addSphereShape(mainOC->cadCreator.point1, magnitude3(camera->cursorToXZPlane() - mainOC->cadCreator.point1));
+				mainOC->renders[mainOC->currentRender]->addSphereShape(mainOC->cadCreator.point1, magnitude3(camera->cursorToXZPlane() - mainOC->cadCreator.point1));
 				mainOC->cadCreator.isPoint1 = 0;
 				gv->cadMode = none;
 			}
 		}
 		if (gv->cadMode == extrusion)
 		{
-			mainOC->a.extrudeFace((gv->mPos.y - mainOC->cadCreator.point1.y) * 0.12);
+			mainOC->renders[mainOC->currentRender]->extrudeFace((gv->mPos.y - mainOC->cadCreator.point1.y) * 0.12);
 			mainOC->cadCreator.isExtruded = 0;
 			gv->cadMode = none;
 
@@ -367,26 +402,31 @@ void mouseEventCallback(GLFWwindow* window, int button, int action, int mods) {
 		gv->isLmbPressed = 0;
 	}
 
+	//RIGHT
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 	{
 
 		if (gv->cadMode == polyline)
 		{
-			gv->cadPositions.back() =gv->cadPositions[0];
+			gv->cadPositions.back() = gv->cadPositions[0];
 			mainOC->cadCreator.lines.clear();
+			//print(mainOC->cadCreator.lines.positions.size()); 
+			//AUNQUE DIGA QUE LO ESTÁ LIMPIANDO NO ES EL CASO, ESTOY TENIENDO QUE BORRARLOS EN none
+			//std::cout <<"a "<< & mainOC->cadCreator.lines << "\n";
+			//PASO A MODO HARDCODED
 			mainOC->cadCreator.lines.addSet(gv->cadPositions);
 
-			mainOC->a.addPolyline(gv->cadPositions);
-			gv->cadPositions.clear();
+			mainOC->renders[mainOC->currentRender]->addPolyline(gv->cadPositions);
+			gv->cadPositions = { { 0,0,0 } };
 			gv->cadMode = none;
-			camera->setCursorToXZPoint(mainOC->a.positions[0]);
+			camera->setCursorToXZPoint(mainOC->renders[mainOC->currentRender]->positions[0]);
 
 
 		}
 	}
 
 
-
+	//MIDDLE
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
 	{
 		gv->isMmbPressed = 1;

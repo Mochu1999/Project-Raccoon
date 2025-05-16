@@ -22,26 +22,52 @@ struct MainOC
 
 
 	Sphere light;
-	p3 lightPos = { 300,250,40 };
+	p3 lightPos = { 300,250,400 };
 	matrix4x4 model3DMatrix = gv.identityMatrix;
 
 	Lines3D lines;
 	Polyhedra polygon;
 
-	ShapeRenderer a, b, c;
-	
+
+	std::vector<p3> colors = {
+	{1.0f, 1.0f, 1.0f},
+	{1.0f, 0.5f, 0.0f},   // Orange
+	{0.0f, 1.0f, 0.0f},   // Green
+	{0.5f, 0.0f, 1.0f},   // Purple
+	{0.0f, 0.0f, 1.0f},   // Blue
+	{1.0f, 1.0f, 0.0f},   // Yellow
+	{1.0f, 0.0f, 1.0f},   // Magenta
+	{0.0f, 1.0f, 1.0f},   // Cyan
+	{1.0f, 0.0f, 0.0f},   // Red
+	{0.5f, 1.0f, 0.0f}    // Lime
+	};
+
+	ShapeRenderer render0, render1, render2, render3, render4,
+		render5, render6, render7, render8, render9;
+
+	ShapeRenderer* renders[10] = {
+	&render0, &render1, &render2, &render3, &render4,
+	&render5, &render6, &render7, &render8, &render9
+	};
+
+	int currentRender = -1;
 
 	MainOC(Shader& shader3D_, Shader& shaderText_, Camera& camera_, GlobalVariables& gv_)
-		:shader3D(shader3D_),shaderText(shaderText_), camera(camera_), gv(gv_), light(3)
-		, a(gv, shader3D), b(gv, shader3D), c(gv, shader3D)
+		:shader3D(shader3D_), shaderText(shaderText_), camera(camera_), gv(gv_), light(3)
 		, axisOCC(shader3D, gv, gv.identityMatrix), axis(shader3D, gv),
-		cadCreator(shader3D,camera, gv, a), text("resources/Glyphs/Helvetica/Helvetica.otf", 36)
+		cadCreator(shader3D, camera, gv, renders[0]), text("resources/Glyphs/Helvetica/Helvetica.otf", 36)
+		, render0(gv, shader3D), render1(gv, shader3D), render2(gv, shader3D), render3(gv, shader3D), render4(gv, shader3D)
+		, render5(gv, shader3D), render6(gv, shader3D), render7(gv, shader3D), render8(gv, shader3D), render9(gv, shader3D)
 	{
-		a.importStlOpenCascade();
-		/*a.addRectangle({ 0,0,0 }, { 5,0,5 });
-		a.extrudeFace(10);
-		b.addSphereShape({ 5,0,5 }, 8);
-		TopoDS_Shape intermShape;*/
+
+
+		/*renders[0]->addIGES("abb.igs");
+		currentRender++;*/
+
+		/*renders[0]->addRectangle({ 0,0,0 }, { 5,0,5 });
+		renders[0]->extrudeFace(10);
+		renders[1]->addSphereShape({ 5,0,5 }, 8);*/
+		/*TopoDS_Shape intermShape;*/
 		//booleanUnion(c, a, b);
 		//booleanIntersection(c, a, b);
 		//booleanCut(c, a, b);
@@ -63,9 +89,9 @@ struct MainOC
 
 	void draw()
 	{
-		cadCreator.draw();
-		
+		cadCreator.draw(*renders[currentRender]);
 
+		//print(currentRender);
 
 
 		shader3D.bind();
@@ -88,11 +114,66 @@ struct MainOC
 		shader3D.setUniform("u_fragmentMode", 0);*/
 		//light.draw();
 
-		a.draw();
-		
+		for (int i = 0; i <= currentRender; i++)
+		{
+			renders[i]->draw(colors[i]);
+		}
+
+
 		/*a.draw();
 		b.draw({1,0,0});*/
-		c.draw();
+		//c.draw();
 		opaque();
+	}
+
+
+
+
+
+	void booleanUnion()
+	{
+		if (currentRender < 1) return;
+
+		ShapeRenderer interm(gv, shader3D);
+
+		interm.shape = BRepAlgoAPI_Fuse(renders[currentRender - 1]->shape, renders[currentRender]->shape);
+		renders[currentRender - 1]->clear(); renders[currentRender]->clear();
+		renders[currentRender - 1]->addShape(interm.shape);
+
+
+	}
+
+	void booleanIntersection()
+	{
+		if (currentRender < 1) return;
+
+		ShapeRenderer interm(gv, shader3D);
+
+		interm.shape = BRepAlgoAPI_Common(renders[currentRender - 1]->shape, renders[currentRender]->shape);
+		renders[currentRender - 1]->clear(); renders[currentRender]->clear();
+		renders[currentRender - 1]->addShape(interm.shape);
+	}
+
+	void booleanCut()
+	{
+		if (currentRender < 1) return;
+
+		ShapeRenderer interm(gv, shader3D);
+
+		interm.shape = BRepAlgoAPI_Cut(renders[currentRender - 1]->shape, renders[currentRender]->shape);
+		renders[currentRender - 1]->clear(); renders[currentRender]->clear();
+		renders[currentRender - 1]->addShape(interm.shape);
+	}
+
+	void removeRenderer()
+	{
+		if (currentRender < 0)
+		{
+			return;
+		}
+		print(currentRender);
+
+		renders[currentRender]->clear();
+		currentRender--;
 	}
 };

@@ -18,11 +18,13 @@ struct ShapeRenderer
 	std::vector<p3> positions, trNormals;
 	std::vector<unsigned int> trIndices, wireIndices;
 
+
 	ShapeRenderer(GlobalVariables& gv_, Shader& shader3D_) :gv(gv_), shader3D(shader3D_)
 	{
 		genBuffers();
 
 	}
+
 	//XZ plane
 	void addRectangle(p3 corner1, p3 corner2)
 	{
@@ -209,7 +211,7 @@ struct ShapeRenderer
 
 	void draw(p3 color = {1,1,1}) const
 	{
-
+		shader3D.bind();
 		shader3D.setUniform("u_Color", color.x, color.y, color.z, 1);
 
 		if (gv.visualizationMode == triangulated)
@@ -231,6 +233,7 @@ struct ShapeRenderer
 			glDrawElements(GL_LINES, wireIndices.size(), GL_UNSIGNED_INT, nullptr);
 			glLineWidth(1);
 		}
+		glBindVertexArray(0);
 	}
 
 
@@ -313,9 +316,12 @@ struct ShapeRenderer
 	}
 	void openShape()
 	{
-		clear();
+
+		print("reading Opencascade");
 
 		BinTools::Read(shape, "Resources/OpenCascade/model.brep");
+		print("extracting Data");
+
 		readDataOpenCascade();
 
 		updateBuffers();
@@ -327,19 +333,22 @@ struct ShapeRenderer
 		clear();
 
 		StlAPI_Reader reader;
-		reader.Read(shape, "Resources/OpenCascade/test.stl");
+		print("reading Opencascade");
+		reader.Read(shape, "Resources/OpenCascade/tust.stl");
+		print("extracting Data");
 		extractShapeData();
 
 
 		trNormals.clear();
-		std::ifstream inFile("Resources/OpenCascade/test.stl");
+		std::ifstream inFile("Resources/OpenCascade/tust.stl");
 
 		if (!inFile) {
-			std::cerr << "Unable to open file: " << "Resources/OpenCascade/test.stl" << std::endl;
+			std::cerr << "Unable to open file: "  << std::endl;
 			return;
 		}
 		std::string line;
 		p3 normal, vertex;
+		print("calculating normals");
 		while (std::getline(inFile, line)) 
 		{
 			std::istringstream iss(line);
@@ -351,48 +360,21 @@ struct ShapeRenderer
 				// Read normal vector
 				iss >> word; // Skip "normal"
 				iss >> normal.x >> normal.y >> normal.z;
-				trNormals.push_back(normal);
-				trNormals.push_back(normal);
-				trNormals.push_back(normal);
-				//print(normal);
-			}
-			else if (word == "vertex") 
-			{
-				// Read and store vertex position
-				iss >> vertex.x >> vertex.y >> vertex.z;
-				vector<p3> interm;
-				//interm.push_back(vertex);
-				//positions.insert(positions.end(), { interm[0].x,interm[0].y,interm[0].z });
-				
-				//print(vertex);
+				trNormals.insert(trNormals.end(), { normal ,normal ,normal });
 			}
 		}
 		inFile.close();
 
 		updateBuffers();
 	}
+
+
+
+
+
+	
 };
 
 
 
-void booleanUnion(ShapeRenderer& output, const ShapeRenderer& a, const ShapeRenderer& b)
-{
-	output.clear();
-	output.shape = BRepAlgoAPI_Fuse(a.shape, b.shape);
-	output.extractShapeData();
-	output.updateBuffers();
-}
 
-void booleanIntersection(ShapeRenderer& output, const ShapeRenderer& a, const ShapeRenderer& b)
-{
-	output.shape = BRepAlgoAPI_Common(a.shape, b.shape);
-	output.extractShapeData();
-	output.updateBuffers();
-}
-
-void booleanCut(ShapeRenderer& output, const ShapeRenderer& a, const ShapeRenderer& b)
-{
-	output.shape = BRepAlgoAPI_Cut(a.shape, b.shape);
-	output.extractShapeData();
-	output.updateBuffers();
-}

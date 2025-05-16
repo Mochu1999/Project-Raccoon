@@ -166,22 +166,27 @@ void createCircle(const p3& center, const float radius, TopoDS_Shape& shape, p3 
 }
 
 
+int faceCounter(const TopoDS_Shape& shape)
+{
+	int count = 0;
+	for (TopExp_Explorer exp(shape, TopAbs_FACE); exp.More(); exp.Next())
+	{
+		++count;
+		if (count >= 2)
+			return 2; // Early exit, no need to count more
+	}
+
+	return count; // 0 if none, 1 if exactly one
+}
 
 
 //overwrites shape
 void extrudeSingleFace(TopoDS_Shape& shape, const p3& direction)
 {
-	//Checking that shape has only one face
+	
+
 	TopExp_Explorer exp(shape, TopAbs_FACE);
-
-	if (!exp.More())
-		throw std::runtime_error("Shape has no faces.");
-
 	const TopoDS_Face& face = TopoDS::Face(exp.Current());
-	exp.Next();
-
-	if (exp.More())
-		throw std::runtime_error("Shape has more than one face.");
 
 	// Extrude
 	gp_Vec vec(direction.x, direction.y, direction.z);

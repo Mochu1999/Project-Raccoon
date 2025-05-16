@@ -9,23 +9,25 @@ struct CadCreation
 	Camera& camera;
 	GlobalVariables& gv;
 
-	ShapeRenderer& lastShape;
-
+	
 	Lines3D lines;
 	p3 point1, point2;
 	bool isPoint1 = 0;
 	bool isExtruded = 0;
 	ShapeRenderer shape,shape1; //intermediate shape
 
-	CadCreation(Shader& shader3D_, Camera& camera_, GlobalVariables& gv_, ShapeRenderer& lastShape_)
-		:shader3D(shader3D_), camera(camera_), gv(gv_), shape(gv, shader3D), shape1(gv, shader3D), lastShape(lastShape_)
+	CadCreation(Shader& shader3D_, Camera& camera_, GlobalVariables& gv_, ShapeRenderer* currentRender_)
+		:shader3D(shader3D_), camera(camera_), gv(gv_), shape(gv, shader3D), shape1(gv, shader3D)
 	{
 
 	}
-	void draw()
+	void draw(ShapeRenderer& currentRender)
 	{
 
-
+		if (gv.cadMode == none)
+		{
+			lines.clear(); //doesn't work from keyMouseInput. Investigate
+		}
 		if (gv.cadMode == polyline)
 		{
 			if (lines.positions.size()>=2)
@@ -71,17 +73,22 @@ struct CadCreation
 		}
 		if (gv.cadMode == extrusion)
 		{
+			
+
 			if (!isExtruded)
 			{
 				//It gets bugged if calculated in keyMouseInput, where it should be, with the callback
 				point1.y = gv.mPos.y;
 				isExtruded = 1;
 			}
-
-			shape.clear();
-			shape.addShape(lastShape.shape);
-			shape.extrudeFace((gv.mPos.y - point1.y)*0.12);
-			shape.draw();
+			if (point1.y != gv.mPos.y)
+			{
+				shape.clear();
+				shape.addShape(currentRender.shape);
+				shape.extrudeFace((gv.mPos.y - point1.y) * 0.12);
+				
+				shape.draw();
+			}
 
 		}
 	}

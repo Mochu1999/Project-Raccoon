@@ -22,9 +22,10 @@ int main(void)
 	Camera camera(window, shader3D, shader2D, shader2D_Instanced, shaderText, gv);
 
 
-
-
-
+	Polyhedra finalTust;
+	finalTust.addPolyhedra("finalTust.bin");
+	Sphere tustin(3);
+	tustin.addSet({ 12,0,12 });
 
 
 
@@ -107,7 +108,11 @@ int main(void)
 			case openCascade:
 				//axis.draw();
 				mainOC.draw();
-
+				shader3D.bind();
+				shader3D.setUniform("u_fragmentMode", 0);
+				shader3D.setUniform("u_Color", 1, 1, 1, 1);
+				finalTust.draw();
+				//tustin.draw();
 				break;
 			}
 

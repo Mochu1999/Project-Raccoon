@@ -63,6 +63,7 @@ struct Sphere {
 	float radius;
 	unsigned int n;
 
+	//Lines3D lines;
 
 	vector<p3> positions, model;
 	vector<p3> normals;
@@ -144,7 +145,7 @@ struct Sphere {
 			positions[i] += model[i];
 		}
 		isBufferUpdated = true;
-
+		//lines.addSet(positions);
 
 		calculateNormals();
 
